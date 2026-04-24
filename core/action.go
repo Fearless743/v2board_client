@@ -2,6 +2,9 @@ package main
 
 import (
 	"encoding/json"
+	"unsafe"
+
+	"github.com/metacubex/mihomo/constant"
 )
 
 type Action struct {
@@ -11,11 +14,11 @@ type Action struct {
 }
 
 type ActionResult struct {
-	Id     string      `json:"id"`
-	Method Method      `json:"method"`
-	Data   interface{} `json:"data"`
-	Code   int         `json:"code"`
-	Port   int64
+	Id       string         `json:"id"`
+	Method   Method         `json:"method"`
+	Data     interface{}    `json:"data"`
+	Code     int            `json:"code"`
+	Callback unsafe.Pointer `json:"-"`
 }
 
 func (result ActionResult) Json() ([]byte, error) {
@@ -105,6 +108,9 @@ func handleAction(action *Action, result ActionResult) {
 			return
 		}
 		result.success(config)
+		return
+	case getCoreVersionMethod:
+		result.success(constant.Version)
 		return
 	case closeConnectionMethod:
 		id := action.Data.(string)
