@@ -7,6 +7,7 @@ import 'package:archive/archive.dart';
 import 'package:flclashx/clash/clash.dart';
 import 'package:flclashx/common/archive.dart';
 import 'package:flclashx/services/subscription_notification_service.dart';
+import 'package:flclashx/services/v2board_service.dart';
 import 'package:flclashx/enum/enum.dart';
 import 'package:flclashx/plugins/app.dart';
 import 'package:flclashx/providers/providers.dart';
@@ -1193,6 +1194,7 @@ class AppController {
     };
     updateTray(true);
     await _initCore();
+    await syncV2BoardProfile(silent: true);
     await _initStatus();
     autoLaunch?.updateStatus(
       _ref.read(appSettingProvider).autoLaunch,
@@ -1237,33 +1239,14 @@ class AppController {
   }
 
   void toProfiles() {
-    toPage(PageLabel.profiles);
+    toPage(PageLabel.dashboard);
   }
 
   void initLink() {
     linkManager.initAppLinksListen(
       (url) async {
-        final res = await globalState.showMessage(
-          title: "${appLocalizations.add} ${appLocalizations.profile}",
-          message: TextSpan(
-            children: [
-              TextSpan(text: appLocalizations.doYouWantToPass),
-              TextSpan(
-                text: " $url",
-                style: TextStyle(
-                  color: Theme.of(context).colorScheme.primary,
-                  decoration: TextDecoration.underline,
-                  decorationColor: Theme.of(context).colorScheme.primary,
-                ),
-              ),
-            ],
-          ),
-        );
-
-        if (res != true) {
-          return;
-        }
-        addProfileFormURL(url);
+        commonPrint
+            .log('Ignored external profile link in V2Board managed mode: $url');
       },
     );
   }
@@ -1306,6 +1289,157 @@ class AppController {
       await handleExit();
     }
     return;
+  }
+
+  Future<Profile> _importV2BoardProfile({
+    required V2BoardSession session,
+    required V2BoardClient client,
+    required V2BoardUserInfo userInfo,
+    required String subscriptionUrl,
+  }) async {
+    final prefs = await SharedPreferences.getInstance();
+    final shouldSend = prefs.getBool('sendDeviceHeaders') ?? true;
+    final profiles = _ref.read(profilesProvider);
+    final existingProfile = session.profileId == null
+        ? null
+        : profiles.getProfile(session.profileId);
+    final fallbackProfile = existingProfile ??
+        profiles.where((profile) => profile.url == subscriptionUrl).firstOrNull;
+    final sourceProfile = fallbackProfile == null
+        ? Profile.normal(url: subscriptionUrl)
+        : fallbackProfile.copyWith(url: subscriptionUrl);
+    final updatedProfile = await sourceProfile.update(
+      shouldSendHeaders: shouldSend,
+    );
+    final providerHeaders = Map<String, String>.from(
+      userInfo.providerHeaders(client.baseUrl),
+    )..addAll(updatedProfile.providerHeaders);
+    providerHeaders.putIfAbsent('v2board-base-url', () => client.baseUrl);
+    final subscriptionInfo = updatedProfile.subscriptionInfo?.isNotEmpty == true
+        ? updatedProfile.subscriptionInfo
+        : userInfo.hasSubscriptionInfo
+            ? userInfo.subscriptionInfo
+            : updatedProfile.subscriptionInfo;
+    final profile = updatedProfile.copyWith(
+      subscriptionInfo: subscriptionInfo,
+      providerHeaders: providerHeaders,
+    );
+    _applyAllHeaderSettings(profile, isNewProfile: fallbackProfile == null);
+    _ref.read(profilesProvider.notifier).setProfile(profile);
+    _ref.read(currentProfileIdProvider.notifier).value = profile.id;
+    applyProfileDebounce(silence: true);
+    await V2BoardSessionStore.save(session.copyWith(
+      profileId: profile.id,
+      subscriptionUrl: subscriptionUrl,
+      updatedAt: DateTime.now(),
+    ));
+    await savePreferences();
+    return profile;
+  }
+
+  Future<void> loginAndImportV2Board({
+    required String baseUrl,
+    required String email,
+    required String password,
+  }) async {
+    final token = await V2BoardClient(baseUrl: baseUrl).login(
+      email: email,
+      password: password,
+    );
+    final client = V2BoardClient(baseUrl: baseUrl, token: token);
+    final userInfo = await client.getSubscribe();
+    final subscriptionUrl = await client.subscriptionUrl(userInfo);
+    final session = V2BoardSession(
+      baseUrl: client.baseUrl,
+      token: token,
+      email: email,
+    );
+    await V2BoardSessionStore.save(session);
+    await _importV2BoardProfile(
+      session: session,
+      client: client,
+      userInfo: userInfo,
+      subscriptionUrl: subscriptionUrl,
+    );
+  }
+
+  Future<bool> syncV2BoardProfile(
+      {bool silent = true, bool force = false}) async {
+    final session = await V2BoardSessionStore.load();
+    if (session == null) return false;
+    try {
+      final client = V2BoardClient(
+        baseUrl: session.baseUrl,
+        token: session.token,
+      );
+      final userInfo = await client.getSubscribe();
+      final subscriptionUrl = await client.subscriptionUrl(userInfo);
+      await _importV2BoardProfile(
+        session: session,
+        client: client,
+        userInfo: userInfo,
+        subscriptionUrl: subscriptionUrl,
+      );
+      return true;
+    } catch (e) {
+      commonPrint.log('Sync V2Board Profile Failed: $e');
+      if (!silent) rethrow;
+      return false;
+    }
+  }
+
+  Future<void> logoutV2Board({bool deleteManagedProfile = false}) async {
+    final session = await V2BoardSessionStore.load();
+    await V2BoardSessionStore.clear();
+    if (deleteManagedProfile && session?.profileId != null) {
+      await deleteProfile(session!.profileId!);
+    }
+    await savePreferences();
+  }
+
+  Future<void> addProfileFormV2Board({
+    required String baseUrl,
+    required String email,
+    required String password,
+  }) async {
+    if (globalState.navigatorKey.currentState?.canPop() ?? false) {
+      globalState.navigatorKey.currentState?.popUntil((route) => route.isFirst);
+    }
+    toPage(PageLabel.dashboard);
+    final commonScaffoldState = globalState.homeScaffoldKey.currentState;
+    if (commonScaffoldState?.mounted != true) return;
+
+    try {
+      final profile = await commonScaffoldState?.loadingRun<Profile>(
+        () async {
+          await loginAndImportV2Board(
+            baseUrl: baseUrl,
+            email: email,
+            password: password,
+          );
+          final session = await V2BoardSessionStore.load();
+          return _ref.read(profilesProvider).getProfile(session?.profileId)!;
+        },
+        title: "${appLocalizations.add}${appLocalizations.profile}",
+      );
+
+      if (profile != null) {
+        _applyAllHeaderSettings(profile, isNewProfile: true);
+
+        final headers = profile.providerHeaders;
+        final showHwidLimit = headers['x-hwid-limit']?.toLowerCase() == 'true';
+        final announceText = headers['announce'];
+        if (showHwidLimit && announceText != null && announceText.isNotEmpty) {
+          _showHwidLimitNotice(announceText, headers['support-url']);
+        }
+
+        await addProfile(profile);
+      }
+    } catch (err) {
+      commonPrint.log('Add V2Board Profile Failed: $err');
+      unawaited(
+          globalState.showMessage(message: TextSpan(text: err.toString())));
+    }
   }
 
   Future<void> addProfileFormURL(String url) async {

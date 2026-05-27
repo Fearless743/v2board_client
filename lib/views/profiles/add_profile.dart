@@ -7,7 +7,6 @@ import 'package:flutter/services.dart';
 import 'receive_profile_dialog.dart';
 
 class AddProfileView extends StatelessWidget {
-
   const AddProfileView({
     super.key,
     required this.context,
@@ -47,52 +46,167 @@ class AddProfileView extends StatelessWidget {
     }
   }
 
-  Future<void> _handleReceiveFromPhone() async {
-  final url = await showDialog<String>(
-    context: context,
-    builder: (_) => const ReceiveProfileDialog(),
-  );
-  if (url != null && url.isNotEmpty) {
-    _handleAddProfileFormURL(url);
+  Future<void> _toAddV2Board() async {
+    final form = await globalState.showCommonDialog<V2BoardLoginForm>(
+      child: const V2BoardLoginDialog(),
+    );
+    if (form != null) {
+      globalState.appController.addProfileFormV2Board(
+        baseUrl: form.baseUrl,
+        email: form.email,
+        password: form.password,
+      );
+    }
   }
-}
+
+  Future<void> _handleReceiveFromPhone() async {
+    final url = await showDialog<String>(
+      context: context,
+      builder: (_) => const ReceiveProfileDialog(),
+    );
+    if (url != null && url.isNotEmpty) {
+      _handleAddProfileFormURL(url);
+    }
+  }
 
   @override
   Widget build(BuildContext context) => FutureBuilder<bool>(
-      future: system.isAndroidTV,
-      builder: (context, snapshot) {
-        final isTV = snapshot.data ?? false;
-        return ListView(
-          children: [
-            if (isTV)
+        future: system.isAndroidTV,
+        builder: (context, snapshot) {
+          final isTV = snapshot.data ?? false;
+          return ListView(
+            children: [
+              if (isTV)
+                ListItem(
+                  leading: const Icon(Icons.tv_outlined),
+                  title: Text(appLocalizations.addFromPhoneTitle),
+                  subtitle: Text(appLocalizations.addFromPhoneSubtitle),
+                  onTap: _handleReceiveFromPhone,
+                ),
               ListItem(
-                leading: const Icon(Icons.tv_outlined),
-                title: Text(appLocalizations.addFromPhoneTitle),
-                subtitle: Text(appLocalizations.addFromPhoneSubtitle),
-                onTap: _handleReceiveFromPhone,
+                leading: const Icon(Icons.qr_code_sharp),
+                title: Text(appLocalizations.qrcode),
+                subtitle: Text(appLocalizations.qrcodeDesc),
+                onTap: _toScan,
               ),
-            ListItem(
-              leading: const Icon(Icons.qr_code_sharp),
-              title: Text(appLocalizations.qrcode),
-              subtitle: Text(appLocalizations.qrcodeDesc),
-              onTap: _toScan,
-            ),
-            ListItem(
-              leading: const Icon(Icons.upload_file_sharp),
-              title: Text(appLocalizations.file),
-              subtitle: Text(appLocalizations.fileDesc),
-              onTap: _handleAddProfileFormFile,
-            ),
-            ListItem(
-              leading: const Icon(Icons.cloud_download_sharp),
-              title: Text(appLocalizations.url),
-              subtitle: Text(appLocalizations.urlDesc),
-              onTap: _toAdd,
-            ),
-          ],
-        );
-      },
+              ListItem(
+                leading: const Icon(Icons.upload_file_sharp),
+                title: Text(appLocalizations.file),
+                subtitle: Text(appLocalizations.fileDesc),
+                onTap: _handleAddProfileFormFile,
+              ),
+              ListItem(
+                leading: const Icon(Icons.cloud_download_sharp),
+                title: Text(appLocalizations.url),
+                subtitle: Text(appLocalizations.urlDesc),
+                onTap: _toAdd,
+              ),
+              ListItem(
+                leading: const Icon(Icons.cloud_sync_sharp),
+                title: Text(appLocalizations.v2board),
+                subtitle: Text(appLocalizations.v2boardDesc),
+                onTap: _toAddV2Board,
+              ),
+            ],
+          );
+        },
+      );
+}
+
+class V2BoardLoginForm {
+  const V2BoardLoginForm({
+    required this.baseUrl,
+    required this.email,
+    required this.password,
+  });
+
+  final String baseUrl;
+  final String email;
+  final String password;
+}
+
+class V2BoardLoginDialog extends StatefulWidget {
+  const V2BoardLoginDialog({super.key});
+
+  @override
+  State<V2BoardLoginDialog> createState() => _V2BoardLoginDialogState();
+}
+
+class _V2BoardLoginDialogState extends State<V2BoardLoginDialog> {
+  final baseUrlController = TextEditingController(
+    text: globalState.v2boardBaseUrl,
+  );
+  final emailController = TextEditingController();
+  final passwordController = TextEditingController();
+
+  void _handleSubmit() {
+    final baseUrl = baseUrlController.text.trim();
+    final email = emailController.text.trim();
+    final password = passwordController.text;
+    if (baseUrl.isEmpty || email.isEmpty || password.isEmpty) return;
+    Navigator.of(context).pop<V2BoardLoginForm>(
+      V2BoardLoginForm(
+        baseUrl: baseUrl,
+        email: email,
+        password: password,
+      ),
     );
+  }
+
+  @override
+  void dispose() {
+    baseUrlController.dispose();
+    emailController.dispose();
+    passwordController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) => CommonDialog(
+        title: appLocalizations.importFromV2Board,
+        actions: [
+          FilledButton(
+            onPressed: _handleSubmit,
+            child: Text(appLocalizations.submit),
+          ),
+        ],
+        child: Padding(
+          padding: const EdgeInsets.only(top: 16.0),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              TextField(
+                controller: baseUrlController,
+                keyboardType: TextInputType.url,
+                autofocus: true,
+                decoration: InputDecoration(
+                  border: const OutlineInputBorder(),
+                  labelText: appLocalizations.panelUrl,
+                ),
+              ),
+              const SizedBox(height: 12),
+              TextField(
+                controller: emailController,
+                keyboardType: TextInputType.emailAddress,
+                decoration: InputDecoration(
+                  border: const OutlineInputBorder(),
+                  labelText: appLocalizations.email,
+                ),
+              ),
+              const SizedBox(height: 12),
+              TextField(
+                controller: passwordController,
+                obscureText: true,
+                onSubmitted: (_) => _handleSubmit(),
+                decoration: InputDecoration(
+                  border: const OutlineInputBorder(),
+                  labelText: appLocalizations.password,
+                ),
+              ),
+            ],
+          ),
+        ),
+      );
 }
 
 class URLFormDialog extends StatefulWidget {
@@ -121,32 +235,32 @@ class _URLFormDialogState extends State<URLFormDialog> {
 
   @override
   Widget build(BuildContext context) => CommonDialog(
-      title: appLocalizations.importFromURL,
-      actions: [
-        TextButton(
-          onPressed: _handlePaste,
-          child: Text(appLocalizations.pasteFromClipboard),
-        ),
-        const SizedBox(width: 8),
-        FilledButton(
-          onPressed: _handleSubmit,
-          child: Text(appLocalizations.submit),
-        ),
-      ],
-      child: Padding(
-        padding: const EdgeInsets.only(top: 16.0),
-        child: TextField(
-          controller: urlController,
-          keyboardType: TextInputType.url,
-          autofocus: true,
-          minLines: 1,
-          maxLines: 5,
-          onSubmitted: (_) => _handleSubmit(),
-          decoration: InputDecoration(
-            border: const OutlineInputBorder(),
-            labelText: appLocalizations.url,
+        title: appLocalizations.importFromURL,
+        actions: [
+          TextButton(
+            onPressed: _handlePaste,
+            child: Text(appLocalizations.pasteFromClipboard),
+          ),
+          const SizedBox(width: 8),
+          FilledButton(
+            onPressed: _handleSubmit,
+            child: Text(appLocalizations.submit),
+          ),
+        ],
+        child: Padding(
+          padding: const EdgeInsets.only(top: 16.0),
+          child: TextField(
+            controller: urlController,
+            keyboardType: TextInputType.url,
+            autofocus: true,
+            minLines: 1,
+            maxLines: 5,
+            onSubmitted: (_) => _handleSubmit(),
+            decoration: InputDecoration(
+              border: const OutlineInputBorder(),
+              labelText: appLocalizations.url,
+            ),
           ),
         ),
-      ),
-    );
+      );
 }

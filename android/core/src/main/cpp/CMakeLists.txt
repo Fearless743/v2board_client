@@ -26,9 +26,5 @@ if (EXISTS ${LIB_CLASH_PATH})
     target_link_libraries(${CMAKE_PROJECT_NAME}
             clash)
 else ()
-    message("Not found libclash.so for ABI ${ANDROID_ABI}")
-    add_library(${CMAKE_PROJECT_NAME} SHARED
-            jni_helper.cpp
-            core.cpp)
-    target_link_libraries(${CMAKE_PROJECT_NAME})
+    message(FATAL_ERROR "Missing libclash.so for ABI ${ANDROID_ABI}. Run: dart setup.dart dev --target android")
 endif ()

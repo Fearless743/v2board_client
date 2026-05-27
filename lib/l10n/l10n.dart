@@ -784,6 +784,56 @@ class AppLocalizations {
     );
   }
 
+  /// `V2Board`
+  String get v2board {
+    return Intl.message('V2Board', name: 'v2board', desc: '', args: []);
+  }
+
+  /// `Login to a V2Board panel and import subscription`
+  String get v2boardDesc {
+    return Intl.message(
+      'Login to a V2Board panel and import subscription',
+      name: 'v2boardDesc',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `V2Board Login`
+  String get v2boardLogin {
+    return Intl.message(
+      'V2Board Login',
+      name: 'v2boardLogin',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Import from V2Board`
+  String get importFromV2Board {
+    return Intl.message(
+      'Import from V2Board',
+      name: 'importFromV2Board',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Panel URL`
+  String get panelUrl {
+    return Intl.message('Panel URL', name: 'panelUrl', desc: '', args: []);
+  }
+
+  /// `Email`
+  String get email {
+    return Intl.message('Email', name: 'email', desc: '', args: []);
+  }
+
+  /// `Login`
+  String get login {
+    return Intl.message('Login', name: 'login', desc: '', args: []);
+  }
+
   /// `Submit`
   String get submit {
     return Intl.message('Submit', name: 'submit', desc: '', args: []);

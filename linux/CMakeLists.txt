@@ -41,7 +41,8 @@ endif()
 # of modifying this function.
 function(APPLY_STANDARD_SETTINGS TARGET)
   target_compile_features(${TARGET} PUBLIC cxx_std_14)
-  target_compile_options(${TARGET} PRIVATE -Wall -Werror)
+  target_compile_options(${TARGET} PRIVATE -Wall)
+  target_compile_options(${TARGET} PRIVATE "$<$<NOT:$<CONFIG:Debug>>:-Werror>")
   target_compile_options(${TARGET} PRIVATE "$<$<NOT:$<CONFIG:Debug>>:-O3>")
   target_compile_definitions(${TARGET} PRIVATE "$<$<NOT:$<CONFIG:Debug>>:NDEBUG>")
 endfunction()
@@ -118,7 +119,10 @@ install(FILES "${FLUTTER_LIBRARY}" DESTINATION "${INSTALL_BUNDLE_LIB_DIR}"
   COMPONENT Runtime)
 
 # libclash.so
-set(CLASH_DIR "../libclash/linux")
+set(CLASH_DIR "${CMAKE_CURRENT_SOURCE_DIR}/../libclash/linux")
+if(NOT EXISTS "${CLASH_DIR}/FlClashCore")
+  message(FATAL_ERROR "Missing FlClashCore at libclash/linux. Run: dart setup.dart dev --target linux. Then retry: flutter run -d linux")
+endif()
 install(PROGRAMS "${CLASH_DIR}/FlClashCore" DESTINATION "${BUILD_BUNDLE_DIR}"
   COMPONENT Runtime)
 

@@ -82,13 +82,17 @@ install(FILES "${FLUTTER_LIBRARY}" DESTINATION "${INSTALL_BUNDLE_LIB_DIR}"
   COMPONENT Runtime)
 
 # libclash.so
-set(CLASH_DIR "../libclash/windows")
+set(CLASH_DIR "${CMAKE_CURRENT_SOURCE_DIR}/../libclash/windows")
 
 # if(CMAKE_SYSTEM_PROCESSOR STREQUAL "ARM64" OR CMAKE_SYSTEM_PROCESSOR MATCHES "aarch64")
 # elseif(CMAKE_SYSTEM_PROCESSOR STREQUAL "ARM" OR CMAKE_SYSTEM_PROCESSOR MATCHES "armv[0-9]+")
 # elseif(CMAKE_SYSTEM_PROCESSOR MATCHES "x86")
-#   set(CLASH_DIR "../libclash/windows/x86")
+#   set(CLASH_DIR "${CMAKE_CURRENT_SOURCE_DIR}/../libclash/windows/x86")
 # endif()
+
+if(NOT EXISTS "${CLASH_DIR}/FlClashCore.exe" OR NOT EXISTS "${CLASH_DIR}/FlClashHelperService.exe")
+  message(FATAL_ERROR "Missing FlClashCore.exe or FlClashHelperService.exe at libclash/windows. Run: dart setup.dart dev --target windows. Then retry: flutter run -d windows --dart-define=CORE_SHA256=<printed-sha256>")
+endif()
 
 install(PROGRAMS "${CLASH_DIR}/FlClashCore.exe" DESTINATION "${INSTALL_BUNDLE_LIB_DIR}"
   COMPONENT Runtime)

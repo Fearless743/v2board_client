@@ -10,6 +10,10 @@ android {
 
     defaultConfig {
         minSdk = 23
+
+        ndk {
+            abiFilters += listOf("armeabi-v7a", "arm64-v8a", "x86_64")
+        }
     }
 
     buildTypes {
@@ -50,6 +54,19 @@ dependencies {
 
 val copyNativeLibs by tasks.register<Copy>("copyNativeLibs") {
     doFirst {
+        val libclashDir = file("../../libclash/android")
+        val missingAbis = listOf("armeabi-v7a", "arm64-v8a", "x86_64").filter {
+            !file("../../libclash/android/$it/libclash.so").exists()
+        }
+        if (!libclashDir.exists() || missingAbis.isNotEmpty()) {
+            val missingAbiMessage = if (missingAbis.isEmpty()) "" else " Missing ABIs: ${missingAbis.joinToString(", ")}."
+            throw GradleException(
+                "Missing native core artifacts at libclash/android. " +
+                    "Run: dart setup.dart dev --target android. " +
+                    "Then retry: flutter run -d <android-device>." +
+                    missingAbiMessage
+            )
+        }
         delete("src/main/jniLibs")
     }
     from("../../libclash/android")

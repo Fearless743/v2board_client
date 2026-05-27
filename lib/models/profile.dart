@@ -29,12 +29,16 @@ class SubscriptionInfo with _$SubscriptionInfo {
       _$SubscriptionInfoFromJson(json);
 
   factory SubscriptionInfo.formHString(String? info) {
-    if (info == null) return const SubscriptionInfo();
+    if (info == null || info.trim().isEmpty) return const SubscriptionInfo();
     final list = info.split(";");
     final map = <String, int?>{};
     for (final i in list) {
       final keyValue = i.trim().split("=");
-      map[keyValue[0]] = int.tryParse(keyValue[1]);
+      if (keyValue.length < 2) continue;
+      final key = keyValue.first.trim();
+      final value = keyValue.sublist(1).join("=").trim();
+      if (key.isEmpty) continue;
+      map[key] = int.tryParse(value);
     }
     return SubscriptionInfo(
       upload: map["upload"] ?? 0,
@@ -43,6 +47,10 @@ class SubscriptionInfo with _$SubscriptionInfo {
       expire: map["expire"] ?? 0,
     );
   }
+}
+
+extension SubscriptionInfoExt on SubscriptionInfo {
+  bool get isNotEmpty => upload > 0 || download > 0 || total > 0 || expire > 0;
 }
 
 @freezed
@@ -71,12 +79,13 @@ class Profile with _$Profile {
   factory Profile.normal({
     String? label,
     String url = '',
-  }) => Profile(
-      label: label,
-      url: url,
-      id: DateTime.now().millisecondsSinceEpoch.toString(),
-      autoUpdateDuration: defaultUpdateDuration,
-    );
+  }) =>
+      Profile(
+        label: label,
+        url: url,
+        id: DateTime.now().millisecondsSinceEpoch.toString(),
+        autoUpdateDuration: defaultUpdateDuration,
+      );
 }
 
 @freezed
@@ -187,34 +196,36 @@ extension ProfileExtension on Profile {
 
     final disposition = response.headers.value("content-disposition");
     final userinfo = response.headers.value('subscription-userinfo');
-    
+
     final responseData = response.data;
     if (responseData == null) {
       throw Exception("Failed to get profile data from response.");
     }
 
     final providerHeaders = <String, String>{};
-    
+
     final headersToCollect = [
       'announce',
-      'support-url', 
+      'support-url',
       'profile-update-interval',
+      'profile-web-page-url',
+      'subscription-title',
       'x-hwid-limit',
     ];
-    
+
     for (final headerName in headersToCollect) {
       final value = response.headers.value(headerName);
       if (value != null && value.isNotEmpty) {
         providerHeaders[headerName] = value;
       }
     }
-    
+
     response.headers.forEach((name, values) {
       if (name.toLowerCase().startsWith('flclashx-') && values.isNotEmpty) {
         providerHeaders[name.toLowerCase()] = values.first;
       }
     });
-    
+
     Duration? durationFromHeader;
     final updateIntervalHeader = providerHeaders['profile-update-interval'];
     if (updateIntervalHeader != null) {
@@ -223,7 +234,7 @@ extension ProfileExtension on Profile {
         durationFromHeader = Duration(hours: hours);
       }
     }
-    
+
     return copyWith(
       label: label ?? utils.getFileNameForDisposition(disposition) ?? id,
       subscriptionInfo: SubscriptionInfo.formHString(userinfo),

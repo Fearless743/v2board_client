@@ -16,6 +16,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'controller.dart';
 import 'pages/pages.dart';
+import 'views/v2board_login_gate.dart';
 
 class Application extends ConsumerStatefulWidget {
   const Application({
@@ -203,7 +204,9 @@ class ApplicationState extends ConsumerState<Application> {
                 home: child,
               );
             },
-            child: const HomePage(),
+            child: const V2BoardLoginGate(
+              child: HomePage(),
+            ),
           ),
         ),
       );

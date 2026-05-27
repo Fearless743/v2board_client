@@ -14,6 +14,19 @@ enum Target {
   macos,
 }
 
+Target get currentHostTarget {
+  if (Platform.isWindows) {
+    return Target.windows;
+  }
+  if (Platform.isLinux) {
+    return Target.linux;
+  }
+  if (Platform.isMacOS) {
+    return Target.macos;
+  }
+  throw "Unsupported current platform";
+}
+
 extension TargetExt on Target {
   String get os {
     if (this == Target.macos) {
@@ -239,11 +252,13 @@ class Build {
   }) async {
     final isLib = mode == Mode.lib;
 
-    final items = buildItems.where(
-      (element) =>
-          element.target == target &&
-          (arch == null ? true : element.arch == arch),
-    ).toList();
+    final items = buildItems
+        .where(
+          (element) =>
+              element.target == target &&
+              (arch == null ? true : element.arch == arch),
+        )
+        .toList();
 
     final List<String> corePaths = [];
 
@@ -339,12 +354,12 @@ class Build {
       "--features",
       "windows-service",
     ];
-    
+
     // Add target for cross-compilation
     if (arch == Arch.arm64 && target == Target.windows) {
       buildArgs.addAll(["--target", "aarch64-pc-windows-msvc"]);
     }
-    
+
     await exec(
       buildArgs,
       environment: {
@@ -353,15 +368,16 @@ class Build {
       name: "build helper",
       workingDirectory: _servicesDir,
     );
-    
+
     // Determine output path based on architecture
     final String releasePath;
     if (arch == Arch.arm64 && target == Target.windows) {
-      releasePath = join(_servicesDir, "target", "aarch64-pc-windows-msvc", "release");
+      releasePath =
+          join(_servicesDir, "target", "aarch64-pc-windows-msvc", "release");
     } else {
       releasePath = join(_servicesDir, "target", "release");
     }
-    
+
     final outPath = join(
       releasePath,
       "helper${target.executableExtensionName}",
@@ -418,6 +434,191 @@ class Build {
       print("Failed to copy file: $e");
     }
   }
+
+  static Future<Arch> resolveHostArch() async {
+    final String? value;
+    if (Platform.isWindows) {
+      value = Platform.environment["PROCESSOR_ARCHITECTURE"];
+    } else if (Platform.isLinux || Platform.isMacOS) {
+      final result = await Process.run('uname', ['-m']);
+      value = result.stdout.toString().trim();
+    } else {
+      value = null;
+    }
+
+    final normalized = value?.toLowerCase();
+    if (normalized == "x86_64" || normalized == "amd64") {
+      return Arch.amd64;
+    }
+    if (normalized == "arm64" || normalized == "aarch64") {
+      return Arch.arm64;
+    }
+    throw "Unsupported host arch: $value";
+  }
+
+  static Arch parseArch(String value) {
+    return Arch.values.firstWhere(
+      (arch) => arch.name == value,
+      orElse: () => throw "Invalid arch parameter: $value",
+    );
+  }
+}
+
+class DevCommand extends Command {
+  DevCommand() {
+    argParser.addOption(
+      "target",
+      valueHelp: "android|linux|windows|macos|current|all",
+      help: "Prepare one target for flutter run",
+    );
+    argParser.addOption(
+      "targets",
+      valueHelp: "android,linux",
+      help: "Prepare multiple targets for flutter run",
+    );
+    argParser.addOption(
+      "arch",
+      valueHelp: "amd64|arm64|arm",
+      help: "Desktop arch to prepare; Android defaults to all ABIs",
+    );
+    argParser.addOption(
+      "env",
+      defaultsTo: "pre",
+      valueHelp: "pre|stable",
+      help: "APP_ENV value used in printed flutter run commands",
+    );
+    argParser.addOption(
+      "v2board-base-url",
+      help: "Default V2Board panel base URL",
+    );
+    argParser.addFlag(
+      "print-flutter-run",
+      negatable: false,
+      help: "Print suggested flutter run commands after preparing artifacts",
+    );
+  }
+
+  @override
+  String get description => "prepare native artifacts for flutter run";
+
+  @override
+  String get name => "dev";
+
+  Future<List<Target>> _resolveTargets() async {
+    final target = argResults?["target"] as String?;
+    final targets = argResults?["targets"] as String?;
+
+    if (target != null && targets != null) {
+      throw "Use either --target or --targets, not both";
+    }
+
+    final values = (targets ?? target ?? "current")
+        .split(",")
+        .map((value) => value.trim())
+        .where((value) => value.isNotEmpty);
+
+    final resolved = <Target>[];
+    for (final value in values) {
+      if (value == "all") {
+        resolved.addAll(Target.values);
+        continue;
+      }
+      if (value == "current") {
+        resolved.add(currentHostTarget);
+        continue;
+      }
+      resolved.add(
+        Target.values.firstWhere(
+          (target) => target.name == value,
+          orElse: () => throw "Invalid target parameter: $value",
+        ),
+      );
+    }
+
+    return resolved.toSet().toList();
+  }
+
+  Future<Arch?> _resolveArch(Target target) async {
+    final archName = argResults?["arch"] as String?;
+    if (target == Target.android) {
+      return archName == null ? null : Build.parseArch(archName);
+    }
+    return archName == null
+        ? await Build.resolveHostArch()
+        : Build.parseArch(archName);
+  }
+
+  Future<String?> _prepareTarget(Target target, String coreVersion) async {
+    final mode = target == Target.android ? Mode.lib : Mode.core;
+    final arch = await _resolveArch(target);
+    final corePaths = await Build.buildCore(
+      mode: mode,
+      target: target,
+      arch: arch,
+      coreVersion: coreVersion,
+    );
+
+    if (target != Target.windows) {
+      return null;
+    }
+
+    final token = await Build.calcSha256(corePaths.first);
+    await Build.buildHelper(target, token, arch: arch);
+    return token;
+  }
+
+  String _v2boardRunDefine(String? v2boardBaseUrl) {
+    final value = v2boardBaseUrl?.trim();
+    if (value == null || value.isEmpty) return "";
+    return " --dart-define=V2BOARD_BASE_URL=$value";
+  }
+
+  void _printFlutterRunHints(
+    List<Target> targets,
+    String env,
+    String? windowsToken,
+    String? v2boardBaseUrl,
+  ) {
+    final v2boardDefine = _v2boardRunDefine(v2boardBaseUrl);
+    final deviceTargets = targets.map((target) => target.name).join(",");
+    print("Prepared native artifacts for: $deviceTargets");
+    print("");
+    if (targets.contains(Target.windows) && windowsToken != null) {
+      print(
+        "flutter run -d windows --dart-define=APP_ENV=$env --dart-define=CORE_SHA256=$windowsToken$v2boardDefine",
+      );
+    }
+    if (targets.length == 1 && !targets.contains(Target.windows)) {
+      print(
+        "flutter run -d ${targets.first.name} --dart-define=APP_ENV=$env$v2boardDefine",
+      );
+      return;
+    }
+    if (!targets.contains(Target.windows)) {
+      print("flutter run -d all --dart-define=APP_ENV=$env$v2boardDefine");
+    }
+  }
+
+  @override
+  Future<void> run() async {
+    final env = argResults?["env"] as String? ?? "pre";
+    final v2boardBaseUrl = argResults?["v2board-base-url"] as String?;
+    final printFlutterRun = argResults?["print-flutter-run"] as bool? ?? false;
+    final targets = await _resolveTargets();
+
+    await Build.syncCoreVersionDartFile();
+    final coreVersion = await Build.extractCoreVersion();
+
+    String? windowsToken;
+    for (final target in targets) {
+      final token = await _prepareTarget(target, coreVersion);
+      windowsToken ??= token;
+    }
+
+    if (printFlutterRun) {
+      _printFlutterRunHints(targets, env, windowsToken, v2boardBaseUrl);
+    }
+  }
 }
 
 class BuildCommand extends Command {
@@ -453,6 +654,10 @@ class BuildCommand extends Command {
         "stable",
       ].join(','),
       help: 'The $name build env',
+    );
+    argParser.addOption(
+      "v2board-base-url",
+      help: "Default V2Board panel base URL",
     );
     // Android builds always create both split and universal APKs
     // No additional flags needed
@@ -518,10 +723,17 @@ class BuildCommand extends Command {
     );
   }
 
+  String _v2boardBuildDefine(String? v2boardBaseUrl) {
+    final value = v2boardBaseUrl?.trim();
+    if (value == null || value.isEmpty) return "";
+    return " --build-dart-define=V2BOARD_BASE_URL=$value";
+  }
+
   _buildMacosApp({
     required Arch arch,
     required String env,
     required String coreVersion,
+    String? v2boardBaseUrl,
   }) async {
     await Build.exec(
       name: "flutter build macos",
@@ -532,6 +744,8 @@ class BuildCommand extends Command {
         "--release",
         "--dart-define=APP_ENV=$env",
         "--dart-define=CORE_VERSION=$coreVersion",
+        if (v2boardBaseUrl?.trim().isNotEmpty == true)
+          "--dart-define=V2BOARD_BASE_URL=${v2boardBaseUrl!.trim()}",
       ],
     );
 
@@ -587,12 +801,14 @@ class BuildCommand extends Command {
     required String targets,
     String args = '',
     required String env,
+    String? v2boardBaseUrl,
   }) async {
+    final v2boardDefine = _v2boardBuildDefine(v2boardBaseUrl);
     await Build.getDistributor();
     await Build.exec(
       name: name,
       Build.getExecutable(
-        "flutter_distributor package --skip-clean --platform ${target.name} --targets $targets --flutter-build-args=verbose$args --build-dart-define=APP_ENV=$env",
+        "dart pub global run flutter_distributor:main package --skip-clean --platform ${target.name} --targets $targets --flutter-build-args=verbose$args --build-dart-define=APP_ENV=$env$v2boardDefine",
       ),
     );
   }
@@ -613,6 +829,7 @@ class BuildCommand extends Command {
     final String out = argResults?["out"] ?? (target.same ? "app" : "core");
     final archName = argResults?["arch"];
     final env = argResults?["env"] ?? "pre";
+    final v2boardBaseUrl = argResults?["v2board-base-url"] as String?;
     final currentArches =
         arches.where((element) => element.name == archName).toList();
     final arch = currentArches.isEmpty ? null : currentArches.first;
@@ -647,6 +864,7 @@ class BuildCommand extends Command {
           args:
               " --description $archName --build-dart-define=CORE_SHA256=$token --build-dart-define=CORE_VERSION=$coreVersion",
           env: env,
+          v2boardBaseUrl: v2boardBaseUrl,
         );
         return;
       case Target.linux:
@@ -667,6 +885,7 @@ class BuildCommand extends Command {
           args:
               " --description $archName --build-target-platform $defaultTarget --build-dart-define=CORE_VERSION=$coreVersion",
           env: env,
+          v2boardBaseUrl: v2boardBaseUrl,
         );
         return;
       case Target.android:
@@ -680,6 +899,7 @@ class BuildCommand extends Command {
           args:
               ",split-per-abi --build-target-platform $allTargets --build-dart-define=CORE_VERSION=$coreVersion",
           env: env,
+          v2boardBaseUrl: v2boardBaseUrl,
         );
 
         // Build universal APK (all architectures in one file)
@@ -689,6 +909,7 @@ class BuildCommand extends Command {
           args:
               " --build-target-platform $allTargets --build-dart-define=CORE_VERSION=$coreVersion",
           env: env,
+          v2boardBaseUrl: v2boardBaseUrl,
         );
 
         return;
@@ -698,6 +919,7 @@ class BuildCommand extends Command {
           arch: arch!,
           env: env,
           coreVersion: coreVersion,
+          v2boardBaseUrl: v2boardBaseUrl,
         );
         return;
     }
@@ -706,6 +928,7 @@ class BuildCommand extends Command {
 
 main(args) async {
   final runner = CommandRunner("setup", "build Application");
+  runner.addCommand(DevCommand());
   runner.addCommand(BuildCommand(target: Target.android));
   runner.addCommand(BuildCommand(target: Target.linux));
   runner.addCommand(BuildCommand(target: Target.windows));
