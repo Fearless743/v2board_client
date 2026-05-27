@@ -29,7 +29,7 @@ class _ProxiesViewState extends ConsumerState<ProxiesView> with PageMixin {
     final groups = ref.read(currentGroupsStateProvider).value;
     final allProxies = <Proxy>[];
     final seenNames = <String>{};
-    
+
     for (final group in groups) {
       for (final proxy in group.all) {
         if (!seenNames.contains(proxy.name)) {
@@ -38,7 +38,7 @@ class _ProxiesViewState extends ConsumerState<ProxiesView> with PageMixin {
         }
       }
     }
-    
+
     if (allProxies.isNotEmpty) {
       await delayTest(allProxies, null);
     }
@@ -80,8 +80,8 @@ class _ProxiesViewState extends ConsumerState<ProxiesView> with PageMixin {
                   (state) => state.value.map((e) => e.name).toList(),
                 ),
               );
-              final allExpanded = groupNames.isNotEmpty &&
-                  groupNames.every(unfoldSet.contains);
+              final allExpanded =
+                  groupNames.isNotEmpty && groupNames.every(unfoldSet.contains);
               return IconButton(
                 onPressed: () {
                   if (allExpanded) {
@@ -100,15 +100,15 @@ class _ProxiesViewState extends ConsumerState<ProxiesView> with PageMixin {
         ],
         CommonPopupBox(
           targetBuilder: (open) => IconButton(
-              onPressed: () {
-                open(
-                  offset: const Offset(0, 20),
-                );
-              },
-              icon: const Icon(
-                Icons.more_vert,
-              ),
+            onPressed: () {
+              open(
+                offset: const Offset(0, 20),
+              );
+            },
+            icon: const Icon(
+              Icons.more_vert,
             ),
+          ),
           popup: CommonPopupMenu(
             items: [
               PopupMenuItemData(
@@ -121,10 +121,10 @@ class _ProxiesViewState extends ConsumerState<ProxiesView> with PageMixin {
                       isScrollControlled: true,
                     ),
                     builder: (_, type) => AdaptiveSheetScaffold(
-                        type: type,
-                        body: const ProxiesSetting(),
-                        title: appLocalizations.settings,
-                      ),
+                      type: type,
+                      body: const ProxiesSetting(),
+                      title: appLocalizations.settings,
+                    ),
                   );
                 },
               ),
