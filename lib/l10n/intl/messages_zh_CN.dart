@@ -257,7 +257,6 @@ class MessageLookup extends MessageLookupByLibrary {
         "ipcidr": MessageLookupByLibrary.simpleMessage("IP/掩码"),
         "ipv6Desc": MessageLookupByLibrary.simpleMessage("开启后将可以接收IPv6流量"),
         "ipv6InboundDesc": MessageLookupByLibrary.simpleMessage("允许IPv6入站"),
-        "ja": MessageLookupByLibrary.simpleMessage("日语"),
         "just": MessageLookupByLibrary.simpleMessage("刚刚"),
         "keepAliveIntervalDesc":
             MessageLookupByLibrary.simpleMessage("TCP保持活动间隔"),
@@ -448,7 +447,6 @@ class MessageLookup extends MessageLookupByLibrary {
         "routeMode_bypassPrivate":
             MessageLookupByLibrary.simpleMessage("绕过私有路由地址"),
         "routeMode_config": MessageLookupByLibrary.simpleMessage("使用配置"),
-        "ru": MessageLookupByLibrary.simpleMessage("俄语"),
         "rule": MessageLookupByLibrary.simpleMessage("按规则"),
         "ruleName": MessageLookupByLibrary.simpleMessage("规则名称"),
         "ruleProviders": MessageLookupByLibrary.simpleMessage("规则提供者"),
