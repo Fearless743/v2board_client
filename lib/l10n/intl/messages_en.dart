@@ -87,7 +87,6 @@ class MessageLookup extends MessageLookupByLibrary {
           "Boot up by using admin mode",
         ),
         "ago": MessageLookupByLibrary.simpleMessage(" Ago"),
-        "agree": MessageLookupByLibrary.simpleMessage("Agree"),
         "allApps": MessageLookupByLibrary.simpleMessage("All apps"),
         "allowBypass": MessageLookupByLibrary.simpleMessage(
           "Allow applications to bypass VPN",
@@ -242,10 +241,6 @@ class MessageLookup extends MessageLookupByLibrary {
           "Developer mode is enabled.",
         ),
         "direct": MessageLookupByLibrary.simpleMessage("Direct"),
-        "disclaimer": MessageLookupByLibrary.simpleMessage("Disclaimer"),
-        "disclaimerDesc": MessageLookupByLibrary.simpleMessage(
-          "This software is only used for non-commercial purposes such as learning exchanges and scientific research. It is strictly prohibited to use this software for commercial purposes. Any commercial activity, if any, has nothing to do with this software.",
-        ),
         "discoverNewVersion": MessageLookupByLibrary.simpleMessage(
           "Discover the new version",
         ),

@@ -34,7 +34,6 @@ mixin _$AppSettingProps {
   bool get isAnimateToPage => throw _privateConstructorUsedError;
   bool get autoCheckUpdate => throw _privateConstructorUsedError;
   bool get showLabel => throw _privateConstructorUsedError;
-  bool get disclaimerAccepted => throw _privateConstructorUsedError;
   bool get minimizeOnExit => throw _privateConstructorUsedError;
   bool get hidden => throw _privateConstructorUsedError;
   bool get developerMode => throw _privateConstructorUsedError;
@@ -72,7 +71,6 @@ abstract class $AppSettingPropsCopyWith<$Res> {
       bool isAnimateToPage,
       bool autoCheckUpdate,
       bool showLabel,
-      bool disclaimerAccepted,
       bool minimizeOnExit,
       bool hidden,
       bool developerMode,
@@ -108,7 +106,6 @@ class _$AppSettingPropsCopyWithImpl<$Res, $Val extends AppSettingProps>
     Object? isAnimateToPage = null,
     Object? autoCheckUpdate = null,
     Object? showLabel = null,
-    Object? disclaimerAccepted = null,
     Object? minimizeOnExit = null,
     Object? hidden = null,
     Object? developerMode = null,
@@ -165,10 +162,6 @@ class _$AppSettingPropsCopyWithImpl<$Res, $Val extends AppSettingProps>
           ? _value.showLabel
           : showLabel // ignore: cast_nullable_to_non_nullable
               as bool,
-      disclaimerAccepted: null == disclaimerAccepted
-          ? _value.disclaimerAccepted
-          : disclaimerAccepted // ignore: cast_nullable_to_non_nullable
-              as bool,
       minimizeOnExit: null == minimizeOnExit
           ? _value.minimizeOnExit
           : minimizeOnExit // ignore: cast_nullable_to_non_nullable
@@ -219,7 +212,6 @@ abstract class _$$AppSettingPropsImplCopyWith<$Res>
       bool isAnimateToPage,
       bool autoCheckUpdate,
       bool showLabel,
-      bool disclaimerAccepted,
       bool minimizeOnExit,
       bool hidden,
       bool developerMode,
@@ -253,7 +245,6 @@ class __$$AppSettingPropsImplCopyWithImpl<$Res>
     Object? isAnimateToPage = null,
     Object? autoCheckUpdate = null,
     Object? showLabel = null,
-    Object? disclaimerAccepted = null,
     Object? minimizeOnExit = null,
     Object? hidden = null,
     Object? developerMode = null,
@@ -310,10 +301,6 @@ class __$$AppSettingPropsImplCopyWithImpl<$Res>
           ? _value.showLabel
           : showLabel // ignore: cast_nullable_to_non_nullable
               as bool,
-      disclaimerAccepted: null == disclaimerAccepted
-          ? _value.disclaimerAccepted
-          : disclaimerAccepted // ignore: cast_nullable_to_non_nullable
-              as bool,
       minimizeOnExit: null == minimizeOnExit
           ? _value.minimizeOnExit
           : minimizeOnExit // ignore: cast_nullable_to_non_nullable
@@ -359,7 +346,6 @@ class _$AppSettingPropsImpl implements _AppSettingProps {
       this.isAnimateToPage = true,
       this.autoCheckUpdate = false,
       this.showLabel = false,
-      this.disclaimerAccepted = false,
       this.minimizeOnExit = false,
       this.hidden = false,
       this.developerMode = false,
@@ -415,9 +401,6 @@ class _$AppSettingPropsImpl implements _AppSettingProps {
   final bool showLabel;
   @override
   @JsonKey()
-  final bool disclaimerAccepted;
-  @override
-  @JsonKey()
   final bool minimizeOnExit;
   @override
   @JsonKey()
@@ -437,7 +420,7 @@ class _$AppSettingPropsImpl implements _AppSettingProps {
 
   @override
   String toString() {
-    return 'AppSettingProps(locale: $locale, dashboardWidgets: $dashboardWidgets, onlyStatisticsProxy: $onlyStatisticsProxy, autoLaunch: $autoLaunch, silentLaunch: $silentLaunch, autoRun: $autoRun, openLogs: $openLogs, closeConnections: $closeConnections, testUrl: $testUrl, isAnimateToPage: $isAnimateToPage, autoCheckUpdate: $autoCheckUpdate, showLabel: $showLabel, disclaimerAccepted: $disclaimerAccepted, minimizeOnExit: $minimizeOnExit, hidden: $hidden, developerMode: $developerMode, overrideProviderSettings: $overrideProviderSettings, overrideNetworkSettings: $overrideNetworkSettings, recoveryStrategy: $recoveryStrategy)';
+    return 'AppSettingProps(locale: $locale, dashboardWidgets: $dashboardWidgets, onlyStatisticsProxy: $onlyStatisticsProxy, autoLaunch: $autoLaunch, silentLaunch: $silentLaunch, autoRun: $autoRun, openLogs: $openLogs, closeConnections: $closeConnections, testUrl: $testUrl, isAnimateToPage: $isAnimateToPage, autoCheckUpdate: $autoCheckUpdate, showLabel: $showLabel, minimizeOnExit: $minimizeOnExit, hidden: $hidden, developerMode: $developerMode, overrideProviderSettings: $overrideProviderSettings, overrideNetworkSettings: $overrideNetworkSettings, recoveryStrategy: $recoveryStrategy)';
   }
 
   @override
@@ -466,8 +449,6 @@ class _$AppSettingPropsImpl implements _AppSettingProps {
                 other.autoCheckUpdate == autoCheckUpdate) &&
             (identical(other.showLabel, showLabel) ||
                 other.showLabel == showLabel) &&
-            (identical(other.disclaimerAccepted, disclaimerAccepted) ||
-                other.disclaimerAccepted == disclaimerAccepted) &&
             (identical(other.minimizeOnExit, minimizeOnExit) ||
                 other.minimizeOnExit == minimizeOnExit) &&
             (identical(other.hidden, hidden) || other.hidden == hidden) &&
@@ -499,7 +480,6 @@ class _$AppSettingPropsImpl implements _AppSettingProps {
         isAnimateToPage,
         autoCheckUpdate,
         showLabel,
-        disclaimerAccepted,
         minimizeOnExit,
         hidden,
         developerMode,
@@ -540,7 +520,6 @@ abstract class _AppSettingProps implements AppSettingProps {
       final bool isAnimateToPage,
       final bool autoCheckUpdate,
       final bool showLabel,
-      final bool disclaimerAccepted,
       final bool minimizeOnExit,
       final bool hidden,
       final bool developerMode,
@@ -577,7 +556,6 @@ abstract class _AppSettingProps implements AppSettingProps {
   @override
   bool get showLabel;
   @override
-  bool get disclaimerAccepted;
   @override
   bool get minimizeOnExit;
   @override

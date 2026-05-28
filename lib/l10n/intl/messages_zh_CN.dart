@@ -68,7 +68,6 @@ class MessageLookup extends MessageLookupByLibrary {
         "adminAutoLaunchDesc":
             MessageLookupByLibrary.simpleMessage("使用管理员模式开机自启动"),
         "ago": MessageLookupByLibrary.simpleMessage("前"),
-        "agree": MessageLookupByLibrary.simpleMessage("同意"),
         "allApps": MessageLookupByLibrary.simpleMessage("所有应用"),
         "allowBypass": MessageLookupByLibrary.simpleMessage("允许应用绕过VPN"),
         "allowBypassDesc":
@@ -169,10 +168,6 @@ class MessageLookup extends MessageLookupByLibrary {
         "developerModeEnableTip":
             MessageLookupByLibrary.simpleMessage("开发者模式已启用。"),
         "direct": MessageLookupByLibrary.simpleMessage("直连"),
-        "disclaimer": MessageLookupByLibrary.simpleMessage("免责声明"),
-        "disclaimerDesc": MessageLookupByLibrary.simpleMessage(
-          "本软件仅供学习交流、科研等非商业性质的用途，严禁将本软件用于商业目的。如有任何商业行为，均与本软件无关。",
-        ),
         "discoverNewVersion": MessageLookupByLibrary.simpleMessage("发现新版本"),
         "discovery": MessageLookupByLibrary.simpleMessage("发现新版本"),
         "dnsDesc": MessageLookupByLibrary.simpleMessage("更新DNS相关设置"),
