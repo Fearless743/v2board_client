@@ -70,6 +70,7 @@ class _HomePageViewState extends ConsumerState<_HomePageView> {
     );
     ref.listenManual(currentPageLabelProvider, (prev, next) {
       if (prev != next) {
+        debugPrint('[PERF][navigation] label change $prev -> $next');
         _toPage(next);
       }
     });
@@ -88,11 +89,14 @@ class _HomePageViewState extends ConsumerState<_HomePageView> {
   }
 
   _toPage(PageLabel pageLabel, [bool ignoreAnimateTo = false]) async {
+    final sw = Stopwatch()..start();
     if (!mounted) {
       return;
     }
     final navigationItems = ref.read(currentNavigationsStateProvider).value;
     final index = navigationItems.indexWhere((item) => item.label == pageLabel);
+    debugPrint(
+        '[PERF][navigation] _toPage resolve ${sw.elapsedMilliseconds}ms label=$pageLabel index=$index items=${navigationItems.length} ignoreAnimate=$ignoreAnimateTo');
     if (index == -1) {
       return;
     }
@@ -104,8 +108,12 @@ class _HomePageViewState extends ConsumerState<_HomePageView> {
         duration: kTabScrollDuration,
         curve: Curves.easeOut,
       );
+      debugPrint(
+          '[PERF][navigation] animateToPage returned ${sw.elapsedMilliseconds}ms label=$pageLabel');
     } else {
       _pageController.jumpToPage(index);
+      debugPrint(
+          '[PERF][navigation] jumpToPage returned ${sw.elapsedMilliseconds}ms label=$pageLabel');
     }
     if (!mounted) {
       return;
@@ -114,6 +122,8 @@ class _HomePageViewState extends ConsumerState<_HomePageView> {
       if (!mounted) {
         return;
       }
+      debugPrint(
+          '[PERF][navigation] first-frame ${sw.elapsedMilliseconds}ms label=$pageLabel');
       FocusManager.instance.primaryFocus?.unfocus();
     });
   }
@@ -131,16 +141,24 @@ class _HomePageViewState extends ConsumerState<_HomePageView> {
 
   @override
   Widget build(BuildContext context) {
+    final sw = Stopwatch()..start();
     final navigationItems = ref.watch(currentNavigationsStateProvider).value;
     final currentLabel = ref.watch(currentPageLabelProvider);
+    debugPrint(
+        '[PERF][home-page] build ${sw.elapsedMilliseconds}ms current=$currentLabel items=${navigationItems.length}');
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      debugPrint(
+          '[PERF][home-page] first-frame ${sw.elapsedMilliseconds}ms current=$currentLabel');
+    });
     return PageView.builder(
       controller: _pageController,
       physics: const NeverScrollableScrollPhysics(),
       itemCount: navigationItems.length,
       itemBuilder: (_, index) {
+        final itemSw = Stopwatch()..start();
         final navigationItem = navigationItems[index];
         final isActive = navigationItem.label == currentLabel;
-        return ExcludeFocus(
+        final item = ExcludeFocus(
           excluding: !isActive,
           child: KeepScope(
             keep: navigationItem.keep,
@@ -148,6 +166,13 @@ class _HomePageViewState extends ConsumerState<_HomePageView> {
             child: navigationItem.view,
           ),
         );
+        debugPrint(
+            '[PERF][home-page] itemBuilder ${itemSw.elapsedMilliseconds}ms label=${navigationItem.label} active=$isActive');
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          debugPrint(
+              '[PERF][home-page] item first-frame ${itemSw.elapsedMilliseconds}ms label=${navigationItem.label} active=$isActive');
+        });
+        return item;
       },
     );
   }
@@ -316,14 +341,15 @@ class _NavigationBarDefaultsM3 extends NavigationBarThemeData {
 
   @override
   WidgetStateProperty<IconThemeData?>? get iconTheme =>
-      WidgetStateProperty.resolveWith((Set<WidgetState> states) => IconThemeData(
-            size: 24.0,
-            color: states.contains(WidgetState.disabled)
-                ? _colors.onSurfaceVariant.opacity38
-                : states.contains(WidgetState.selected)
-                    ? _colors.onSecondaryContainer
-                    : _colors.onSurfaceVariant,
-          ));
+      WidgetStateProperty.resolveWith(
+          (Set<WidgetState> states) => IconThemeData(
+                size: 24.0,
+                color: states.contains(WidgetState.disabled)
+                    ? _colors.onSurfaceVariant.opacity38
+                    : states.contains(WidgetState.selected)
+                        ? _colors.onSecondaryContainer
+                        : _colors.onSurfaceVariant,
+              ));
 
   @override
   Color? get indicatorColor => _colors.secondaryContainer;
@@ -333,8 +359,8 @@ class _NavigationBarDefaultsM3 extends NavigationBarThemeData {
 
   @override
   WidgetStateProperty<TextStyle?>? get labelTextStyle =>
-      WidgetStateProperty.resolveWith((Set<WidgetState> states) =>
-          _textTheme.labelMedium!.apply(
+      WidgetStateProperty.resolveWith(
+          (Set<WidgetState> states) => _textTheme.labelMedium!.apply(
               overflow: TextOverflow.ellipsis,
               color: states.contains(WidgetState.disabled)
                   ? _colors.onSurfaceVariant.opacity38
