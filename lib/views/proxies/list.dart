@@ -424,6 +424,10 @@ class _ProxyGroupCardState extends State<ProxyGroupCard>
                     widget.proxyCardType == ProxyCardType.oneline ? 4.0 : 8.0;
                 final totalHeight =
                     rowCount * rowHeight + max(rowCount - 1, 0) * gap;
+                final bodyHeight = min(
+                  totalHeight,
+                  MediaQuery.sizeOf(context).height * 0.72,
+                );
                 final body = RepaintBoundary(
                   child: SizeTransition(
                     sizeFactor: animation,
@@ -433,10 +437,9 @@ class _ProxyGroupCardState extends State<ProxyGroupCard>
                       child: Container(
                         margin: const EdgeInsets.symmetric(vertical: 4.0),
                         child: SizedBox(
-                          height: totalHeight,
+                          height: bodyHeight,
                           child: ListView.builder(
                             padding: EdgeInsets.zero,
-                            physics: const NeverScrollableScrollPhysics(),
                             itemCount: rowCount,
                             itemBuilder: (_, rowIndex) {
                               final rowSw = Stopwatch()..start();
