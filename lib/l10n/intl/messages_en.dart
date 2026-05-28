@@ -55,7 +55,6 @@ class MessageLookup extends MessageLookupByLibrary {
         "accessControlNotAllowDesc": MessageLookupByLibrary.simpleMessage(
           "The selected application will be excluded from VPN",
         ),
-        "account": MessageLookupByLibrary.simpleMessage("Account"),
         "action": MessageLookupByLibrary.simpleMessage("Action"),
         "action_mode": MessageLookupByLibrary.simpleMessage("Switch mode"),
         "action_proxy": MessageLookupByLibrary.simpleMessage("System proxy"),
@@ -74,12 +73,6 @@ class MessageLookup extends MessageLookupByLibrary {
           "Attach on the original rules",
         ),
         "address": MessageLookupByLibrary.simpleMessage("Address"),
-        "addressHelp": MessageLookupByLibrary.simpleMessage(
-          "WebDAV server address",
-        ),
-        "addressTip": MessageLookupByLibrary.simpleMessage(
-          "Please enter a valid WebDAV address",
-        ),
         "adminAutoLaunch": MessageLookupByLibrary.simpleMessage(
           "Admin auto launch",
         ),
@@ -138,20 +131,11 @@ class MessageLookup extends MessageLookupByLibrary {
         "autoUpdateInterval": MessageLookupByLibrary.simpleMessage(
           "Auto update interval (minutes)",
         ),
-        "backup": MessageLookupByLibrary.simpleMessage("Backup"),
-        "backupAndRecovery": MessageLookupByLibrary.simpleMessage(
-          "Backup and Recovery",
-        ),
-        "backupAndRecoveryDesc": MessageLookupByLibrary.simpleMessage(
-          "Sync data via WebDAV or file",
-        ),
-        "backupSuccess": MessageLookupByLibrary.simpleMessage("Backup success"),
         "basicConfig":
             MessageLookupByLibrary.simpleMessage("Basic configuration"),
         "basicConfigDesc": MessageLookupByLibrary.simpleMessage(
           "Modify the basic configuration globally",
         ),
-        "bind": MessageLookupByLibrary.simpleMessage("Bind"),
         "blacklistMode": MessageLookupByLibrary.simpleMessage("Blacklist mode"),
         "bypassDomain": MessageLookupByLibrary.simpleMessage("Bypass domain"),
         "bypassDomainDesc": MessageLookupByLibrary.simpleMessage(
@@ -196,7 +180,6 @@ class MessageLookup extends MessageLookupByLibrary {
         "connectionsDesc": MessageLookupByLibrary.simpleMessage(
           "View current connections data",
         ),
-        "connectivity": MessageLookupByLibrary.simpleMessage("Connectivity："),
         "contactMe": MessageLookupByLibrary.simpleMessage("Contact me"),
         "content": MessageLookupByLibrary.simpleMessage("Content"),
         "contentScheme": MessageLookupByLibrary.simpleMessage("Content"),
@@ -533,9 +516,6 @@ class MessageLookup extends MessageLookupByLibrary {
         "password": MessageLookupByLibrary.simpleMessage("Password"),
         "paste": MessageLookupByLibrary.simpleMessage("Paste"),
         "pasteFromClipboard": MessageLookupByLibrary.simpleMessage("Paste"),
-        "pleaseBindWebDAV": MessageLookupByLibrary.simpleMessage(
-          "Please bind WebDAV",
-        ),
         "pleaseEnterScriptName": MessageLookupByLibrary.simpleMessage(
           "Please enter a script name",
         ),
@@ -614,12 +594,6 @@ class MessageLookup extends MessageLookupByLibrary {
         "receiveSubscriptionTitle": MessageLookupByLibrary.simpleMessage(
           "Receive Subscription",
         ),
-        "recovery": MessageLookupByLibrary.simpleMessage("Recovery"),
-        "recoveryAll":
-            MessageLookupByLibrary.simpleMessage("Recovery all data"),
-        "recoveryProfiles": MessageLookupByLibrary.simpleMessage(
-          "Only recovery profiles",
-        ),
         "recoveryStrategy": MessageLookupByLibrary.simpleMessage(
           "Recovery strategy",
         ),
@@ -629,8 +603,6 @@ class MessageLookup extends MessageLookupByLibrary {
         "recoveryStrategy_override": MessageLookupByLibrary.simpleMessage(
           "Override",
         ),
-        "recoverySuccess":
-            MessageLookupByLibrary.simpleMessage("Recovery success"),
         "redirPort": MessageLookupByLibrary.simpleMessage("Redir Port"),
         "redo": MessageLookupByLibrary.simpleMessage("redo"),
         "regExp": MessageLookupByLibrary.simpleMessage("RegExp"),
@@ -638,12 +610,6 @@ class MessageLookup extends MessageLookupByLibrary {
         "remainingPlural": MessageLookupByLibrary.simpleMessage("Remaining"),
         "remainingSingular": MessageLookupByLibrary.simpleMessage("Remaining"),
         "remote": MessageLookupByLibrary.simpleMessage("Remote"),
-        "remoteBackupDesc": MessageLookupByLibrary.simpleMessage(
-          "Backup local data to WebDAV",
-        ),
-        "remoteRecoveryDesc": MessageLookupByLibrary.simpleMessage(
-          "Recovery data from WebDAV",
-        ),
         "remove": MessageLookupByLibrary.simpleMessage("Remove"),
         "rename": MessageLookupByLibrary.simpleMessage("Rename"),
         "requests": MessageLookupByLibrary.simpleMessage("Requests"),
@@ -826,9 +792,6 @@ class MessageLookup extends MessageLookupByLibrary {
         ),
         "vpnTip": MessageLookupByLibrary.simpleMessage(
           "Changes take effect after restarting the VPN",
-        ),
-        "webDAVConfiguration": MessageLookupByLibrary.simpleMessage(
-          "WebDAV configuration",
         ),
         "whitelistMode": MessageLookupByLibrary.simpleMessage("Whitelist mode"),
         "years": MessageLookupByLibrary.simpleMessage("Years"),

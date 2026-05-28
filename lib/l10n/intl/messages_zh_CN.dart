@@ -51,7 +51,6 @@ class MessageLookup extends MessageLookupByLibrary {
         "accessControlNotAllowDesc": MessageLookupByLibrary.simpleMessage(
           "选中应用将会被排除在VPN之外",
         ),
-        "account": MessageLookupByLibrary.simpleMessage("账号"),
         "action": MessageLookupByLibrary.simpleMessage("操作"),
         "action_mode": MessageLookupByLibrary.simpleMessage("切换模式"),
         "action_proxy": MessageLookupByLibrary.simpleMessage("系统代理"),
@@ -62,8 +61,6 @@ class MessageLookup extends MessageLookupByLibrary {
         "addRule": MessageLookupByLibrary.simpleMessage("添加规则"),
         "addedOriginRules": MessageLookupByLibrary.simpleMessage("附加到原始规则"),
         "address": MessageLookupByLibrary.simpleMessage("地址"),
-        "addressHelp": MessageLookupByLibrary.simpleMessage("WebDAV服务器地址"),
-        "addressTip": MessageLookupByLibrary.simpleMessage("请输入有效的WebDAV地址"),
         "adminAutoLaunch": MessageLookupByLibrary.simpleMessage("管理员自启动"),
         "adminAutoLaunchDesc":
             MessageLookupByLibrary.simpleMessage("使用管理员模式开机自启动"),
@@ -95,15 +92,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "autoUpdate": MessageLookupByLibrary.simpleMessage("自动更新"),
         "autoUpdateInterval":
             MessageLookupByLibrary.simpleMessage("自动更新间隔（分钟）"),
-        "backup": MessageLookupByLibrary.simpleMessage("备份"),
-        "backupAndRecovery": MessageLookupByLibrary.simpleMessage("备份与恢复"),
-        "backupAndRecoveryDesc": MessageLookupByLibrary.simpleMessage(
-          "通过WebDAV或者文件同步数据",
-        ),
-        "backupSuccess": MessageLookupByLibrary.simpleMessage("备份成功"),
         "basicConfig": MessageLookupByLibrary.simpleMessage("基本配置"),
         "basicConfigDesc": MessageLookupByLibrary.simpleMessage("全局修改基本配置"),
-        "bind": MessageLookupByLibrary.simpleMessage("绑定"),
         "blacklistMode": MessageLookupByLibrary.simpleMessage("黑名单模式"),
         "bypassDomain": MessageLookupByLibrary.simpleMessage("排除域名"),
         "bypassDomainDesc": MessageLookupByLibrary.simpleMessage("仅在系统代理启用时生效"),
@@ -133,7 +123,6 @@ class MessageLookup extends MessageLookupByLibrary {
         "confirm": MessageLookupByLibrary.simpleMessage("确定"),
         "connections": MessageLookupByLibrary.simpleMessage("连接"),
         "connectionsDesc": MessageLookupByLibrary.simpleMessage("查看当前连接数据"),
-        "connectivity": MessageLookupByLibrary.simpleMessage("连通性："),
         "contactMe": MessageLookupByLibrary.simpleMessage("联系我"),
         "content": MessageLookupByLibrary.simpleMessage("内容"),
         "contentScheme": MessageLookupByLibrary.simpleMessage("内容主题"),
@@ -356,7 +345,6 @@ class MessageLookup extends MessageLookupByLibrary {
         "palette": MessageLookupByLibrary.simpleMessage("调色板"),
         "password": MessageLookupByLibrary.simpleMessage("密码"),
         "paste": MessageLookupByLibrary.simpleMessage("粘贴"),
-        "pleaseBindWebDAV": MessageLookupByLibrary.simpleMessage("请绑定WebDAV"),
         "pleaseEnterScriptName":
             MessageLookupByLibrary.simpleMessage("请输入脚本名称"),
         "pleaseInputAdminPassword": MessageLookupByLibrary.simpleMessage(
@@ -408,21 +396,14 @@ class MessageLookup extends MessageLookupByLibrary {
         "qrcode": MessageLookupByLibrary.simpleMessage("二维码"),
         "qrcodeDesc": MessageLookupByLibrary.simpleMessage("扫描二维码获取配置文件"),
         "rainbowScheme": MessageLookupByLibrary.simpleMessage("彩虹"),
-        "recovery": MessageLookupByLibrary.simpleMessage("恢复"),
-        "recoveryAll": MessageLookupByLibrary.simpleMessage("恢复所有数据"),
-        "recoveryProfiles": MessageLookupByLibrary.simpleMessage("仅恢复配置文件"),
         "recoveryStrategy": MessageLookupByLibrary.simpleMessage("恢复策略"),
         "recoveryStrategy_compatible":
             MessageLookupByLibrary.simpleMessage("兼容"),
         "recoveryStrategy_override": MessageLookupByLibrary.simpleMessage("覆盖"),
-        "recoverySuccess": MessageLookupByLibrary.simpleMessage("恢复成功"),
         "redirPort": MessageLookupByLibrary.simpleMessage("Redir端口"),
         "redo": MessageLookupByLibrary.simpleMessage("重做"),
         "regExp": MessageLookupByLibrary.simpleMessage("正则"),
         "remote": MessageLookupByLibrary.simpleMessage("远程"),
-        "remoteBackupDesc": MessageLookupByLibrary.simpleMessage("备份数据到WebDAV"),
-        "remoteRecoveryDesc":
-            MessageLookupByLibrary.simpleMessage("通过WebDAV恢复数据"),
         "remove": MessageLookupByLibrary.simpleMessage("移除"),
         "rename": MessageLookupByLibrary.simpleMessage("重命名"),
         "requests": MessageLookupByLibrary.simpleMessage("请求"),
@@ -543,7 +524,6 @@ class MessageLookup extends MessageLookupByLibrary {
           "为VpnService附加HTTP代理",
         ),
         "vpnTip": MessageLookupByLibrary.simpleMessage("重启VPN后改变生效"),
-        "webDAVConfiguration": MessageLookupByLibrary.simpleMessage("WebDAV配置"),
         "whitelistMode": MessageLookupByLibrary.simpleMessage("白名单模式"),
         "years": MessageLookupByLibrary.simpleMessage("年"),
         "zh_CN": MessageLookupByLibrary.simpleMessage("中文简体"),

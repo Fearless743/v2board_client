@@ -1144,144 +1144,14 @@ class AppLocalizations {
     return Intl.message('tip', name: 'tip', desc: '', args: []);
   }
 
-  /// `Backup and Recovery`
-  String get backupAndRecovery {
-    return Intl.message(
-      'Backup and Recovery',
-      name: 'backupAndRecovery',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Sync data via WebDAV or file`
-  String get backupAndRecoveryDesc {
-    return Intl.message(
-      'Sync data via WebDAV or file',
-      name: 'backupAndRecoveryDesc',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Account`
-  String get account {
-    return Intl.message('Account', name: 'account', desc: '', args: []);
-  }
-
-  /// `Backup`
-  String get backup {
-    return Intl.message('Backup', name: 'backup', desc: '', args: []);
-  }
-
-  /// `Recovery`
-  String get recovery {
-    return Intl.message('Recovery', name: 'recovery', desc: '', args: []);
-  }
-
-  /// `Only recovery profiles`
-  String get recoveryProfiles {
-    return Intl.message(
-      'Only recovery profiles',
-      name: 'recoveryProfiles',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Recovery all data`
-  String get recoveryAll {
-    return Intl.message(
-      'Recovery all data',
-      name: 'recoveryAll',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Recovery success`
-  String get recoverySuccess {
-    return Intl.message(
-      'Recovery success',
-      name: 'recoverySuccess',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Backup success`
-  String get backupSuccess {
-    return Intl.message(
-      'Backup success',
-      name: 'backupSuccess',
-      desc: '',
-      args: [],
-    );
-  }
-
   /// `No info`
   String get noInfo {
     return Intl.message('No info', name: 'noInfo', desc: '', args: []);
   }
 
-  /// `Please bind WebDAV`
-  String get pleaseBindWebDAV {
-    return Intl.message(
-      'Please bind WebDAV',
-      name: 'pleaseBindWebDAV',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Bind`
-  String get bind {
-    return Intl.message('Bind', name: 'bind', desc: '', args: []);
-  }
-
-  /// `Connectivity：`
-  String get connectivity {
-    return Intl.message(
-      'Connectivity：',
-      name: 'connectivity',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `WebDAV configuration`
-  String get webDAVConfiguration {
-    return Intl.message(
-      'WebDAV configuration',
-      name: 'webDAVConfiguration',
-      desc: '',
-      args: [],
-    );
-  }
-
   /// `Address`
   String get address {
     return Intl.message('Address', name: 'address', desc: '', args: []);
-  }
-
-  /// `WebDAV server address`
-  String get addressHelp {
-    return Intl.message(
-      'WebDAV server address',
-      name: 'addressHelp',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Please enter a valid WebDAV address`
-  String get addressTip {
-    return Intl.message(
-      'Please enter a valid WebDAV address',
-      name: 'addressTip',
-      desc: '',
-      args: [],
-    );
   }
 
   /// `Password`
@@ -1827,26 +1697,6 @@ class AppLocalizations {
   /// `Remote`
   String get remote {
     return Intl.message('Remote', name: 'remote', desc: '', args: []);
-  }
-
-  /// `Backup local data to WebDAV`
-  String get remoteBackupDesc {
-    return Intl.message(
-      'Backup local data to WebDAV',
-      name: 'remoteBackupDesc',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Recovery data from WebDAV`
-  String get remoteRecoveryDesc {
-    return Intl.message(
-      'Recovery data from WebDAV',
-      name: 'remoteRecoveryDesc',
-      desc: '',
-      args: [],
-    );
   }
 
   /// `Backup local data to local`

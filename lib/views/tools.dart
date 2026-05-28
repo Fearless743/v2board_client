@@ -15,7 +15,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import 'package:path/path.dart' show dirname, join;
 
-import 'backup_and_recovery.dart';
 import 'developer.dart';
 import 'theme.dart';
 
@@ -67,7 +66,6 @@ class _ToolboxViewState extends ConsumerState<ToolsView> {
         items: [
           const _LocaleItem(),
           const _ThemeItem(),
-          const _BackupItem(),
           if (system.isDesktop) const _HotkeyItem(),
           if (Platform.isWindows) const _LoopbackItem(),
           if (Platform.isAndroid) const _AccessItem(),
@@ -157,24 +155,6 @@ class _ThemeItem extends StatelessWidget {
       delegate: OpenDelegate(
         title: appLocale.theme,
         widget: const ThemeView(),
-      ),
-    );
-  }
-}
-
-class _BackupItem extends StatelessWidget {
-  const _BackupItem();
-
-  @override
-  Widget build(BuildContext context) {
-    final appLocale = AppLocalizations.of(context);
-    return ListItem.open(
-      leading: const Icon(Icons.cloud_sync),
-      title: Text(appLocale.backupAndRecovery),
-      subtitle: Text(appLocale.backupAndRecoveryDesc),
-      delegate: OpenDelegate(
-        title: appLocale.backupAndRecovery,
-        widget: const BackupAndRecovery(),
       ),
     );
   }
