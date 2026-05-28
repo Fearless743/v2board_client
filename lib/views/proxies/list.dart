@@ -217,17 +217,27 @@ class _ProxyGroupCardState extends State<ProxyGroupCard>
     }
   }
 
+  @override
+  void didUpdateWidget(covariant ProxyGroupCard oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.proxies != oldWidget.proxies) {
+      setState(() {});
+    }
+  }
+
   void _toggleExpansion(Set<String> currentUnfoldSet) {
     final appController = globalState.appController;
     final unfoldSet = Set<String>.from(currentUnfoldSet);
 
-    if (_expansibleController.isExpanded) {
-      _expansibleController.collapse();
-      unfoldSet.remove(groupName);
-    } else {
-      _expansibleController.expand();
-      unfoldSet.add(groupName);
-    }
+    setState(() {
+      if (_expansibleController.isExpanded) {
+        _expansibleController.collapse();
+        unfoldSet.remove(groupName);
+      } else {
+        _expansibleController.expand();
+        unfoldSet.add(groupName);
+      }
+    });
     appController.updateCurrentUnfoldSet(unfoldSet);
   }
 
@@ -383,37 +393,13 @@ class _ProxyGroupCardState extends State<ProxyGroupCard>
                 ),
               ),
               bodyBuilder: (context, animation) {
-                final rows = widget.proxies
-                    .chunks(widget.columns)
-                    .map<Widget>((proxies) {
-                  final children = proxies
-                      .map<Widget>(
-                        (proxy) => Flexible(
-                          flex: 1,
-                          child: RepaintBoundary(
-                            child: ProxyCard(
-                              testUrl: widget.group.testUrl,
-                              type: widget.proxyCardType,
-                              groupType: widget.group.type,
-                              key: ValueKey('$groupName.${proxy.name}'),
-                              proxy: proxy,
-                              groupName: groupName,
-                            ),
-                          ),
-                        ),
-                      )
-                      .fill(
-                        widget.columns,
-                        filler: (_) => const Flexible(child: SizedBox()),
-                      )
-                      .separated(const SizedBox(width: 8));
-                  return Row(children: children.toList());
-                }).separated(
-                  SizedBox(
-                    height:
-                        widget.proxyCardType == ProxyCardType.oneline ? 4 : 8,
-                  ),
-                );
+                final rowCount =
+                    (widget.proxies.length / widget.columns).ceil();
+                final rowHeight = getItemHeight(widget.proxyCardType);
+                final gap =
+                    widget.proxyCardType == ProxyCardType.oneline ? 4.0 : 8.0;
+                final totalHeight =
+                    rowCount * rowHeight + max(rowCount - 1, 0) * gap;
                 return RepaintBoundary(
                   child: SizeTransition(
                     sizeFactor: animation,
@@ -422,7 +408,49 @@ class _ProxyGroupCardState extends State<ProxyGroupCard>
                       opacity: animation,
                       child: Container(
                         margin: const EdgeInsets.symmetric(vertical: 4.0),
-                        child: Column(children: rows.toList()),
+                        child: SizedBox(
+                          height: totalHeight,
+                          child: ListView.builder(
+                            padding: EdgeInsets.zero,
+                            physics: const NeverScrollableScrollPhysics(),
+                            itemCount: rowCount,
+                            itemBuilder: (_, rowIndex) {
+                              final start = rowIndex * widget.columns;
+                              final end = min(start + widget.columns,
+                                  widget.proxies.length);
+                              final rowProxies =
+                                  widget.proxies.sublist(start, end);
+                              final children = rowProxies
+                                  .map<Widget>(
+                                    (proxy) => Flexible(
+                                      flex: 1,
+                                      child: RepaintBoundary(
+                                        child: ProxyCard(
+                                          testUrl: widget.group.testUrl,
+                                          type: widget.proxyCardType,
+                                          groupType: widget.group.type,
+                                          key: ValueKey(
+                                              '$groupName.${proxy.name}'),
+                                          proxy: proxy,
+                                          groupName: groupName,
+                                        ),
+                                      ),
+                                    ),
+                                  )
+                                  .fill(
+                                    widget.columns,
+                                    filler: (_) =>
+                                        const Flexible(child: SizedBox()),
+                                  )
+                                  .separated(const SizedBox(width: 8));
+                              return Padding(
+                                padding: EdgeInsets.only(
+                                    bottom: rowIndex < rowCount - 1 ? gap : 0),
+                                child: Row(children: children.toList()),
+                              );
+                            },
+                          ),
+                        ),
                       ),
                     ),
                   ),
