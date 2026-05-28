@@ -79,6 +79,7 @@ class _ProxiesListViewState extends State<ProxiesListView> {
     required ProxyCardType type,
     required String query,
   }) {
+    final sw = Stopwatch()..start();
     final items = <Widget>[];
     final groupNameProxiesMap = <String, List<Proxy>>{};
     for (final groupName in groupNames) {
@@ -106,12 +107,15 @@ class _ProxiesListViewState extends State<ProxiesListView> {
       ));
     }
     _lastGroupNameProxiesMap = groupNameProxiesMap;
+    debugPrint(
+        '[PERF][proxies-list] _buildItems ${sw.elapsedMilliseconds}ms groups=${groupNames.length} total=${groupNameProxiesMap.values.fold<int>(0, (sum, list) => sum + list.length)} expanded=${currentUnfoldSet.length}');
     return items;
   }
 
   @override
   Widget build(BuildContext context) => Consumer(
         builder: (_, ref, __) {
+          final sw = Stopwatch()..start();
           final state = ref.watch(proxiesListSelectorStateProvider);
 
           final groupsVersion = ref.watch(versionProvider);
@@ -145,6 +149,12 @@ class _ProxiesListViewState extends State<ProxiesListView> {
             type: state.proxyCardType,
             query: state.query,
           );
+          debugPrint(
+              '[PERF][proxies-list] build ${sw.elapsedMilliseconds}ms groups=${state.groupNames.length} query=${state.query}');
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            debugPrint(
+                '[PERF][proxies-list] first-frame ${sw.elapsedMilliseconds}ms');
+          });
           return RepaintBoundary(
             child: CommonScrollBar(
               controller: _controller,
@@ -226,11 +236,13 @@ class _ProxyGroupCardState extends State<ProxyGroupCard>
   }
 
   void _toggleExpansion(Set<String> currentUnfoldSet) {
+    final sw = Stopwatch()..start();
     final appController = globalState.appController;
     final unfoldSet = Set<String>.from(currentUnfoldSet);
+    final wasExpanded = _expansibleController.isExpanded;
 
     setState(() {
-      if (_expansibleController.isExpanded) {
+      if (wasExpanded) {
         _expansibleController.collapse();
         unfoldSet.remove(groupName);
       } else {
@@ -238,7 +250,15 @@ class _ProxyGroupCardState extends State<ProxyGroupCard>
         unfoldSet.add(groupName);
       }
     });
+    debugPrint(
+        '[PERF][proxy-group:$groupName] toggle setState ${sw.elapsedMilliseconds}ms expanded=${!wasExpanded} proxies=${widget.proxies.length}');
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      debugPrint(
+          '[PERF][proxy-group:$groupName] toggle first-frame ${sw.elapsedMilliseconds}ms expanded=${!wasExpanded}');
+    });
     appController.updateCurrentUnfoldSet(unfoldSet);
+    debugPrint(
+        '[PERF][proxy-group:$groupName] toggle total ${sw.elapsedMilliseconds}ms');
   }
 
   Future<void> _delayTest() async {
@@ -292,6 +312,7 @@ class _ProxyGroupCardState extends State<ProxyGroupCard>
   @override
   Widget build(BuildContext context) {
     super.build(context);
+    final sw = Stopwatch()..start();
     final colorScheme = context.colorScheme;
     return Consumer(
       builder: (_, ref, __) {
@@ -308,6 +329,8 @@ class _ProxyGroupCardState extends State<ProxyGroupCard>
             }
           });
         }
+        debugPrint(
+            '[PERF][proxy-group:$groupName] build header ${sw.elapsedMilliseconds}ms shouldExpand=$shouldExpand proxies=${widget.proxies.length}');
 
         return RepaintBoundary(
           child: FocusTraversalGroup(
@@ -393,6 +416,7 @@ class _ProxyGroupCardState extends State<ProxyGroupCard>
                 ),
               ),
               bodyBuilder: (context, animation) {
+                final bodySw = Stopwatch()..start();
                 final rowCount =
                     (widget.proxies.length / widget.columns).ceil();
                 final rowHeight = getItemHeight(widget.proxyCardType);
@@ -400,7 +424,7 @@ class _ProxyGroupCardState extends State<ProxyGroupCard>
                     widget.proxyCardType == ProxyCardType.oneline ? 4.0 : 8.0;
                 final totalHeight =
                     rowCount * rowHeight + max(rowCount - 1, 0) * gap;
-                return RepaintBoundary(
+                final body = RepaintBoundary(
                   child: SizeTransition(
                     sizeFactor: animation,
                     axisAlignment: -1.0,
@@ -415,6 +439,7 @@ class _ProxyGroupCardState extends State<ProxyGroupCard>
                             physics: const NeverScrollableScrollPhysics(),
                             itemCount: rowCount,
                             itemBuilder: (_, rowIndex) {
+                              final rowSw = Stopwatch()..start();
                               final start = rowIndex * widget.columns;
                               final end = min(start + widget.columns,
                                   widget.proxies.length);
@@ -443,11 +468,14 @@ class _ProxyGroupCardState extends State<ProxyGroupCard>
                                         const Flexible(child: SizedBox()),
                                   )
                                   .separated(const SizedBox(width: 8));
-                              return Padding(
+                              final row = Padding(
                                 padding: EdgeInsets.only(
                                     bottom: rowIndex < rowCount - 1 ? gap : 0),
                                 child: Row(children: children.toList()),
                               );
+                              debugPrint(
+                                  '[PERF][proxy-group:$groupName] row $rowIndex build ${rowSw.elapsedMilliseconds}ms items=${rowProxies.length}');
+                              return row;
                             },
                           ),
                         ),
@@ -455,6 +483,13 @@ class _ProxyGroupCardState extends State<ProxyGroupCard>
                     ),
                   ),
                 );
+                debugPrint(
+                    '[PERF][proxy-group:$groupName] body build ${bodySw.elapsedMilliseconds}ms rows=$rowCount proxies=${widget.proxies.length}');
+                WidgetsBinding.instance.addPostFrameCallback((_) {
+                  debugPrint(
+                      '[PERF][proxy-group:$groupName] body first-frame ${bodySw.elapsedMilliseconds}ms rows=$rowCount');
+                });
+                return body;
               },
               expansibleBuilder: (context, header, body, animation) =>
                   Column(children: [header, body]),

@@ -9,7 +9,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 class ProxyCard extends StatelessWidget {
-
   const ProxyCard({
     super.key,
     required this.groupName,
@@ -34,43 +33,43 @@ class ProxyCard extends StatelessWidget {
   }
 
   Widget _buildDelayText() => SizedBox(
-      height: measure.labelSmallHeight,
-      child: Consumer(
-        builder: (context, ref, __) {
-          final delay = ref.watch(getDelayProvider(
-            proxyName: proxy.name,
-            testUrl: testUrl,
-          ));
-          return delay == 0 || delay == null
-              ? SizedBox(
-                  height: measure.labelSmallHeight,
-                  width: measure.labelSmallHeight,
-                  child: delay == 0
-                      ? const CircularProgressIndicator(
-                          strokeWidth: 2,
-                        )
-                      : IconButton(
-                          icon: const Icon(Icons.bolt),
-                          iconSize: globalState.measure.labelSmallHeight,
-                          padding: EdgeInsets.zero,
-                          onPressed: _handleTestCurrentDelay,
+        height: measure.labelSmallHeight,
+        child: Consumer(
+          builder: (context, ref, __) {
+            final delay = ref.watch(getDelayProvider(
+              proxyName: proxy.name,
+              testUrl: testUrl,
+            ));
+            return delay == 0 || delay == null
+                ? SizedBox(
+                    height: measure.labelSmallHeight,
+                    width: measure.labelSmallHeight,
+                    child: delay == 0
+                        ? const CircularProgressIndicator(
+                            strokeWidth: 2,
+                          )
+                        : IconButton(
+                            icon: const Icon(Icons.bolt),
+                            iconSize: globalState.measure.labelSmallHeight,
+                            padding: EdgeInsets.zero,
+                            onPressed: _handleTestCurrentDelay,
+                          ),
+                  )
+                : GestureDetector(
+                    onTap: _handleTestCurrentDelay,
+                    child: Text(
+                      delay > 0 ? '$delay ms' : "Timeout",
+                      style: context.textTheme.labelSmall?.copyWith(
+                        overflow: TextOverflow.ellipsis,
+                        color: utils.getDelayColor(
+                          delay,
                         ),
-                )
-              : GestureDetector(
-                  onTap: _handleTestCurrentDelay,
-                  child: Text(
-                    delay > 0 ? '$delay ms' : "Timeout",
-                    style: context.textTheme.labelSmall?.copyWith(
-                      overflow: TextOverflow.ellipsis,
-                      color: utils.getDelayColor(
-                        delay,
                       ),
                     ),
-                  ),
-                );
-        },
-      ),
-    );
+                  );
+          },
+        ),
+      );
 
   Widget _buildProxyNameText(BuildContext context) {
     if (type == ProxyCardType.oneline) {
@@ -152,10 +151,11 @@ class ProxyCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final sw = Stopwatch()..start();
     final measure = globalState.measure;
     final delayText = _buildDelayText();
     final proxyNameText = _buildProxyNameText(context);
-    return Stack(
+    final card = Stack(
       children: [
         Consumer(
           builder: (_, ref, child) {
@@ -225,11 +225,15 @@ class ProxyCard extends StatelessWidget {
           )
       ],
     );
+    if (sw.elapsedMilliseconds > 1) {
+      debugPrint(
+          '[PERF][proxy-card] build ${sw.elapsedMilliseconds}ms group=$groupName proxy=${proxy.name} type=$type');
+    }
+    return card;
   }
 }
 
 class _ProxyDesc extends ConsumerWidget {
-
   const _ProxyDesc({
     required this.proxy,
   });
@@ -251,7 +255,6 @@ class _ProxyDesc extends ConsumerWidget {
 }
 
 class _ProxyComputedMark extends ConsumerWidget {
-
   const _ProxyComputedMark({
     required this.groupName,
     required this.proxy,
