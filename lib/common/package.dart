@@ -8,13 +8,16 @@ extension PackageInfoExtension on PackageInfo {
         "Platform/${Platform.operatingSystem}",
       ].join(" ");
 
+  /// UA for subscription fetching.
+  /// Xboard matches "flclash" flag → ClashMeta YAML output.
+  /// Includes mihomo core version for feature gating (ECH, xhttp, etc).
   String uaWithCoreVersion(String? coreVersion) {
     final cv = coreVersion ?? '';
-    return [
-      "clash.meta",
-      if (cv.isNotEmpty) "v$cv",
-      "FlClash X/v$version",
+    final parts = <String>[
+      "FlClash/v$version",
+      if (cv.isNotEmpty) "mihomo/$cv",
       "Platform/${Platform.operatingSystem}",
-    ].join(" ");
+    ];
+    return parts.join(" ");
   }
 }
