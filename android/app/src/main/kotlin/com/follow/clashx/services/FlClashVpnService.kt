@@ -174,9 +174,10 @@ class FlClashXVpnService : VpnService(), BaseServiceInterface {
 
     private fun Builder.establishVpn(): Int? {
         return try {
+            vpnInterface?.close()
             vpnInterface = establish()
             vpnInterface?.fd
-        } catch (e: IllegalStateException) {
+        } catch (e: Exception) {
             Log.d("VpnService", "establish failed: ${e.message}")
             null
         }

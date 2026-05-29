@@ -83,6 +83,13 @@ data object VpnPlugin : FlutterPlugin, MethodChannel.MethodCallHandler {
 
     override fun onDetachedFromEngine(flutterPluginBinding: FlutterPlugin.FlutterPluginBinding) {
         unRegisterNetworkCallback()
+        if (isBind) {
+            try {
+                FlClashXApplication.getAppContext().unbindService(connection)
+            } catch (_: Exception) {}
+            isBind = false
+        }
+        flClashXService = null
         flutterMethodChannel.setMethodCallHandler(null)
     }
 
@@ -269,7 +276,9 @@ data object VpnPlugin : FlutterPlugin, MethodChannel.MethodCallHandler {
 
     fun handleStop() {
         GlobalState.runLock.withLock {
-            if (GlobalState.runState.value == RunState.STOP && flClashXService == null) return
+            if (GlobalState.runState.value == RunState.STOP && flClashXService == null) {
+                return
+            }
             GlobalState.runState.value = RunState.STOP
             stopForegroundJob()
             Core.stopTun()

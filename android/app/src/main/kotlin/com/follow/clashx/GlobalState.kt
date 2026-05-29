@@ -146,17 +146,15 @@ object GlobalState {
     fun handleStop() {
         Log.d("GlobalState", "handleStop called, current runState: ${runState.value}")
         getCurrentVPNPlugin()?.handleStop()
-        if (runState.value == RunState.START || serviceEngine != null) {
-            runState.value = RunState.PENDING
-            runLock.withLock {
-                val tilePlugin = getCurrentTilePlugin()
-                if (tilePlugin != null) {
-                    tilePlugin.handleStop()
-                } else {
-                    Log.d("GlobalState", "No TilePlugin for stop, setting pending action")
-                    TilePlugin.setPendingAction(TilePlugin.Companion.PendingAction.STOP)
-                    initServiceEngine()
-                }
+        runLock.withLock {
+            val tilePlugin = getCurrentTilePlugin()
+            if (tilePlugin != null) {
+                tilePlugin.handleStop()
+            } else if (runState.value != RunState.STOP) {
+                Log.d("GlobalState", "No TilePlugin for stop, setting pending action")
+                runState.value = RunState.PENDING
+                TilePlugin.setPendingAction(TilePlugin.Companion.PendingAction.STOP)
+                initServiceEngine()
             }
         }
     }
