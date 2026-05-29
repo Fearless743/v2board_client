@@ -4,7 +4,7 @@ import 'package:flclashx/services/v2board_service.dart';
 import 'package:flclashx/state.dart';
 import 'package:flutter/material.dart';
 
-enum _GatePhase { coreCheck, coreDownload, sessionCheck, ready }
+enum _GatePhase { coreCheck, coreDownload, sessionCheck, coreInit, ready }
 
 class V2BoardLoginGate extends StatefulWidget {
   const V2BoardLoginGate({
@@ -120,11 +120,24 @@ class _V2BoardLoginGateState extends State<V2BoardLoginGate> {
         silent: false,
       );
       if (!mounted) return;
-      setState(() {
-        loggedIn = isLoggedIn;
-        _phase = _GatePhase.ready;
-        error = isLoggedIn ? null : '登录已失效，请重新登录。';
-      });
+      if (isLoggedIn) {
+        setState(() {
+          _phase = _GatePhase.coreInit;
+          _coreStatus = '正在初始化内核...';
+        });
+        await globalState.appController.initCoreAndSetReady();
+        if (!mounted) return;
+        setState(() {
+          loggedIn = true;
+          _phase = _GatePhase.ready;
+        });
+      } else {
+        setState(() {
+          loggedIn = false;
+          _phase = _GatePhase.ready;
+          error = '登录已失效，请重新登录。';
+        });
+      }
     } catch (e) {
       if (!mounted) return;
       setState(() {
@@ -152,6 +165,12 @@ class _V2BoardLoginGateState extends State<V2BoardLoginGate> {
         email: email,
         password: password,
       );
+      if (!mounted) return;
+      setState(() {
+        _phase = _GatePhase.coreInit;
+        _coreStatus = '正在初始化内核...';
+      });
+      await globalState.appController.initCoreAndSetReady();
       if (!mounted) return;
       setState(() {
         loggedIn = true;
@@ -190,6 +209,9 @@ class _V2BoardLoginGateState extends State<V2BoardLoginGate> {
       return const Scaffold(
         body: Center(child: CircularProgressIndicator()),
       );
+    }
+    if (_phase == _GatePhase.coreInit) {
+      return _buildCoreInitView();
     }
     if (loggedIn) {
       return widget.child;
@@ -246,6 +268,47 @@ class _V2BoardLoginGateState extends State<V2BoardLoginGate> {
                       child: const Text('跳过更新'),
                     ),
                   ],
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildCoreInitView() {
+    return Scaffold(
+      body: Center(
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 420),
+          child: Card(
+            margin: const EdgeInsets.all(24),
+            child: Padding(
+              padding: const EdgeInsets.all(32),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  Icon(
+                    Icons.rocket_launch,
+                    size: 48,
+                    color: Theme.of(context).colorScheme.primary,
+                  ),
+                  const SizedBox(height: 24),
+                  Text(
+                    'FlClashX',
+                    style: Theme.of(context).textTheme.headlineSmall,
+                    textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: 24),
+                  const LinearProgressIndicator(),
+                  const SizedBox(height: 16),
+                  Text(
+                    _coreStatus,
+                    style: Theme.of(context).textTheme.bodyMedium,
+                    textAlign: TextAlign.center,
+                  ),
                 ],
               ),
             ),

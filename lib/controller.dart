@@ -1168,7 +1168,10 @@ class AppController {
     await handleExit();
   }
 
+  bool _coreInitialized = false;
+
   Future<void> _initCore() async {
+    if (_coreInitialized) return;
     // On Android, switch to process mode if a downloaded core binary exists
     await clashCore.switchToProcessModeIfNeeded();
 
@@ -1180,6 +1183,21 @@ class AppController {
       );
     }
     await applyProfile();
+    _coreInitialized = true;
+    _ref.read(initProvider.notifier).value = true;
+  }
+
+  /// Initialize the clash core and mark the app as ready.
+  /// Called from the login gate so the start button is available
+  /// immediately when the main page renders.
+  Future<void> initCoreAndSetReady() async {
+    if (_coreInitialized) return;
+    final downloadedVersion = await coreUpdater.getInstalledCoreVersion();
+    if (downloadedVersion != kCoreVersionFromSource) {
+      globalState.coreVersion = downloadedVersion;
+    }
+    await _initCore();
+    await _initStatus();
   }
 
   Future<void> init() async {
@@ -1188,15 +1206,17 @@ class AppController {
     };
     updateTray(true);
 
-    // Update core version from downloaded core if available
-    final downloadedVersion = await coreUpdater.getInstalledCoreVersion();
-    if (downloadedVersion != kCoreVersionFromSource) {
-      globalState.coreVersion = downloadedVersion;
-    }
+    if (!_coreInitialized) {
+      // Update core version from downloaded core if available
+      final downloadedVersion = await coreUpdater.getInstalledCoreVersion();
+      if (downloadedVersion != kCoreVersionFromSource) {
+        globalState.coreVersion = downloadedVersion;
+      }
 
-    await _initCore();
+      await _initCore();
+      await _initStatus();
+    }
     await syncV2BoardProfile(silent: true);
-    await _initStatus();
     autoLaunch?.updateStatus(
       _ref.read(appSettingProvider).autoLaunch,
     );
@@ -1213,7 +1233,6 @@ class AppController {
       }
     }
     await _handlePreference();
-    _ref.read(initProvider.notifier).value = true;
   }
 
   Future<void> _initStatus() async {
