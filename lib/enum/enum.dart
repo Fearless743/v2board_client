@@ -291,6 +291,12 @@ enum DashboardWidget {
       child: SystemProxyButton(),
     ),
     platforms: desktopPlatforms,
+  ),
+  proxySelector(
+    GridItem(
+      crossAxisCellCount: 8,
+      child: ProxySelectorWidget(),
+    ),
   );
 
   final GridItem widget;

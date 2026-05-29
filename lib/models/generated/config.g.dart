@@ -70,6 +70,7 @@ const _$DashboardWidgetEnumMap = {
   DashboardWidget.outboundModeV2: 'outboundModeV2',
   DashboardWidget.tunButton: 'tunButton',
   DashboardWidget.systemProxyButton: 'systemProxyButton',
+  DashboardWidget.proxySelector: 'proxySelector',
 };
 
 _$AccessControlImpl _$$AccessControlImplFromJson(Map<String, dynamic> json) =>
