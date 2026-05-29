@@ -16,6 +16,11 @@ class ProxySelectorWidget extends ConsumerWidget {
       return const SizedBox.shrink();
     }
 
+    final mainGroup = groups.first;
+    final proxyName = ref
+        .watch(getSelectedProxyNameProvider(mainGroup.name))
+        .getSafeValue("");
+
     return CommonCard(
       onPressed: () {
         globalState.appController.toPage(PageLabel.proxies);
@@ -26,41 +31,11 @@ class ProxySelectorWidget extends ConsumerWidget {
       ),
       child: Container(
         padding: baseInfoEdgeInsets.copyWith(top: 4, bottom: 8),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            for (int i = 0; i < groups.length; i++) ...[
-              Row(
-                children: [
-                  Expanded(
-                    child: Text(
-                      groups[i].name,
-                      style: context.textTheme.bodySmall?.toLight,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                  ),
-                  const SizedBox(width: 8),
-                  Expanded(
-                    child: Consumer(
-                      builder: (_, ref, __) {
-                        final proxyName = ref
-                            .watch(getSelectedProxyNameProvider(groups[i].name))
-                            .getSafeValue("");
-                        return EmojiText(
-                          proxyName.isEmpty ? "-" : proxyName,
-                          overflow: TextOverflow.ellipsis,
-                          maxLines: 1,
-                          style: context.textTheme.bodySmall,
-                        );
-                      },
-                    ),
-                  ),
-                ],
-              ),
-              if (i < groups.length - 1)
-                const SizedBox(height: 4),
-            ],
-          ],
+        child: EmojiText(
+          proxyName.isEmpty ? "-" : proxyName,
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+          style: context.textTheme.bodyMedium,
         ),
       ),
     );
