@@ -12,21 +12,11 @@ if (NOT "${CMAKE_BUILD_TYPE}" STREQUAL "Debug")
     add_link_options(-flto -Wl,--gc-sections,--strip-all)
 endif ()
 
-set(LIB_CLASH_PATH "${CMAKE_SOURCE_DIR}/../jniLibs/${ANDROID_ABI}/libclash.so")
+add_library(${CMAKE_PROJECT_NAME} SHARED
+        jni_helper.cpp
+        core.cpp)
 
-message("LIB_CLASH_PATH ${LIB_CLASH_PATH}")
-if (EXISTS ${LIB_CLASH_PATH})
-    message("Found libclash.so for ABI ${ANDROID_ABI}")
-    add_compile_definitions(LIBCLASH)
-    include_directories(${CMAKE_SOURCE_DIR}/../cpp/includes/${ANDROID_ABI})
-    add_library(${CMAKE_PROJECT_NAME} SHARED
-            jni_helper.cpp
-            core.cpp)
-    # libclash.so is loaded dynamically via dlopen at runtime,
-    # not linked at build time. This allows loading a downloaded
-    # version from the app's data directory.
-    target_link_libraries(${CMAKE_PROJECT_NAME}
-            dl)
-else ()
-    message(FATAL_ERROR "Missing libclash.so for ABI ${ANDROID_ABI}. Run: dart setup.dart dev --target android")
-endif ()
+# libclash.so is loaded dynamically via dlopen/dlsym at runtime.
+# No compile-time link dependency. The -ldl flag provides dlopen/dlsym.
+target_link_libraries(${CMAKE_PROJECT_NAME}
+        dl)
