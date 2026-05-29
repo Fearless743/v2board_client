@@ -269,11 +269,16 @@ data object VpnPlugin : FlutterPlugin, MethodChannel.MethodCallHandler {
 
     fun handleStop() {
         GlobalState.runLock.withLock {
-            if (GlobalState.runState.value == RunState.STOP) return
+            if (GlobalState.runState.value == RunState.STOP && flClashXService == null) return
             GlobalState.runState.value = RunState.STOP
-            flClashXService?.stop()
             stopForegroundJob()
             Core.stopTun()
+            flClashXService?.stop()
+            flClashXService = null
+            if (isBind) {
+                FlClashXApplication.getAppContext().unbindService(connection)
+                isBind = false
+            }
             GlobalState.handleTryDestroy()
         }
     }

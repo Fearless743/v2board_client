@@ -8,6 +8,7 @@ import android.os.Binder
 import android.os.Build
 import android.os.IBinder
 import android.os.Parcel
+import android.os.ParcelFileDescriptor
 import android.os.RemoteException
 import android.util.Log
 import androidx.core.app.NotificationCompat
@@ -23,13 +24,26 @@ import kotlinx.coroutines.launch
 
 
 class FlClashXVpnService : VpnService(), BaseServiceInterface {
+    private var vpnInterface: ParcelFileDescriptor? = null
+
     override fun onCreate() {
         super.onCreate()
         GlobalState.initServiceEngine()
     }
 
     override fun start(options: VpnOptions): Int {
-        return with(Builder()) {
+        return createBuilder(options, includeIpv6 = true).establishVpn() ?: run {
+            if (options.ipv6Address.isNotEmpty()) {
+                Log.d("VpnService", "Failed to establish VPN with IPv6, retrying with IPv4 only.")
+                createBuilder(options, includeIpv6 = false).establishVpn()
+            } else {
+                null
+            }
+        } ?: throw NullPointerException("Establish VPN rejected by system")
+    }
+
+    private fun createBuilder(options: VpnOptions, includeIpv6: Boolean): Builder {
+        return Builder().apply {
             if (options.ipv4Address.isNotEmpty()) {
                 val cidr = options.ipv4Address.toCIDR()
                 addAddress(cidr.address, cidr.prefixLength)
@@ -56,44 +70,41 @@ class FlClashXVpnService : VpnService(), BaseServiceInterface {
             } else {
                 addRoute("0.0.0.0", 0)
             }
-            try {
-                if (options.ipv6Address.isNotEmpty()) {
-                    val cidr = options.ipv6Address.toCIDR()
-                    Log.d(
-                        "addAddress6",
-                        "address: ${cidr.address} prefixLength:${cidr.prefixLength}"
-                    )
-                    addAddress(cidr.address, cidr.prefixLength)
-                    val routeAddress = options.getIpv6RouteAddress()
-                    if (routeAddress.isNotEmpty()) {
-                        try {
-                            routeAddress.forEach { i ->
-                                Log.d(
-                                    "addRoute6",
-                                    "address: ${i.address} prefixLength:${i.prefixLength}"
-                                )
-                                addRoute(i.address, i.prefixLength)
+            if (includeIpv6) {
+                try {
+                    if (options.ipv6Address.isNotEmpty()) {
+                        val cidr = options.ipv6Address.toCIDR()
+                        Log.d(
+                            "addAddress6",
+                            "address: ${cidr.address} prefixLength:${cidr.prefixLength}"
+                        )
+                        addAddress(cidr.address, cidr.prefixLength)
+                        val routeAddress = options.getIpv6RouteAddress()
+                        if (routeAddress.isNotEmpty()) {
+                            try {
+                                routeAddress.forEach { i ->
+                                    Log.d(
+                                        "addRoute6",
+                                        "address: ${i.address} prefixLength:${i.prefixLength}"
+                                    )
+                                    addRoute(i.address, i.prefixLength)
+                                }
+                            } catch (_: Exception) {
+                                addRoute("::", 0)
                             }
-                        } catch (_: Exception) {
+                        } else {
                             addRoute("::", 0)
                         }
-                    } else {
-                        addRoute("::", 0)
                     }
+                } catch (_: Exception) {
+                    Log.d(
+                        "addAddress6",
+                        "IPv6 is not supported."
+                    )
                 }
-            }catch (_:Exception){
-                Log.d(
-                    "addAddress6",
-                    "IPv6 is not supported."
-                )
             }
             addDnsServer(options.dnsServerAddress)
             setMtu(9000)
-            // Profile-level tun.include-package / tun.exclude-package take
-            // precedence over the app-level access control. Android's
-            // VpnService.Builder only permits one of allowed/disallowed, so we
-            // pick a single mode in this order: include (whitelist) > exclude
-            // (blacklist) > app-level accessControl.
             val include = options.includePackage.orEmpty()
             val exclude = options.excludePackage.orEmpty()
             when {
@@ -158,12 +169,22 @@ class FlClashXVpnService : VpnService(), BaseServiceInterface {
                     )
                 )
             }
-            establish()?.detachFd()
-                ?: throw NullPointerException("Establish VPN rejected by system")
+        }
+    }
+
+    private fun Builder.establishVpn(): Int? {
+        return try {
+            vpnInterface = establish()
+            vpnInterface?.fd
+        } catch (e: IllegalStateException) {
+            Log.d("VpnService", "establish failed: ${e.message}")
+            null
         }
     }
 
     override fun stop() {
+        vpnInterface?.close()
+        vpnInterface = null
         stopSelf()
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
             stopForeground(STOP_FOREGROUND_REMOVE)

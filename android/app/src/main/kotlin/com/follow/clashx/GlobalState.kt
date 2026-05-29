@@ -86,7 +86,7 @@ object GlobalState {
     }
 
     fun getCurrentVPNPlugin(): VpnPlugin? {
-        return serviceEngine?.plugins?.get(VpnPlugin::class.java) as VpnPlugin?
+        return (serviceEngine ?: flutterEngine)?.plugins?.get(VpnPlugin::class.java) as VpnPlugin?
     }
 
     fun handleToggle() {
@@ -145,7 +145,8 @@ object GlobalState {
 
     fun handleStop() {
         Log.d("GlobalState", "handleStop called, current runState: ${runState.value}")
-        if (runState.value == RunState.START) {
+        getCurrentVPNPlugin()?.handleStop()
+        if (runState.value == RunState.START || serviceEngine != null) {
             runState.value = RunState.PENDING
             runLock.withLock {
                 val tilePlugin = getCurrentTilePlugin()
