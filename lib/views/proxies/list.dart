@@ -87,7 +87,9 @@ class _ProxiesListViewState extends State<ProxiesListView> {
           (state) => state.getGroup(groupName),
         ),
       );
-      if (group == null) continue;
+      if (group == null) {
+        continue;
+      }
       final sortedProxies = globalState.appController.getSortProxies(
         group.all
             .where((item) => item.name.toLowerCase().contains(query))
@@ -111,16 +113,22 @@ class _ProxiesListViewState extends State<ProxiesListView> {
   Widget build(BuildContext context) => Consumer(
         builder: (_, ref, __) {
           final state = ref.watch(proxiesListSelectorStateProvider);
+
           final groupsVersion = ref.watch(versionProvider);
+
           ref.watch(themeSettingProvider.select((state) => state.textScale));
 
           if (_lastGroupsVersion != groupsVersion ||
               !listEquals(_lastGroupNames, state.groupNames)) {
             _lastGroupsVersion = groupsVersion;
             _lastGroupNames = state.groupNames;
+
             _lastGroupNameProxiesMap.clear();
+
             WidgetsBinding.instance.addPostFrameCallback((_) {
-              if (mounted) setState(() {});
+              if (mounted) {
+                setState(() {});
+              }
             });
           }
 
@@ -187,6 +195,10 @@ class _ProxyGroupCardState extends State<ProxyGroupCard>
     with AutomaticKeepAliveClientMixin {
   final _expansibleController = ExpansibleController();
 
+  bool isLock = false;
+
+  String get icon => widget.group.icon;
+
   String get groupName => widget.group.name;
 
   bool get isExpand => _expansibleController.isExpanded;
@@ -230,6 +242,16 @@ class _ProxyGroupCardState extends State<ProxyGroupCard>
     appController.updateCurrentUnfoldSet(unfoldSet);
   }
 
+  Future<void> _delayTest() async {
+    if (isLock) return;
+    isLock = true;
+    await delayTest(
+      widget.group.all,
+      widget.group.testUrl,
+    );
+    isLock = false;
+  }
+
   Widget _buildIcon() => Consumer(
         builder: (_, ref, child) {
           final iconStyle = ref.watch(
@@ -246,12 +268,16 @@ class _ProxyGroupCardState extends State<ProxyGroupCard>
                 return false;
               }
             });
-            if (index != -1) return iconMapEntryList[index].value;
-            return widget.group.icon;
+            if (index != -1) {
+              return iconMapEntryList[index].value;
+            }
+            return this.icon;
           }));
           return switch (iconStyle) {
             ProxiesIconStyle.icon => Container(
-                margin: const EdgeInsets.only(right: 16),
+                margin: const EdgeInsets.only(
+                  right: 16,
+                ),
                 child: LayoutBuilder(
                   builder: (_, constraints) => CommonTargetIcon(
                     src: icon,
@@ -346,9 +372,22 @@ class _ProxyGroupCardState extends State<ProxyGroupCard>
                           ],
                         ),
                       ),
-                      IconButton.filledTonal(
-                        onPressed: () => _toggleExpansion(unfoldSet),
-                        icon: CommonExpandIcon(expand: isExpand),
+                      Row(
+                        children: [
+                          if (isExpand) ...[
+                            IconButton(
+                              onPressed: _delayTest,
+                              visualDensity: VisualDensity.standard,
+                              icon: const Icon(Icons.network_ping),
+                            ),
+                            const SizedBox(width: 6),
+                          ] else
+                            const SizedBox(width: 4),
+                          IconButton.filledTonal(
+                            onPressed: () => _toggleExpansion(unfoldSet),
+                            icon: CommonExpandIcon(expand: isExpand),
+                          ),
+                        ],
                       ),
                     ],
                   ),
@@ -366,7 +405,7 @@ class _ProxyGroupCardState extends State<ProxyGroupCard>
                   totalHeight,
                   MediaQuery.sizeOf(context).height * 0.72,
                 );
-                return RepaintBoundary(
+                final body = RepaintBoundary(
                   child: SizeTransition(
                     sizeFactor: animation,
                     axisAlignment: -1.0,
@@ -421,6 +460,7 @@ class _ProxyGroupCardState extends State<ProxyGroupCard>
                     ),
                   ),
                 );
+                return body;
               },
               expansibleBuilder: (context, header, body, animation) =>
                   Column(children: [header, body]),
