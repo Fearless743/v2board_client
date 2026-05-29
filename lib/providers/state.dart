@@ -460,27 +460,6 @@ bool globalModeEnabled(Ref ref) {
 }
 
 @riverpod
-bool hasAnnounceData(Ref ref) {
-  final profile = ref.watch(currentProfileProvider);
-  final value = profile?.providerHeaders['announce'];
-  return value != null && value.isNotEmpty;
-}
-
-@riverpod
-bool hasServiceInfoData(Ref ref) {
-  final profile = ref.watch(currentProfileProvider);
-  final value = profile?.providerHeaders['flclashx-servicename'];
-  return value != null && value.isNotEmpty;
-}
-
-@riverpod
-bool hasServerInfoData(Ref ref) {
-  final profile = ref.watch(currentProfileProvider);
-  final value = profile?.providerHeaders['flclashx-serverinfo'];
-  return value != null && value.isNotEmpty;
-}
-
-@riverpod
 String? backgroundUrl(Ref ref) {
   final profile = ref.watch(currentProfileProvider);
   return profile?.providerHeaders['flclashx-background'];
@@ -605,18 +584,9 @@ VM2? layoutChange(Ref ref) {
 }
 
 @riverpod
-VM2<int, bool> checkIp(Ref ref) {
+int checkIp(Ref ref) {
   final checkIpNum = ref.watch(checkIpNumProvider);
-  final containsDetection = ref.watch(
-    dashboardStateProvider.select(
-      (state) =>
-          state.dashboardWidgets.contains(DashboardWidget.networkDetection),
-    ),
-  );
-  return VM2(
-    a: checkIpNum,
-    b: containsDetection,
-  );
+  return checkIpNum;
 }
 
 @riverpod

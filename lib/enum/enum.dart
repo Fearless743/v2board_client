@@ -2,7 +2,6 @@
 
 import 'dart:io';
 
-import 'package:flclashx/views/dashboard/widgets/announce_widget.dart';
 import 'package:flclashx/views/dashboard/widgets/metainfo_widget.dart';
 import 'package:flclashx/views/dashboard/widgets/widgets.dart';
 import 'package:flclashx/widgets/widgets.dart';
@@ -255,7 +254,6 @@ enum FunctionTag {
   applyProfile,
   savePreferences,
   changeProxy,
-  checkIp,
   handleWill,
   updateDelay,
   vpnTip,
@@ -281,34 +279,10 @@ enum DashboardWidget {
       child: OutboundModeV2(),
     ),
   ),
-  outboundMode(
-    GridItem(
-      crossAxisCellCount: 4,
-      child: OutboundMode(),
-    ),
-  ),
-  trafficUsage(
-    GridItem(
-      crossAxisCellCount: 4,
-      child: TrafficUsage(),
-    ),
-  ),
-  announce(
-    GridItem(
-      crossAxisCellCount: 8,
-      child: AnnounceWidget(),
-    ),
-  ),
   metainfo(
     GridItem(
       crossAxisCellCount: 8,
       child: MetainfoWidget(),
-    ),
-  ),
-  networkDetection(
-    GridItem(
-      crossAxisCellCount: 4,
-      child: NetworkDetection(),
     ),
   ),
   tunButton(
@@ -333,30 +307,6 @@ enum DashboardWidget {
       child: SystemProxyButton(),
     ),
     platforms: desktopPlatforms,
-  ),
-  intranetIp(
-    GridItem(
-      crossAxisCellCount: 4,
-      child: IntranetIP(),
-    ),
-  ),
-  memoryInfo(
-    GridItem(
-      crossAxisCellCount: 4,
-      child: MemoryInfo(),
-    ),
-  ),
-  changeServerButton(
-    GridItem(
-      crossAxisCellCount: 8,
-      child: ChangeServerButton(),
-    ),
-  ),
-  serviceInfo(
-    GridItem(
-      crossAxisCellCount: 8,
-      child: ServiceInfoWidget(),
-    ),
   );
 
   final GridItem widget;

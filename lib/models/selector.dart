@@ -64,15 +64,6 @@ class ProfilesSelectorState with _$ProfilesSelectorState {
 }
 
 @freezed
-class NetworkDetectionState with _$NetworkDetectionState {
-  const factory NetworkDetectionState({
-    required bool isLoading,
-    required bool isTesting,
-    required IpInfo? ipInfo,
-  }) = _NetworkDetectionState;
-}
-
-@freezed
 class TrayState with _$TrayState {
   const factory TrayState({
     required Mode mode,

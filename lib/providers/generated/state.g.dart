@@ -993,58 +993,6 @@ final globalModeEnabledProvider = AutoDisposeProvider<bool>.internal(
 @Deprecated('Will be removed in 3.0. Use Ref instead')
 // ignore: unused_element
 typedef GlobalModeEnabledRef = AutoDisposeProviderRef<bool>;
-String _$hasAnnounceDataHash() => r'518399bf6581fbf003d0fe26afbe9db97e6c0322';
-
-/// See also [hasAnnounceData].
-@ProviderFor(hasAnnounceData)
-final hasAnnounceDataProvider = AutoDisposeProvider<bool>.internal(
-  hasAnnounceData,
-  name: r'hasAnnounceDataProvider',
-  debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
-      ? null
-      : _$hasAnnounceDataHash,
-  dependencies: null,
-  allTransitiveDependencies: null,
-);
-
-@Deprecated('Will be removed in 3.0. Use Ref instead')
-// ignore: unused_element
-typedef HasAnnounceDataRef = AutoDisposeProviderRef<bool>;
-String _$hasServiceInfoDataHash() =>
-    r'055787255c43f3a469414256f73d41492a2752d3';
-
-/// See also [hasServiceInfoData].
-@ProviderFor(hasServiceInfoData)
-final hasServiceInfoDataProvider = AutoDisposeProvider<bool>.internal(
-  hasServiceInfoData,
-  name: r'hasServiceInfoDataProvider',
-  debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
-      ? null
-      : _$hasServiceInfoDataHash,
-  dependencies: null,
-  allTransitiveDependencies: null,
-);
-
-@Deprecated('Will be removed in 3.0. Use Ref instead')
-// ignore: unused_element
-typedef HasServiceInfoDataRef = AutoDisposeProviderRef<bool>;
-String _$hasServerInfoDataHash() => r'9692b3a04a067504f58d8f6403ce9622fa02b003';
-
-/// See also [hasServerInfoData].
-@ProviderFor(hasServerInfoData)
-final hasServerInfoDataProvider = AutoDisposeProvider<bool>.internal(
-  hasServerInfoData,
-  name: r'hasServerInfoDataProvider',
-  debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
-      ? null
-      : _$hasServerInfoDataHash,
-  dependencies: null,
-  allTransitiveDependencies: null,
-);
-
-@Deprecated('Will be removed in 3.0. Use Ref instead')
-// ignore: unused_element
-typedef HasServerInfoDataRef = AutoDisposeProviderRef<bool>;
 String _$backgroundUrlHash() => r'13f97b984026adac4ccddacb35f9f9c06b420afc';
 
 /// See also [backgroundUrl].
@@ -1756,7 +1704,7 @@ String _$checkIpHash() => r'07ebf8d032349e2b3adda483e68b1936ffbed68d';
 
 /// See also [checkIp].
 @ProviderFor(checkIp)
-final checkIpProvider = AutoDisposeProvider<VM2<int, bool>>.internal(
+final checkIpProvider = AutoDisposeProvider<int>.internal(
   checkIp,
   name: r'checkIpProvider',
   debugGetCreateSourceHash:
@@ -1767,7 +1715,7 @@ final checkIpProvider = AutoDisposeProvider<VM2<int, bool>>.internal(
 
 @Deprecated('Will be removed in 3.0. Use Ref instead')
 // ignore: unused_element
-typedef CheckIpRef = AutoDisposeProviderRef<VM2<int, bool>>;
+typedef CheckIpRef = AutoDisposeProviderRef<int>;
 String _$genColorSchemeHash() => r'b18f15c938a8132ee4ed02cdfc02f3b9f01724e2';
 
 /// See also [genColorScheme].

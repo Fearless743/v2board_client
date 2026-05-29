@@ -41,7 +41,6 @@ const defaultThemeProps = ThemeProps(
 );
 
 const List<DashboardWidget> defaultDashboardWidgets = [
-  DashboardWidget.announce,
   DashboardWidget.metainfo,
   DashboardWidget.outboundModeV2,
 ];
