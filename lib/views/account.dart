@@ -72,9 +72,7 @@ class _AccountViewState extends ConsumerState<AccountView> {
         : ref.watch(currentProfileProvider)?.subscriptionInfo;
 
     final items = <Widget>[
-      ..._buildAccountHeader(context, theme, email, planName),
-      if (subscriptionInfo != null)
-        ..._buildSubscriptionSection(context, theme, subscriptionInfo),
+      ..._buildInfoSection(context, theme, email, planName, subscriptionInfo),
       ..._buildActionsSection(context),
       ..._buildLogoutSection(context),
     ];
@@ -97,60 +95,28 @@ class _AccountViewState extends ConsumerState<AccountView> {
     );
   }
 
-  List<Widget> _buildAccountHeader(
+  List<Widget> _buildInfoSection(
     BuildContext context,
     ThemeData theme,
     String? email,
     String? planName,
-  ) {
-    return [
-      Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 24),
-        child: Column(
-          children: [
-            CircleAvatar(
-              radius: 36,
-              backgroundColor: theme.colorScheme.primaryContainer,
-              child: Icon(
-                Icons.person,
-                size: 40,
-                color: theme.colorScheme.onPrimaryContainer,
-              ),
-            ),
-            if (email != null && email.isNotEmpty) ...[
-              const SizedBox(height: 12),
-              Text(
-                email,
-                style: theme.textTheme.titleMedium,
-              ),
-            ],
-            if (planName != null && planName.isNotEmpty) ...[
-              const SizedBox(height: 4),
-              Text(
-                planName,
-                style: theme.textTheme.bodyMedium?.copyWith(
-                  color: theme.colorScheme.onSurfaceVariant,
-                ),
-              ),
-            ],
-          ],
-        ),
-      ),
-    ];
-  }
-
-  List<Widget> _buildSubscriptionSection(
-    BuildContext context,
-    ThemeData theme,
-    SubscriptionInfo subscriptionInfo,
+    SubscriptionInfo? subscriptionInfo,
   ) {
     final appLocale = AppLocalizations.of(context);
-    final isUnlimitedTraffic = subscriptionInfo.total == 0;
-    final isPerpetual = subscriptionInfo.expire == 0;
+    final labelStyle = theme.textTheme.bodyLarge;
+    final valueStyle = theme.textTheme.bodyMedium?.copyWith(
+      color: theme.colorScheme.onSurfaceVariant,
+    );
+
+    final isUnlimitedTraffic = subscriptionInfo == null || subscriptionInfo.total == 0;
+    final isPerpetual = subscriptionInfo == null || subscriptionInfo.expire == 0;
 
     return generateSection(
-      title: appLocale.accountSettings,
       items: [
+        if (email != null && email.isNotEmpty)
+          _InfoRow(label: appLocale.email, value: email),
+        if (planName != null && planName.isNotEmpty)
+          _InfoRow(label: appLocale.subscriptionPlan, value: planName),
         if (!isUnlimitedTraffic)
           Builder(builder: (context) {
             final totalTraffic = TrafficValue(value: subscriptionInfo.total);
@@ -173,23 +139,17 @@ class _AccountViewState extends ConsumerState<AccountView> {
             }
 
             return Padding(
-              padding:
-                  const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Text(
-                        appLocale.remainingTraffic,
-                        style: theme.textTheme.bodyLarge,
-                      ),
+                      Text(appLocale.remainingTraffic, style: labelStyle),
                       Text(
                         '${remainingTraffic.showValue} ${remainingTraffic.showUnit} / ${totalTraffic.showValue} ${totalTraffic.showUnit}',
-                        style: theme.textTheme.bodyMedium?.copyWith(
-                          color: theme.colorScheme.onSurfaceVariant,
-                        ),
+                        style: valueStyle,
                       ),
                     ],
                   ),
@@ -199,35 +159,28 @@ class _AccountViewState extends ConsumerState<AccountView> {
                     child: LinearProgressIndicator(
                       value: progress,
                       minHeight: 6,
-                      backgroundColor:
-                          theme.colorScheme.surfaceContainerHighest,
-                      valueColor:
-                          AlwaysStoppedAnimation<Color>(progressColor),
+                      backgroundColor: theme.colorScheme.surfaceContainerHighest,
+                      valueColor: AlwaysStoppedAnimation<Color>(progressColor),
                     ),
                   ),
                 ],
               ),
             );
           })
-        else
-          ListTile(
-            contentPadding: const EdgeInsets.symmetric(horizontal: 16),
-            leading: const Icon(Icons.data_usage),
-            title: Text(appLocale.remainingTraffic),
-            subtitle: Text(appLocale.trafficUnlimited),
+        else if (subscriptionInfo != null)
+          _InfoRow(
+            label: appLocale.remainingTraffic,
+            value: appLocale.trafficUnlimited,
           ),
-        ListTile(
-          contentPadding: const EdgeInsets.symmetric(horizontal: 16),
-          leading: const Icon(Icons.calendar_today),
-          title: Text(appLocale.expirationDate),
-          subtitle: Text(
-            isPerpetual
+        if (subscriptionInfo != null)
+          _InfoRow(
+            label: appLocale.expirationDate,
+            value: isPerpetual
                 ? appLocale.subscriptionEternal
                 : DateFormat('yyyy-MM-dd').format(
                     DateTime.fromMillisecondsSinceEpoch(
                         subscriptionInfo.expire * 1000)),
           ),
-        ),
       ],
     );
   }
@@ -281,6 +234,38 @@ class _AccountViewState extends ConsumerState<AccountView> {
           },
         ),
       ],
+    );
+  }
+}
+
+class _InfoRow extends StatelessWidget {
+  const _InfoRow({required this.label, required this.value});
+
+  final String label;
+  final String value;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Text(label, style: theme.textTheme.bodyLarge),
+          const SizedBox(width: 16),
+          Flexible(
+            child: Text(
+              value,
+              style: theme.textTheme.bodyMedium?.copyWith(
+                color: theme.colorScheme.onSurfaceVariant,
+              ),
+              textAlign: TextAlign.end,
+              overflow: TextOverflow.ellipsis,
+            ),
+          ),
+        ],
+      ),
     );
   }
 }
