@@ -29,6 +29,12 @@ class ProxySelectorWidget extends ConsumerWidget {
         ? "$selectedName / ${ref.watch(getSelectedProxyNameProvider(subGroup.name)).getSafeValue("-")}"
         : selectedName;
 
+    final testUrl = subGroup?.testUrl ?? mainGroup.testUrl;
+    final delay = ref.watch(getDelayProvider(
+      proxyName: selectedName,
+      testUrl: testUrl,
+    ));
+
     return CommonCard(
       onPressed: () {
         globalState.appController.toPage(PageLabel.proxies);
@@ -39,12 +45,38 @@ class ProxySelectorWidget extends ConsumerWidget {
       ),
       child: Container(
         padding: baseInfoEdgeInsets.copyWith(top: 4, bottom: 8),
-        child: EmojiText(
-          displayText,
-          maxLines: 1,
-          overflow: TextOverflow.ellipsis,
-          style: context.textTheme.bodyMedium,
+        child: Row(
+          children: [
+            Expanded(
+              child: EmojiText(
+                displayText,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: context.textTheme.bodyMedium,
+              ),
+            ),
+            const SizedBox(width: 8),
+            _buildDelayText(context, delay),
+          ],
         ),
+      ),
+    );
+  }
+
+  Widget _buildDelayText(BuildContext context, int? delay) {
+    if (delay == null || delay == 0) {
+      return SizedBox(
+        width: 14,
+        height: 14,
+        child: delay == 0
+            ? const CircularProgressIndicator(strokeWidth: 2)
+            : const Icon(Icons.bolt, size: 14),
+      );
+    }
+    return Text(
+      delay > 0 ? '$delay ms' : "Timeout",
+      style: context.textTheme.labelSmall?.copyWith(
+        color: utils.getDelayColor(delay),
       ),
     );
   }
