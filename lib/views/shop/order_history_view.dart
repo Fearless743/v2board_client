@@ -99,41 +99,66 @@ class _OrderHistoryViewState extends State<OrderHistoryView> {
     final appLocale = AppLocalizations.of(context);
     final theme = Theme.of(context);
 
-    return Scaffold(
-      appBar: AppBar(title: Text(appLocale.orderHistory)),
-      body: _loading
-          ? const Center(child: CircularProgressIndicator())
-          : _error != null
-              ? Center(
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Text(_error!, style: theme.textTheme.bodyLarge),
-                      const SizedBox(height: 16),
-                      FilledButton(
-                        onPressed: _fetchOrders,
-                        child: Text(appLocale.refresh),
-                      ),
-                    ],
-                  ),
-                )
-              : _orders.isEmpty
-                  ? Center(child: Text(appLocale.noOrders))
-                  : RefreshIndicator(
-                      onRefresh: _fetchOrders,
-                      child: ListView.builder(
-                        padding: const EdgeInsets.all(16),
-                        itemCount: _orders.length,
-                        itemBuilder: (_, index) => _OrderCard(
-                          order: _orders[index],
-                          statusLabel: _statusLabel(_orders[index], appLocale),
-                          statusColor: _statusColor(_orders[index], theme),
-                          typeLabel: _typeLabel(_orders[index], appLocale),
-                          periodLabel: _periodLabel(_orders[index].period, appLocale),
-                        ),
+    return _loading
+        ? const Center(child: CircularProgressIndicator())
+        : _error != null
+            ? Center(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(_error!, style: theme.textTheme.bodyLarge),
+                    const SizedBox(height: 16),
+                    FilledButton(
+                      onPressed: _fetchOrders,
+                      child: Text(appLocale.refresh),
+                    ),
+                  ],
+                ),
+              )
+            : _orders.isEmpty
+                ? Center(child: Text(appLocale.noOrders))
+                : RefreshIndicator(
+                    onRefresh: _fetchOrders,
+                    child: ListView.builder(
+                      padding: const EdgeInsets.all(16),
+                      itemCount: _orders.length,
+                      itemBuilder: (_, index) => _OrderCard(
+                        order: _orders[index],
+                        statusLabel: _statusLabel(_orders[index], appLocale),
+                        statusColor: _statusColor(_orders[index], theme),
+                        typeLabel: _typeLabel(_orders[index], appLocale),
+                        periodLabel: _periodLabel(_orders[index].period, appLocale),
+                        onCancel: _orders[index].isPending ? () => _cancelOrder(_orders[index]) : null,
                       ),
                     ),
+                  );
+  }
+
+  Future<void> _cancelOrder(ShopOrder order) async {
+    final appLocale = AppLocalizations.of(context);
+    final confirmed = await globalState.showMessage(
+      title: appLocale.cancelOrder,
+      message: TextSpan(text: '${appLocale.cancelOrder} ${order.tradeNo}?'),
     );
+    if (confirmed != true) return;
+    try {
+      final session = await V2BoardSessionStore.load();
+      if (session == null) return;
+      final client = V2BoardClient(baseUrl: session.baseUrl, token: session.token);
+      await client.cancelOrder(order.tradeNo);
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(appLocale.orderCancelled)),
+        );
+        _fetchOrders();
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(e.toString())),
+        );
+      }
+    }
   }
 }
 
@@ -144,6 +169,7 @@ class _OrderCard extends StatelessWidget {
     required this.statusColor,
     required this.typeLabel,
     required this.periodLabel,
+    this.onCancel,
   });
 
   final ShopOrder order;
@@ -151,6 +177,7 @@ class _OrderCard extends StatelessWidget {
   final Color statusColor;
   final String typeLabel;
   final String periodLabel;
+  final VoidCallback? onCancel;
 
   @override
   Widget build(BuildContext context) {
@@ -211,6 +238,23 @@ class _OrderCard extends StatelessWidget {
                 color: theme.colorScheme.onSurfaceVariant,
               ),
             ),
+            if (onCancel != null) ...[
+              const SizedBox(height: 8),
+              Align(
+                alignment: Alignment.centerRight,
+                child: TextButton(
+                  onPressed: onCancel,
+                  style: TextButton.styleFrom(
+                    visualDensity: VisualDensity.compact,
+                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                  ),
+                  child: Text(
+                    AppLocalizations.of(context).cancelOrder,
+                    style: TextStyle(color: theme.colorScheme.error, fontSize: 13),
+                  ),
+                ),
+              ),
+            ],
           ],
         ),
       ),
