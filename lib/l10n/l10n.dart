@@ -3646,6 +3646,10 @@ class AppLocalizations {
   String get openInBrowser {
     return Intl.message('Open in Browser', name: 'openInBrowser', desc: '', args: []);
   }
+
+  String get handlingFee {
+    return Intl.message('Fee', name: 'handlingFee', desc: '', args: []);
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<AppLocalizations> {

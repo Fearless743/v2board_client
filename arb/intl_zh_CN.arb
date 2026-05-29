@@ -463,5 +463,6 @@
   "orderType3": "升级",
   "orderType4": "重置流量",
   "copyLink": "复制链接",
-  "openInBrowser": "在浏览器中打开"
+  "openInBrowser": "在浏览器中打开",
+  "handlingFee": "手续费"
 }

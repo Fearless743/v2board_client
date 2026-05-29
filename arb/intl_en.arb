@@ -491,5 +491,6 @@
   "orderType3": "Upgrade",
   "orderType4": "Traffic Reset",
   "copyLink": "Copy Link",
-  "openInBrowser": "Open in Browser"
+  "openInBrowser": "Open in Browser",
+  "handlingFee": "Fee"
 }

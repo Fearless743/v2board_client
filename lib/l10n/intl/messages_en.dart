@@ -854,5 +854,6 @@ class MessageLookup extends MessageLookupByLibrary {
         "orderType4": MessageLookupByLibrary.simpleMessage("Traffic Reset"),
         "copyLink": MessageLookupByLibrary.simpleMessage("Copy Link"),
         "openInBrowser": MessageLookupByLibrary.simpleMessage("Open in Browser"),
+        "handlingFee": MessageLookupByLibrary.simpleMessage("Fee"),
       };
 }

@@ -583,5 +583,6 @@ class MessageLookup extends MessageLookupByLibrary {
         "orderType4": MessageLookupByLibrary.simpleMessage("重置流量"),
         "copyLink": MessageLookupByLibrary.simpleMessage("复制链接"),
         "openInBrowser": MessageLookupByLibrary.simpleMessage("在浏览器中打开"),
+        "handlingFee": MessageLookupByLibrary.simpleMessage("手续费"),
       };
 }

@@ -23,6 +23,17 @@ class PaymentSheet extends StatefulWidget {
   State<PaymentSheet> createState() => _PaymentSheetState();
 }
 
+int _calcFee(PaymentMethod method, int priceInCents) {
+  double fee = 0;
+  if (method.handlingFeeFixed != null && method.handlingFeeFixed! > 0) {
+    fee += method.handlingFeeFixed!;
+  }
+  if (method.handlingFeePercent != null && method.handlingFeePercent! > 0) {
+    fee += priceInCents * method.handlingFeePercent! / 100;
+  }
+  return fee.round();
+}
+
 class _PaymentSheetState extends State<PaymentSheet> {
   bool _processing = false;
   Timer? _pollTimer;
@@ -164,21 +175,37 @@ class _PaymentSheetState extends State<PaymentSheet> {
           Text(appLocale.selectPayment, style: theme.textTheme.titleMedium),
           const SizedBox(height: 16),
           ...widget.paymentMethods.map(
-            (method) => ListTile(
-              leading: method.icon != null && method.icon!.isNotEmpty
-                  ? Text(method.icon!, style: const TextStyle(fontSize: 24))
-                  : const Icon(Icons.payment),
-              title: Text(method.name),
-              trailing: _processing
-                  ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2))
-                  : const Icon(Icons.chevron_right),
-              onTap: _processing ? null : () => _selectPayment(method),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(8),
-                side: BorderSide(color: theme.colorScheme.outlineVariant),
-              ),
-              contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-            ),
+            (method) {
+              final fee = _calcFee(method, widget.finalPrice);
+              final feeText = fee > 0 ? '+¥${(fee / 100).toStringAsFixed(2)}' : null;
+              return Padding(
+                padding: const EdgeInsets.only(bottom: 8),
+                child: ListTile(
+                  leading: method.icon != null && method.icon!.isNotEmpty
+                      ? Text(method.icon!, style: const TextStyle(fontSize: 24))
+                      : const Icon(Icons.payment),
+                  title: Text(method.name),
+                  subtitle: feeText != null
+                      ? Text(
+                          '${appLocale.handlingFee}: $feeText'
+                          '${method.handlingFeePercent != null ? ' (${method.handlingFeePercent}%)' : ''}',
+                          style: theme.textTheme.bodySmall?.copyWith(
+                            color: theme.colorScheme.onSurfaceVariant,
+                          ),
+                        )
+                      : null,
+                  trailing: _processing
+                      ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2))
+                      : const Icon(Icons.chevron_right),
+                  onTap: _processing ? null : () => _selectPayment(method),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8),
+                    side: BorderSide(color: theme.colorScheme.outlineVariant),
+                  ),
+                  contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+                ),
+              );
+            },
           ),
           const SizedBox(height: 16),
           TextButton(
