@@ -445,5 +445,6 @@
   "subscriptionPlan": "Subscription Plan",
   "expirationDate": "Expiration Date",
   "remainingTraffic": "Remaining Traffic",
-  "accountSettings": "Account Settings"
+  "accountSettings": "Account Settings",
+  "refresh": "Refresh"
 }

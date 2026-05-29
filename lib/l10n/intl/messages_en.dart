@@ -808,5 +808,6 @@ class MessageLookup extends MessageLookupByLibrary {
         "accountSettings": MessageLookupByLibrary.simpleMessage(
           "Account Settings",
         ),
+        "refresh": MessageLookupByLibrary.simpleMessage("Refresh"),
       };
 }

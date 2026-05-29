@@ -417,5 +417,6 @@
   "subscriptionPlan": "订阅套餐",
   "expirationDate": "过期时间",
   "remainingTraffic": "剩余流量",
-  "accountSettings": "账户设置"
+  "accountSettings": "账户设置",
+  "refresh": "刷新"
 }

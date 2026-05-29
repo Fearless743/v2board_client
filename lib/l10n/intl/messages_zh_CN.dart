@@ -537,5 +537,6 @@ class MessageLookup extends MessageLookupByLibrary {
         "expirationDate": MessageLookupByLibrary.simpleMessage("过期时间"),
         "remainingTraffic": MessageLookupByLibrary.simpleMessage("剩余流量"),
         "accountSettings": MessageLookupByLibrary.simpleMessage("账户设置"),
+        "refresh": MessageLookupByLibrary.simpleMessage("刷新"),
       };
 }

@@ -1,4 +1,3 @@
-import 'dart:convert';
 import 'dart:io';
 
 import 'package:flclashx/l10n/l10n.dart';
@@ -21,57 +20,84 @@ class AccountView extends ConsumerStatefulWidget {
 
 class _AccountViewState extends ConsumerState<AccountView> {
   V2BoardSession? _session;
+  V2BoardUserInfo? _userInfo;
+  bool _loading = false;
 
   @override
   void initState() {
     super.initState();
-    _loadSession();
+    _loadSessionAndFetch();
   }
 
-  Future<void> _loadSession() async {
+  Future<void> _loadSessionAndFetch() async {
     final session = await V2BoardSessionStore.load();
-    if (mounted) {
-      setState(() {
-        _session = session;
-      });
+    if (!mounted || session == null) return;
+    setState(() {
+      _session = session;
+    });
+    await _fetchSubscribe();
+  }
+
+  Future<void> _fetchSubscribe() async {
+    final session = _session;
+    if (session == null) return;
+    setState(() => _loading = true);
+    try {
+      final client = V2BoardClient(
+        baseUrl: session.baseUrl,
+        token: session.token,
+      );
+      final userInfo = await client.getSubscribe();
+      if (mounted) {
+        setState(() {
+          _userInfo = userInfo;
+          _loading = false;
+        });
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() => _loading = false);
+      }
     }
   }
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final currentProfile = ref.watch(currentProfileProvider);
-    final subscriptionInfo = currentProfile?.subscriptionInfo;
-    final headers = currentProfile?.providerHeaders ?? {};
-    final planName = _decodeBase64IfNeeded(headers['flclashx-servicename']) ??
-        headers['v2board-plan-name'];
-    final email = _session?.email;
+
+    final email = _userInfo?.email ?? _session?.email;
+    final planName = _userInfo?.planName;
+    final subscriptionInfo = _userInfo != null
+        ? _userInfo!.subscriptionInfo
+        : ref.watch(currentProfileProvider)?.subscriptionInfo;
 
     final items = <Widget>[
-      ..._buildAccountSection(context, theme, email, planName),
+      ..._buildAccountHeader(context, theme, email, planName),
       if (subscriptionInfo != null)
         ..._buildSubscriptionSection(context, theme, subscriptionInfo),
       ..._buildActionsSection(context),
       ..._buildLogoutSection(context),
     ];
 
-    return ListView.builder(
-      itemCount: items.length,
-      itemBuilder: (_, index) => items[index],
-      padding: const EdgeInsets.only(bottom: 20),
+    return Stack(
+      children: [
+        ListView.builder(
+          itemCount: items.length,
+          itemBuilder: (_, index) => items[index],
+          padding: const EdgeInsets.only(bottom: 20),
+        ),
+        if (_loading)
+          const Positioned(
+            top: 0,
+            left: 0,
+            right: 0,
+            child: LinearProgressIndicator(),
+          ),
+      ],
     );
   }
 
-  String? _decodeBase64IfNeeded(String? value) {
-    if (value == null || value.isEmpty) return value;
-    try {
-      return utf8.decode(base64.decode(value));
-    } catch (e) {
-      return value;
-    }
-  }
-
-  List<Widget> _buildAccountSection(
+  List<Widget> _buildAccountHeader(
     BuildContext context,
     ThemeData theme,
     String? email,
@@ -210,10 +236,14 @@ class _AccountViewState extends ConsumerState<AccountView> {
     final appLocale = AppLocalizations.of(context);
     return generateSection(
       items: [
+        ListItem(
+          leading: const Icon(Icons.sync),
+          title: Text(appLocale.refresh),
+          onTap: _fetchSubscribe,
+        ),
         ListItem.open(
           leading: const Icon(Icons.settings),
           title: Text(appLocale.settings),
-          subtitle: Text(appLocale.settings),
           delegate: OpenDelegate(
             title: appLocale.settings,
             widget: const ToolsView(),
