@@ -42,7 +42,6 @@ class MessageLookup extends MessageLookupByLibrary {
 
   final messages = _notInlinedMessages(_notInlinedMessages);
   static Map<String, Function> _notInlinedMessages(_) => <String, Function>{
-        "about": MessageLookupByLibrary.simpleMessage("关于"),
         "accessControl": MessageLookupByLibrary.simpleMessage("访问控制"),
         "accessControlAllowDesc": MessageLookupByLibrary.simpleMessage(
           "只允许选中应用进入VPN",
@@ -217,10 +216,6 @@ class MessageLookup extends MessageLookupByLibrary {
         "gratitude": MessageLookupByLibrary.simpleMessage("感激"),
         "hasCacheChange": MessageLookupByLibrary.simpleMessage("是否缓存修改"),
         "hostsDesc": MessageLookupByLibrary.simpleMessage("追加Hosts"),
-        "hotkeyConflict": MessageLookupByLibrary.simpleMessage("快捷键冲突"),
-        "hotkeyManagement": MessageLookupByLibrary.simpleMessage("快捷键管理"),
-        "hotkeyManagementDesc":
-            MessageLookupByLibrary.simpleMessage("使用键盘控制应用程序"),
         "hours": MessageLookupByLibrary.simpleMessage("小时"),
         "icon": MessageLookupByLibrary.simpleMessage("图片"),
         "iconConfiguration": MessageLookupByLibrary.simpleMessage("图片配置"),
@@ -233,7 +228,6 @@ class MessageLookup extends MessageLookupByLibrary {
         "importUrl": MessageLookupByLibrary.simpleMessage("通过URL导入"),
         "infiniteTime": MessageLookupByLibrary.simpleMessage("长期有效"),
         "init": MessageLookupByLibrary.simpleMessage("初始化"),
-        "inputCorrectHotkey": MessageLookupByLibrary.simpleMessage("请输入正确的快捷键"),
         "intelligentSelected": MessageLookupByLibrary.simpleMessage("智能选择"),
         "internet": MessageLookupByLibrary.simpleMessage("互联网"),
         "interval": MessageLookupByLibrary.simpleMessage("间隔"),
@@ -295,7 +289,6 @@ class MessageLookup extends MessageLookupByLibrary {
         "panelUrl": MessageLookupByLibrary.simpleMessage("面板地址"),
         "neutralScheme": MessageLookupByLibrary.simpleMessage("中性"),
         "noData": MessageLookupByLibrary.simpleMessage("暂无数据"),
-        "noHotKey": MessageLookupByLibrary.simpleMessage("暂无快捷键"),
         "noIcon": MessageLookupByLibrary.simpleMessage("无图标"),
         "noInfo": MessageLookupByLibrary.simpleMessage("暂无信息"),
         "noMoreInfoDesc": MessageLookupByLibrary.simpleMessage("暂无更多信息"),
@@ -358,7 +351,6 @@ class MessageLookup extends MessageLookupByLibrary {
         "portConflictTip": MessageLookupByLibrary.simpleMessage("请输入不同的端口"),
         "portTip": m6,
         "preferH3Desc": MessageLookupByLibrary.simpleMessage("优先使用DOH的http/3"),
-        "pressKeyboard": MessageLookupByLibrary.simpleMessage("请按下按键"),
         "preview": MessageLookupByLibrary.simpleMessage("预览"),
         "profile": MessageLookupByLibrary.simpleMessage("配置"),
         "profileAutoUpdateIntervalInvalidValidationDesc":
@@ -404,7 +396,6 @@ class MessageLookup extends MessageLookupByLibrary {
         "redo": MessageLookupByLibrary.simpleMessage("重做"),
         "regExp": MessageLookupByLibrary.simpleMessage("正则"),
         "remote": MessageLookupByLibrary.simpleMessage("远程"),
-        "remove": MessageLookupByLibrary.simpleMessage("移除"),
         "rename": MessageLookupByLibrary.simpleMessage("重命名"),
         "requests": MessageLookupByLibrary.simpleMessage("请求"),
         "requestsDesc": MessageLookupByLibrary.simpleMessage("查看最近请求记录"),

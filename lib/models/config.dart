@@ -244,7 +244,6 @@ class Config with _$Config {
     @Default(defaultAppSettingProps)
     AppSettingProps appSetting,
     @Default([]) List<Profile> profiles,
-    @Default([]) List<HotKeyAction> hotKeyActions,
     String? currentProfileId,
     @Default(false) bool overrideDns,
     DAV? dav,

@@ -2494,7 +2494,6 @@ mixin _$Config {
   @JsonKey(fromJson: AppSettingProps.safeFromJson)
   AppSettingProps get appSetting => throw _privateConstructorUsedError;
   List<Profile> get profiles => throw _privateConstructorUsedError;
-  List<HotKeyAction> get hotKeyActions => throw _privateConstructorUsedError;
   String? get currentProfileId => throw _privateConstructorUsedError;
   bool get overrideDns => throw _privateConstructorUsedError;
   DAV? get dav => throw _privateConstructorUsedError;
@@ -2525,7 +2524,6 @@ abstract class $ConfigCopyWith<$Res> {
       {@JsonKey(fromJson: AppSettingProps.safeFromJson)
       AppSettingProps appSetting,
       List<Profile> profiles,
-      List<HotKeyAction> hotKeyActions,
       String? currentProfileId,
       bool overrideDns,
       DAV? dav,
@@ -2565,7 +2563,6 @@ class _$ConfigCopyWithImpl<$Res, $Val extends Config>
   $Res call({
     Object? appSetting = null,
     Object? profiles = null,
-    Object? hotKeyActions = null,
     Object? currentProfileId = freezed,
     Object? overrideDns = null,
     Object? dav = freezed,
@@ -2586,10 +2583,6 @@ class _$ConfigCopyWithImpl<$Res, $Val extends Config>
           ? _value.profiles
           : profiles // ignore: cast_nullable_to_non_nullable
               as List<Profile>,
-      hotKeyActions: null == hotKeyActions
-          ? _value.hotKeyActions
-          : hotKeyActions // ignore: cast_nullable_to_non_nullable
-              as List<HotKeyAction>,
       currentProfileId: freezed == currentProfileId
           ? _value.currentProfileId
           : currentProfileId // ignore: cast_nullable_to_non_nullable
@@ -2739,7 +2732,6 @@ abstract class _$$ConfigImplCopyWith<$Res> implements $ConfigCopyWith<$Res> {
       {@JsonKey(fromJson: AppSettingProps.safeFromJson)
       AppSettingProps appSetting,
       List<Profile> profiles,
-      List<HotKeyAction> hotKeyActions,
       String? currentProfileId,
       bool overrideDns,
       DAV? dav,
@@ -2786,7 +2778,6 @@ class __$$ConfigImplCopyWithImpl<$Res>
   $Res call({
     Object? appSetting = null,
     Object? profiles = null,
-    Object? hotKeyActions = null,
     Object? currentProfileId = freezed,
     Object? overrideDns = null,
     Object? dav = freezed,
@@ -2807,10 +2798,6 @@ class __$$ConfigImplCopyWithImpl<$Res>
           ? _value._profiles
           : profiles // ignore: cast_nullable_to_non_nullable
               as List<Profile>,
-      hotKeyActions: null == hotKeyActions
-          ? _value._hotKeyActions
-          : hotKeyActions // ignore: cast_nullable_to_non_nullable
-              as List<HotKeyAction>,
       currentProfileId: freezed == currentProfileId
           ? _value.currentProfileId
           : currentProfileId // ignore: cast_nullable_to_non_nullable
@@ -2862,7 +2849,6 @@ class _$ConfigImpl implements _Config {
       {@JsonKey(fromJson: AppSettingProps.safeFromJson)
       this.appSetting = defaultAppSettingProps,
       final List<Profile> profiles = const [],
-      final List<HotKeyAction> hotKeyActions = const [],
       this.currentProfileId,
       this.overrideDns = false,
       this.dav,
@@ -2873,8 +2859,7 @@ class _$ConfigImpl implements _Config {
       this.windowProps = defaultWindowProps,
       this.patchClashConfig = defaultClashConfig,
       this.scriptProps = const ScriptProps()})
-      : _profiles = profiles,
-        _hotKeyActions = hotKeyActions;
+      : _profiles = profiles;
 
   factory _$ConfigImpl.fromJson(Map<String, dynamic> json) =>
       _$$ConfigImplFromJson(json);
@@ -2889,15 +2874,6 @@ class _$ConfigImpl implements _Config {
     if (_profiles is EqualUnmodifiableListView) return _profiles;
     // ignore: implicit_dynamic_type
     return EqualUnmodifiableListView(_profiles);
-  }
-
-  final List<HotKeyAction> _hotKeyActions;
-  @override
-  @JsonKey()
-  List<HotKeyAction> get hotKeyActions {
-    if (_hotKeyActions is EqualUnmodifiableListView) return _hotKeyActions;
-    // ignore: implicit_dynamic_type
-    return EqualUnmodifiableListView(_hotKeyActions);
   }
 
   @override
@@ -2931,7 +2907,7 @@ class _$ConfigImpl implements _Config {
 
   @override
   String toString() {
-    return 'Config(appSetting: $appSetting, profiles: $profiles, hotKeyActions: $hotKeyActions, currentProfileId: $currentProfileId, overrideDns: $overrideDns, dav: $dav, networkProps: $networkProps, vpnProps: $vpnProps, themeProps: $themeProps, proxiesStyle: $proxiesStyle, windowProps: $windowProps, patchClashConfig: $patchClashConfig, scriptProps: $scriptProps)';
+    return 'Config(appSetting: $appSetting, profiles: $profiles, currentProfileId: $currentProfileId, overrideDns: $overrideDns, dav: $dav, networkProps: $networkProps, vpnProps: $vpnProps, themeProps: $themeProps, proxiesStyle: $proxiesStyle, windowProps: $windowProps, patchClashConfig: $patchClashConfig, scriptProps: $scriptProps)';
   }
 
   @override
@@ -2942,8 +2918,6 @@ class _$ConfigImpl implements _Config {
             (identical(other.appSetting, appSetting) ||
                 other.appSetting == appSetting) &&
             const DeepCollectionEquality().equals(other._profiles, _profiles) &&
-            const DeepCollectionEquality()
-                .equals(other._hotKeyActions, _hotKeyActions) &&
             (identical(other.currentProfileId, currentProfileId) ||
                 other.currentProfileId == currentProfileId) &&
             (identical(other.overrideDns, overrideDns) ||
@@ -2971,7 +2945,6 @@ class _$ConfigImpl implements _Config {
       runtimeType,
       appSetting,
       const DeepCollectionEquality().hash(_profiles),
-      const DeepCollectionEquality().hash(_hotKeyActions),
       currentProfileId,
       overrideDns,
       dav,
@@ -3004,7 +2977,6 @@ abstract class _Config implements Config {
       {@JsonKey(fromJson: AppSettingProps.safeFromJson)
       final AppSettingProps appSetting,
       final List<Profile> profiles,
-      final List<HotKeyAction> hotKeyActions,
       final String? currentProfileId,
       final bool overrideDns,
       final DAV? dav,
@@ -3024,8 +2996,6 @@ abstract class _Config implements Config {
   AppSettingProps get appSetting;
   @override
   List<Profile> get profiles;
-  @override
-  List<HotKeyAction> get hotKeyActions;
   @override
   String? get currentProfileId;
   @override

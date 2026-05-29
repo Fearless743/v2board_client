@@ -191,19 +191,6 @@ class OverrideDns extends _$OverrideDns with AutoDisposeNotifierMixin {
 }
 
 @riverpod
-class HotKeyActions extends _$HotKeyActions with AutoDisposeNotifierMixin {
-  @override
-  List<HotKeyAction> build() => globalState.config.hotKeyActions;
-
-  @override
-  void onUpdate(List<HotKeyAction> value) {
-    globalState.config = globalState.config.copyWith(
-      hotKeyActions: value,
-    );
-  }
-}
-
-@riverpod
 class ProxiesStyleSetting extends _$ProxiesStyleSetting
     with AutoDisposeNotifierMixin {
   @override

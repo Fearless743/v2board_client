@@ -4,11 +4,9 @@ import 'package:flclashx/common/common.dart';
 import 'package:flclashx/l10n/l10n.dart';
 import 'package:flclashx/models/models.dart';
 import 'package:flclashx/providers/providers.dart';
-import 'package:flclashx/views/about.dart';
 import 'package:flclashx/views/access.dart';
 import 'package:flclashx/views/application_setting.dart';
 import 'package:flclashx/views/config/config.dart';
-import 'package:flclashx/views/hotkey.dart';
 import 'package:flclashx/widgets/widgets.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -57,7 +55,6 @@ class _ToolboxViewState extends ConsumerState<ToolsView> {
         title: AppLocalizations.of(context).other,
         items: [
           if (enableDeveloperMode) const _DeveloperItem(),
-          const _InfoItem(),
         ],
       );
 
@@ -66,7 +63,6 @@ class _ToolboxViewState extends ConsumerState<ToolsView> {
         items: [
           const _LocaleItem(),
           const _ThemeItem(),
-          if (system.isDesktop) const _HotkeyItem(),
           if (Platform.isWindows) const _LoopbackItem(),
           if (Platform.isAndroid) const _AccessItem(),
           const _ConfigItem(),
@@ -160,24 +156,6 @@ class _ThemeItem extends StatelessWidget {
   }
 }
 
-class _HotkeyItem extends StatelessWidget {
-  const _HotkeyItem();
-
-  @override
-  Widget build(BuildContext context) {
-    final appLocale = AppLocalizations.of(context);
-    return ListItem.open(
-      leading: const Icon(Icons.keyboard),
-      title: Text(appLocale.hotkeyManagement),
-      subtitle: Text(appLocale.hotkeyManagementDesc),
-      delegate: OpenDelegate(
-        title: appLocale.hotkeyManagement,
-        widget: const HotKeyView(),
-      ),
-    );
-  }
-}
-
 class _LoopbackItem extends StatelessWidget {
   const _LoopbackItem();
 
@@ -247,23 +225,6 @@ class _SettingItem extends StatelessWidget {
       delegate: OpenDelegate(
         title: appLocale.application,
         widget: const ApplicationSettingView(),
-      ),
-    );
-  }
-}
-
-class _InfoItem extends StatelessWidget {
-  const _InfoItem();
-
-  @override
-  Widget build(BuildContext context) {
-    final appLocale = AppLocalizations.of(context);
-    return ListItem.open(
-      leading: const Icon(Icons.info),
-      title: Text(appLocale.about),
-      delegate: OpenDelegate(
-        title: appLocale.about,
-        widget: const AboutView(),
       ),
     );
   }

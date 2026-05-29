@@ -14,10 +14,6 @@ PODS:
   - flutter_js (0.0.1):
     - FlutterMacOS
   - FlutterMacOS (1.0.0)
-  - HotKey (0.2.0)
-  - hotkey_manager_macos (0.0.1):
-    - FlutterMacOS
-    - HotKey
   - mobile_scanner (7.0.0):
     - Flutter
     - FlutterMacOS
@@ -54,7 +50,6 @@ DEPENDENCIES:
   - file_selector_macos (from `Flutter/ephemeral/.symlinks/plugins/file_selector_macos/macos`)
   - flutter_js (from `Flutter/ephemeral/.symlinks/plugins/flutter_js/macos`)
   - FlutterMacOS (from `Flutter/ephemeral`)
-  - hotkey_manager_macos (from `Flutter/ephemeral/.symlinks/plugins/hotkey_manager_macos/macos`)
   - mobile_scanner (from `Flutter/ephemeral/.symlinks/plugins/mobile_scanner/darwin`)
   - network_info_plus (from `Flutter/ephemeral/.symlinks/plugins/network_info_plus/macos`)
   - package_info_plus (from `Flutter/ephemeral/.symlinks/plugins/package_info_plus/macos`)
@@ -66,10 +61,6 @@ DEPENDENCIES:
   - url_launcher_macos (from `Flutter/ephemeral/.symlinks/plugins/url_launcher_macos/macos`)
   - window_ext (from `Flutter/ephemeral/.symlinks/plugins/window_ext/macos`)
   - window_manager (from `Flutter/ephemeral/.symlinks/plugins/window_manager/macos`)
-
-SPEC REPOS:
-  trunk:
-    - HotKey
 
 EXTERNAL SOURCES:
   app_links:
@@ -88,8 +79,6 @@ EXTERNAL SOURCES:
     :path: Flutter/ephemeral/.symlinks/plugins/flutter_js/macos
   FlutterMacOS:
     :path: Flutter/ephemeral
-  hotkey_manager_macos:
-    :path: Flutter/ephemeral/.symlinks/plugins/hotkey_manager_macos/macos
   mobile_scanner:
     :path: Flutter/ephemeral/.symlinks/plugins/mobile_scanner/darwin
   network_info_plus:
@@ -122,8 +111,6 @@ SPEC CHECKSUMS:
   file_selector_macos: 6280b52b459ae6c590af5d78fc35c7267a3c4b31
   flutter_js: 79c3c70d33ba464c67d8eb88639a61aa718cd8b8
   FlutterMacOS: d0db08ddef1a9af05a5ec4b724367152bb0500b1
-  HotKey: e96d8a2ddbf4591131e2bb3f54e69554d90cdca6
-  hotkey_manager_macos: a4317849af96d2430fa89944d3c58977ca089fbe
   mobile_scanner: 9157936403f5a0644ca3779a38ff8404c5434a93
   network_info_plus: f52abf61c7a311ecf3ac1b482be8a28908b4604d
   package_info_plus: f0052d280d17aa382b932f399edf32507174e870

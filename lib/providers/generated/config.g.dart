@@ -145,22 +145,6 @@ final overrideDnsProvider =
 );
 
 typedef _$OverrideDns = AutoDisposeNotifier<bool>;
-String _$hotKeyActionsHash() => r'7665ae5f39621a7adbc407dd3ff4c6bfd77cab25';
-
-/// See also [HotKeyActions].
-@ProviderFor(HotKeyActions)
-final hotKeyActionsProvider =
-    AutoDisposeNotifierProvider<HotKeyActions, List<HotKeyAction>>.internal(
-  HotKeyActions.new,
-  name: r'hotKeyActionsProvider',
-  debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
-      ? null
-      : _$hotKeyActionsHash,
-  dependencies: null,
-  allTransitiveDependencies: null,
-);
-
-typedef _$HotKeyActions = AutoDisposeNotifier<List<HotKeyAction>>;
 String _$proxiesStyleSettingHash() =>
     r'f5be490206fac5ae452b5c3ec1f1091b1519772c';
 

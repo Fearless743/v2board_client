@@ -4,5 +4,7 @@
       "Bash(go build *)",
       "Bash(dart analyze *)"
     ]
-  }
+  },
+  "prefersReducedMotion": true,
+  "outputStyle": "Proactive"
 }

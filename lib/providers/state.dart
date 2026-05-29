@@ -24,13 +24,11 @@ Config configState(Ref ref) {
   final vpnProps = ref.watch(vpnSettingProvider);
   final proxiesStyle = ref.watch(proxiesStyleSettingProvider);
   final scriptProps = ref.watch(scriptStateProvider);
-  final hotKeyActions = ref.watch(hotKeyActionsProvider);
   final dav = ref.watch(appDAVSettingProvider);
   final windowProps = ref.watch(windowSettingProvider);
   return Config(
     dav: dav,
     windowProps: windowProps,
-    hotKeyActions: hotKeyActions,
     scriptProps: scriptProps,
     proxiesStyle: proxiesStyle,
     vpnProps: vpnProps,
@@ -446,20 +444,6 @@ Set<String> unfoldSet(Ref ref) {
   );
   return unfoldSet;
 }
-
-@riverpod
-HotKeyAction getHotKeyAction(Ref ref, HotAction hotAction) => ref.watch(
-    hotKeyActionsProvider.select(
-      (state) {
-        final index = state.indexWhere((item) => item.action == hotAction);
-        return index != -1
-            ? state[index]
-            : HotKeyAction(
-                action: hotAction,
-              );
-      },
-    ),
-  );
 
 @riverpod
 Profile? currentProfile(Ref ref) {

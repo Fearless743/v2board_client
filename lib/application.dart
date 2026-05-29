@@ -5,7 +5,6 @@ import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flclashx/clash/clash.dart';
 import 'package:flclashx/common/common.dart';
 import 'package:flclashx/l10n/l10n.dart';
-import 'package:flclashx/manager/hotkey_manager.dart';
 import 'package:flclashx/manager/manager.dart';
 import 'package:flclashx/plugins/app.dart';
 import 'package:flclashx/providers/providers.dart';
@@ -88,10 +87,8 @@ class ApplicationState extends ConsumerState<Application> {
     if (system.isDesktop) {
       return WindowManager(
         child: TrayManager(
-          child: HotKeyManager(
-            child: ProxyManager(
-              child: child,
-            ),
+          child: ProxyManager(
+            child: child,
           ),
         ),
       );

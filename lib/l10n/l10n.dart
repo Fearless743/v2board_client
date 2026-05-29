@@ -239,11 +239,6 @@ class AppLocalizations {
     return Intl.message('Other', name: 'other', desc: '', args: []);
   }
 
-  /// `About`
-  String get about {
-    return Intl.message('About', name: 'about', desc: '', args: []);
-  }
-
   /// `English`
   String get en {
     return Intl.message('English', name: 'en', desc: '', args: []);
@@ -2202,66 +2197,6 @@ class AppLocalizations {
   /// `TUN`
   String get action_tun {
     return Intl.message('TUN', name: 'action_tun', desc: '', args: []);
-  }
-
-  /// `Hotkey Management`
-  String get hotkeyManagement {
-    return Intl.message(
-      'Hotkey Management',
-      name: 'hotkeyManagement',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Use keyboard to control applications`
-  String get hotkeyManagementDesc {
-    return Intl.message(
-      'Use keyboard to control applications',
-      name: 'hotkeyManagementDesc',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Please press the keyboard.`
-  String get pressKeyboard {
-    return Intl.message(
-      'Please press the keyboard.',
-      name: 'pressKeyboard',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Please enter the correct hotkey`
-  String get inputCorrectHotkey {
-    return Intl.message(
-      'Please enter the correct hotkey',
-      name: 'inputCorrectHotkey',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Hotkey conflict`
-  String get hotkeyConflict {
-    return Intl.message(
-      'Hotkey conflict',
-      name: 'hotkeyConflict',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Remove`
-  String get remove {
-    return Intl.message('Remove', name: 'remove', desc: '', args: []);
-  }
-
-  /// `No HotKey`
-  String get noHotKey {
-    return Intl.message('No HotKey', name: 'noHotKey', desc: '', args: []);
   }
 
   /// `No network`

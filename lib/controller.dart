@@ -657,23 +657,6 @@ class AppController {
     _ref.read(logsProvider).add(log);
   }
 
-  void updateOrAddHotKeyAction(HotKeyAction hotKeyAction) {
-    final hotKeyActions = _ref.read(hotKeyActionsProvider);
-    final index =
-        hotKeyActions.indexWhere((item) => item.action == hotKeyAction.action);
-    if (index == -1) {
-      _ref.read(hotKeyActionsProvider.notifier).value = List.from(hotKeyActions)
-        ..add(hotKeyAction);
-    } else {
-      _ref.read(hotKeyActionsProvider.notifier).value = List.from(hotKeyActions)
-        ..[index] = hotKeyAction;
-    }
-
-    _ref.read(hotKeyActionsProvider.notifier).value = index == -1
-        ? (List.from(hotKeyActions)..add(hotKeyAction))
-        : (List.from(hotKeyActions)..[index] = hotKeyAction);
-  }
-
   List<Group> getCurrentGroups() =>
       _ref.read(currentGroupsStateProvider.select((state) => state.value));
 
@@ -1940,7 +1923,6 @@ class AppController {
           config.proxiesStyle;
       _ref.read(overrideDnsProvider.notifier).value = config.overrideDns;
       _ref.read(networkSettingProvider.notifier).value = config.networkProps;
-      _ref.read(hotKeyActionsProvider.notifier).value = config.hotKeyActions;
       _ref.read(scriptStateProvider.notifier).value = config.scriptProps;
     }
     final currentProfile = _ref.read(currentProfileProvider);

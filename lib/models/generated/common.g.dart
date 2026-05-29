@@ -166,41 +166,6 @@ const _$GroupTypeEnumMap = {
   GroupType.Relay: 'Relay',
 };
 
-_$HotKeyActionImpl _$$HotKeyActionImplFromJson(Map<String, dynamic> json) =>
-    _$HotKeyActionImpl(
-      action: $enumDecode(_$HotActionEnumMap, json['action']),
-      key: (json['key'] as num?)?.toInt(),
-      modifiers: (json['modifiers'] as List<dynamic>?)
-              ?.map((e) => $enumDecode(_$KeyboardModifierEnumMap, e))
-              .toSet() ??
-          const {},
-    );
-
-Map<String, dynamic> _$$HotKeyActionImplToJson(_$HotKeyActionImpl instance) =>
-    <String, dynamic>{
-      'action': _$HotActionEnumMap[instance.action]!,
-      'key': instance.key,
-      'modifiers':
-          instance.modifiers.map((e) => _$KeyboardModifierEnumMap[e]!).toList(),
-    };
-
-const _$HotActionEnumMap = {
-  HotAction.start: 'start',
-  HotAction.view: 'view',
-  HotAction.mode: 'mode',
-  HotAction.proxy: 'proxy',
-  HotAction.tun: 'tun',
-};
-
-const _$KeyboardModifierEnumMap = {
-  KeyboardModifier.alt: 'alt',
-  KeyboardModifier.capsLock: 'capsLock',
-  KeyboardModifier.control: 'control',
-  KeyboardModifier.fn: 'fn',
-  KeyboardModifier.meta: 'meta',
-  KeyboardModifier.shift: 'shift',
-};
-
 _$TextPainterParamsImpl _$$TextPainterParamsImplFromJson(
         Map<String, dynamic> json) =>
     _$TextPainterParamsImpl(

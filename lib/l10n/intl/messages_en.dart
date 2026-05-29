@@ -44,7 +44,6 @@ class MessageLookup extends MessageLookupByLibrary {
 
   final messages = _notInlinedMessages(_notInlinedMessages);
   static Map<String, Function> _notInlinedMessages(_) => <String, Function>{
-        "about": MessageLookupByLibrary.simpleMessage("About"),
         "accessControl": MessageLookupByLibrary.simpleMessage("AccessControl"),
         "accessControlAllowDesc": MessageLookupByLibrary.simpleMessage(
           "Only allow selected app to enter VPN",
@@ -320,14 +319,6 @@ class MessageLookup extends MessageLookupByLibrary {
           "Do you want to cache the changes?",
         ),
         "hostsDesc": MessageLookupByLibrary.simpleMessage("Add Hosts"),
-        "hotkeyConflict":
-            MessageLookupByLibrary.simpleMessage("Hotkey conflict"),
-        "hotkeyManagement": MessageLookupByLibrary.simpleMessage(
-          "Hotkey Management",
-        ),
-        "hotkeyManagementDesc": MessageLookupByLibrary.simpleMessage(
-          "Use keyboard to control applications",
-        ),
         "hour": MessageLookupByLibrary.simpleMessage("hour"),
         "hours": MessageLookupByLibrary.simpleMessage("Hours"),
         "hoursGenitive": MessageLookupByLibrary.simpleMessage("hours"),
@@ -348,9 +339,6 @@ class MessageLookup extends MessageLookupByLibrary {
         "infiniteTime":
             MessageLookupByLibrary.simpleMessage("Long term effective"),
         "init": MessageLookupByLibrary.simpleMessage("Init"),
-        "inputCorrectHotkey": MessageLookupByLibrary.simpleMessage(
-          "Please enter the correct hotkey",
-        ),
         "intelligentSelected": MessageLookupByLibrary.simpleMessage(
           "Intelligent selection",
         ),
@@ -443,7 +431,6 @@ class MessageLookup extends MessageLookupByLibrary {
         "panelUrl": MessageLookupByLibrary.simpleMessage("Panel URL"),
         "neutralScheme": MessageLookupByLibrary.simpleMessage("Neutral"),
         "noData": MessageLookupByLibrary.simpleMessage("No data"),
-        "noHotKey": MessageLookupByLibrary.simpleMessage("No HotKey"),
         "noIcon": MessageLookupByLibrary.simpleMessage("None"),
         "noInfo": MessageLookupByLibrary.simpleMessage("No info"),
         "noMoreInfoDesc": MessageLookupByLibrary.simpleMessage("No more info"),
@@ -536,9 +523,6 @@ class MessageLookup extends MessageLookupByLibrary {
         "preferH3Desc": MessageLookupByLibrary.simpleMessage(
           "Prioritize the use of DOH\'s http/3",
         ),
-        "pressKeyboard": MessageLookupByLibrary.simpleMessage(
-          "Please press the keyboard.",
-        ),
         "preview": MessageLookupByLibrary.simpleMessage("Preview"),
         "profile": MessageLookupByLibrary.simpleMessage("Profile"),
         "profileAutoUpdateIntervalInvalidValidationDesc":
@@ -610,7 +594,6 @@ class MessageLookup extends MessageLookupByLibrary {
         "remainingPlural": MessageLookupByLibrary.simpleMessage("Remaining"),
         "remainingSingular": MessageLookupByLibrary.simpleMessage("Remaining"),
         "remote": MessageLookupByLibrary.simpleMessage("Remote"),
-        "remove": MessageLookupByLibrary.simpleMessage("Remove"),
         "rename": MessageLookupByLibrary.simpleMessage("Rename"),
         "requests": MessageLookupByLibrary.simpleMessage("Requests"),
         "requestsDesc": MessageLookupByLibrary.simpleMessage(

@@ -100,11 +100,12 @@ class Log with _$Log {
 
   factory Log.app(
     String payload,
-  ) => Log(
-      payload: payload,
-      dateTime: _logDateTime(null),
-      // id: _logId(null),
-    );
+  ) =>
+      Log(
+        payload: payload,
+        dateTime: _logDateTime(null),
+        // id: _logId(null),
+      );
 
   factory Log.fromJson(Map<String, Object?> json) => _$LogFromJson(json);
 }
@@ -204,16 +205,15 @@ class VersionInfo with _$VersionInfo {
 }
 
 class Traffic {
-
   Traffic({int? up, int? down})
       : id = DateTime.now().millisecondsSinceEpoch,
         up = TrafficValue(value: up),
         down = TrafficValue(value: down);
 
   factory Traffic.fromMap(Map<String, dynamic> map) => Traffic(
-      up: map['up'],
-      down: map['down'],
-    );
+        up: map['up'],
+        down: map['down'],
+      );
   int id;
   TrafficValue up;
   TrafficValue down;
@@ -238,7 +238,6 @@ class Traffic {
 
 @immutable
 class TrafficValueShow {
-
   const TrafficValueShow({
     required this.value,
     required this.unit,
@@ -293,7 +292,6 @@ extension GroupExt on Group {
 
 @immutable
 class TrafficValue {
-
   const TrafficValue({int? value}) : _value = value ?? 0;
   final int _value;
 
@@ -390,7 +388,6 @@ extension ColorSchemesExt on ColorSchemes {
 }
 
 class IpInfo {
-
   const IpInfo({
     required this.ip,
     required this.countryCode,
@@ -399,67 +396,55 @@ class IpInfo {
   final String countryCode;
 
   static IpInfo fromIpInfoIoJson(Map<String, dynamic> json) => switch (json) {
-      {
-        "ip": final String ip,
-        "country": final String country,
-      } =>
-        IpInfo(
-          ip: ip,
-          countryCode: country,
-        ),
-      _ => throw const FormatException("invalid json"),
-    };
+        {
+          "ip": final String ip,
+          "country": final String country,
+        } =>
+          IpInfo(
+            ip: ip,
+            countryCode: country,
+          ),
+        _ => throw const FormatException("invalid json"),
+      };
 
   static IpInfo fromIpApiCoJson(Map<String, dynamic> json) => switch (json) {
-      {
-        "ip": final String ip,
-        "country_code": final String countryCode,
-      } =>
-        IpInfo(
-          ip: ip,
-          countryCode: countryCode,
-        ),
-      _ => throw const FormatException("invalid json"),
-    };
+        {
+          "ip": final String ip,
+          "country_code": final String countryCode,
+        } =>
+          IpInfo(
+            ip: ip,
+            countryCode: countryCode,
+          ),
+        _ => throw const FormatException("invalid json"),
+      };
 
   static IpInfo fromIpSbJson(Map<String, dynamic> json) => switch (json) {
-      {
-        "ip": final String ip,
-        "country_code": final String countryCode,
-      } =>
-        IpInfo(
-          ip: ip,
-          countryCode: countryCode,
-        ),
-      _ => throw const FormatException("invalid json"),
-    };
+        {
+          "ip": final String ip,
+          "country_code": final String countryCode,
+        } =>
+          IpInfo(
+            ip: ip,
+            countryCode: countryCode,
+          ),
+        _ => throw const FormatException("invalid json"),
+      };
 
   static IpInfo fromIpwhoIsJson(Map<String, dynamic> json) => switch (json) {
-      {
-        "ip": final String ip,
-        "country_code": final String countryCode,
-      } =>
-        IpInfo(
-          ip: ip,
-          countryCode: countryCode,
-        ),
-      _ => throw const FormatException("invalid json"),
-    };
+        {
+          "ip": final String ip,
+          "country_code": final String countryCode,
+        } =>
+          IpInfo(
+            ip: ip,
+            countryCode: countryCode,
+          ),
+        _ => throw const FormatException("invalid json"),
+      };
 
   @override
   String toString() => 'IpInfo{ip: $ip, countryCode: $countryCode}';
-}
-
-@freezed
-class HotKeyAction with _$HotKeyAction {
-  const factory HotKeyAction({
-    required HotAction action,
-    int? key,
-    @Default({}) Set<KeyboardModifier> modifiers,
-  }) = _HotKeyAction;
-
-  factory HotKeyAction.fromJson(Map<String, Object?> json) =>
-      _$HotKeyActionFromJson(json);
 }
 
 typedef Validator = String? Function(String? value);
@@ -546,11 +531,12 @@ class Script with _$Script {
   factory Script.create({
     required String label,
     required String content,
-  }) => Script(
-      id: utils.uuidV4,
-      label: label,
-      content: content,
-    );
+  }) =>
+      Script(
+        id: utils.uuidV4,
+        label: label,
+        content: content,
+      );
 
   factory Script.fromJson(Map<String, Object?> json) => _$ScriptFromJson(json);
 }
