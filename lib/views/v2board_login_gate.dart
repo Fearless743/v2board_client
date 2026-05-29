@@ -160,17 +160,15 @@ class _V2BoardLoginGateState extends State<V2BoardLoginGate> {
     });
 
     try {
+      // Initialize core first so it's ready before profile import
+      // triggers debounced applyProfile
+      await globalState.appController.initCoreAndSetReady();
+      if (!mounted) return;
       await globalState.appController.loginAndImportV2Board(
         baseUrl: baseUrl,
         email: email,
         password: password,
       );
-      if (!mounted) return;
-      setState(() {
-        _phase = _GatePhase.coreInit;
-        _coreStatus = '正在初始化内核...';
-      });
-      await globalState.appController.initCoreAndSetReady();
       if (!mounted) return;
       setState(() {
         loggedIn = true;

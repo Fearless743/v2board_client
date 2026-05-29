@@ -1182,7 +1182,9 @@ class AppController {
         globalState.getCoreState(),
       );
     }
-    await applyProfile();
+    // Cancel any pending debounced applyProfile to avoid double setupConfig
+    debouncer.cancel(FunctionTag.applyProfile);
+    await _applyProfile();
     _coreInitialized = true;
     _ref.read(initProvider.notifier).value = true;
   }
