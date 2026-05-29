@@ -3402,6 +3402,69 @@ class AppLocalizations {
       args: [],
     );
   }
+
+  String get account {
+    return Intl.message(
+      'Account',
+      name: 'account',
+      desc: '',
+      args: [],
+    );
+  }
+
+  String get logout {
+    return Intl.message(
+      'Logout',
+      name: 'logout',
+      desc: '',
+      args: [],
+    );
+  }
+
+  String get logoutDesc {
+    return Intl.message(
+      'Sign out of your current account',
+      name: 'logoutDesc',
+      desc: '',
+      args: [],
+    );
+  }
+
+  String get subscriptionPlan {
+    return Intl.message(
+      'Subscription Plan',
+      name: 'subscriptionPlan',
+      desc: '',
+      args: [],
+    );
+  }
+
+  String get expirationDate {
+    return Intl.message(
+      'Expiration Date',
+      name: 'expirationDate',
+      desc: '',
+      args: [],
+    );
+  }
+
+  String get remainingTraffic {
+    return Intl.message(
+      'Remaining Traffic',
+      name: 'remainingTraffic',
+      desc: '',
+      args: [],
+    );
+  }
+
+  String get accountSettings {
+    return Intl.message(
+      'Account Settings',
+      name: 'accountSettings',
+      desc: '',
+      args: [],
+    );
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<AppLocalizations> {

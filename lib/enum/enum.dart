@@ -414,6 +414,7 @@ enum PageLabel {
   requests,
   resources,
   connections,
+  account,
 }
 
 enum RuleAction {

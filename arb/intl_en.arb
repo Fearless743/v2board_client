@@ -438,5 +438,12 @@
   "subscriptionExpiresToday": "Your subscription expires today",
   "subscriptionExpired": "Your subscription has expired",
   "renew": "Renew",
-  "announcement": "Announcement"
+  "announcement": "Announcement",
+  "account": "Account",
+  "logout": "Logout",
+  "logoutDesc": "Sign out of your current account",
+  "subscriptionPlan": "Subscription Plan",
+  "expirationDate": "Expiration Date",
+  "remainingTraffic": "Remaining Traffic",
+  "accountSettings": "Account Settings"
 }

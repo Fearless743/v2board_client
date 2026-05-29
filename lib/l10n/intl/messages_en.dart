@@ -791,5 +791,22 @@ class MessageLookup extends MessageLookupByLibrary {
         ),
         "renew": MessageLookupByLibrary.simpleMessage("Renew"),
         "announcement": MessageLookupByLibrary.simpleMessage("Announcement"),
+        "account": MessageLookupByLibrary.simpleMessage("Account"),
+        "logout": MessageLookupByLibrary.simpleMessage("Logout"),
+        "logoutDesc": MessageLookupByLibrary.simpleMessage(
+          "Sign out of your current account",
+        ),
+        "subscriptionPlan": MessageLookupByLibrary.simpleMessage(
+          "Subscription Plan",
+        ),
+        "expirationDate": MessageLookupByLibrary.simpleMessage(
+          "Expiration Date",
+        ),
+        "remainingTraffic": MessageLookupByLibrary.simpleMessage(
+          "Remaining Traffic",
+        ),
+        "accountSettings": MessageLookupByLibrary.simpleMessage(
+          "Account Settings",
+        ),
       };
 }

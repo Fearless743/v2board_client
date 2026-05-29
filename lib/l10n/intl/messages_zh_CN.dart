@@ -530,5 +530,12 @@ class MessageLookup extends MessageLookupByLibrary {
         ),
         "renew": MessageLookupByLibrary.simpleMessage("续订"),
         "announcement": MessageLookupByLibrary.simpleMessage("公告"),
+        "account": MessageLookupByLibrary.simpleMessage("我的"),
+        "logout": MessageLookupByLibrary.simpleMessage("退出登录"),
+        "logoutDesc": MessageLookupByLibrary.simpleMessage("退出当前账户登录"),
+        "subscriptionPlan": MessageLookupByLibrary.simpleMessage("订阅套餐"),
+        "expirationDate": MessageLookupByLibrary.simpleMessage("过期时间"),
+        "remainingTraffic": MessageLookupByLibrary.simpleMessage("剩余流量"),
+        "accountSettings": MessageLookupByLibrary.simpleMessage("账户设置"),
       };
 }

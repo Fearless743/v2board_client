@@ -410,5 +410,12 @@
   "subscriptionExpiresToday": "您的订阅今天到期",
   "subscriptionExpired": "您的订阅已过期",
   "renew": "续订",
-  "announcement": "公告"
+  "announcement": "公告",
+  "account": "我的",
+  "logout": "退出登录",
+  "logoutDesc": "退出当前账户登录",
+  "subscriptionPlan": "订阅套餐",
+  "expirationDate": "过期时间",
+  "remainingTraffic": "剩余流量",
+  "accountSettings": "账户设置"
 }

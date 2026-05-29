@@ -93,6 +93,16 @@ class Navigation {
           ),
           modes: [NavigationItemMode.desktop, NavigationItemMode.mobile],
         ),
+        const NavigationItem(
+          icon: Icon(Icons.person),
+          label: PageLabel.account,
+          view: AccountView(
+            key: GlobalObjectKey(
+              PageLabel.account,
+            ),
+          ),
+          modes: [NavigationItemMode.mobile, NavigationItemMode.desktop],
+        ),
       ];
 }
 
