@@ -6,6 +6,7 @@ import android.os.Bundle
 import android.provider.Settings
 import androidx.appcompat.app.AppCompatDelegate
 import com.follow.clashx.plugins.AppPlugin
+import com.follow.clashx.core.Core
 import com.follow.clashx.plugins.ServicePlugin
 import com.follow.clashx.plugins.TilePlugin
 import com.follow.clashx.plugins.VpnPlugin
@@ -45,6 +46,16 @@ class MainActivity : FlutterActivity() {
 
     override fun configureFlutterEngine(flutterEngine: FlutterEngine) {
         super.configureFlutterEngine(flutterEngine)
+
+        // Load libclash.so before anything else that might trigger Core.init.
+        // If a downloaded version exists in files/cores/, load it instead of the bundled one.
+        val coresDir = java.io.File(filesDir, "cores")
+        val downloadedLib = java.io.File(coresDir, "libclash.so")
+        if (downloadedLib.exists() && downloadedLib.canRead()) {
+            Core.loadLibClash(downloadedLib.absolutePath)
+        } else {
+            Core.loadLibClash(null)
+        }
         
         // Platform Channel for getting Android ID
         MethodChannel(flutterEngine.dartExecutor.binaryMessenger, "com.follow.clashx/device_id")

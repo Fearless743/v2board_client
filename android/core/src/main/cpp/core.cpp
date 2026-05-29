@@ -1,5 +1,6 @@
 #ifdef LIBCLASH
 #include <jni.h>
+#include <dlfcn.h>
 #include "jni_helper.h"
 #include "libclash.h"
 
@@ -46,6 +47,21 @@ call_tun_interface_resolve_process_impl(void *tun_interface, int protocol,
                                                                        new_string(target),
                                                                        uid));
     return get_string(packageName);
+}
+
+extern "C"
+JNIEXPORT jboolean JNICALL
+Java_com_follow_clashx_core_Core_loadLibClash(JNIEnv *env, jclass, jstring path) {
+    if (path == nullptr) {
+        // Load from default search path (bundled version)
+        void *handle = dlopen("libclash.so", RTLD_NOW | RTLD_GLOBAL);
+        return handle != nullptr ? JNI_TRUE : JNI_FALSE;
+    }
+
+    const char *pathStr = env->GetStringUTFChars(path, nullptr);
+    void *handle = dlopen(pathStr, RTLD_NOW | RTLD_GLOBAL);
+    env->ReleaseStringUTFChars(path, pathStr);
+    return handle != nullptr ? JNI_TRUE : JNI_FALSE;
 }
 
 extern "C"

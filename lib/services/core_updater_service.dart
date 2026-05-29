@@ -226,34 +226,31 @@ class CoreUpdaterService {
 
   static const _channel = MethodChannel('com.follow.clashx/core_updater');
 
-  Future<void> _installAndroid(List<int> binaryBytes) async {
+  Future<void> _installAndroid(List<int> soBytes) async {
     final coresDir = await appPath.coresDirPath;
     final coresDirectory = Directory(coresDir);
     if (!await coresDirectory.exists()) {
       await coresDirectory.create(recursive: true);
     }
 
-    final targetPath = p.join(coresDir, 'mihomo');
+    final targetPath = p.join(coresDir, 'libclash.so');
 
     // Write to temp file first
     final tempDirPath = await appPath.tempPath;
-    final tempPath = p.join(tempDirPath, 'mihomo_download.tmp');
+    final tempPath = p.join(tempDirPath, 'libclash_download.tmp');
     final tempFile = File(tempPath);
-    await tempFile.writeAsBytes(binaryBytes, flush: true);
+    await tempFile.writeAsBytes(soBytes, flush: true);
 
-    // Use Kotlin to copy and set executable permission
-    // (Java File API handles permissions more reliably on Android)
+    // Use Kotlin to copy with proper permissions
     try {
       await _channel.invokeMethod('installCoreBinary', {
         'srcPath': tempPath,
         'destPath': targetPath,
       });
     } on MissingPluginException {
-      // Fallback for when channel isn't available (e.g., unit tests)
       final targetFile = File(targetPath);
       if (await targetFile.exists()) await targetFile.delete();
       await tempFile.copy(targetPath);
-      await Process.run('chmod', ['755', targetPath]);
     } finally {
       if (await tempFile.exists()) await tempFile.delete();
     }
@@ -286,7 +283,9 @@ class CoreUpdaterService {
       _ => 'arm64-v8',
     };
 
-    return 'mihomo-android-$arch-*.gz';
+    // Prefer .so files (for dlopen-based loading)
+    // Fall back to executable if .so not available in release assets
+    return 'libclash-android-$arch-*.so';
   }
 
   String? _resolveLinuxAssetName() {

@@ -115,7 +115,7 @@ class AppPath {
 
   Future<String> get downloadedCorePath async {
     if (Platform.isAndroid) {
-      return join(await coresDirPath, "mihomo");
+      return join(await coresDirPath, "libclash.so");
     }
     return corePath;
   }
