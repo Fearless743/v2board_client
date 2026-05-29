@@ -9,13 +9,15 @@ extension PackageInfoExtension on PackageInfo {
       ].join(" ");
 
   /// UA for subscription fetching.
-  /// Xboard matches "flclash" flag → ClashMeta YAML output.
-  /// Includes mihomo core version for feature gating (ECH, xhttp, etc).
+  /// Xboard regex extracts first name/version pair as clientVersion.
+  /// Putting mihomo first ensures clientVersion = mihomo version,
+  /// which Xboard uses for xhttp (>= 1.19.24) and other feature checks.
+  /// Phase 2 substring match finds "flclash" → ClashMeta protocol output.
   String uaWithCoreVersion(String? coreVersion) {
     final cv = coreVersion ?? '';
     final parts = <String>[
-      "FlClash/v$version",
       if (cv.isNotEmpty) "mihomo/$cv",
+      "FlClash/v$version",
       "Platform/${Platform.operatingSystem}",
     ];
     return parts.join(" ");
