@@ -6,7 +6,6 @@ import 'package:flclashx/providers/providers.dart';
 import 'package:flclashx/services/v2board_service.dart';
 import 'package:flclashx/state.dart';
 import 'package:flclashx/views/tools.dart';
-import 'package:flclashx/views/shop/shop_view.dart';
 import 'package:flclashx/views/shop/order_history_view.dart';
 import 'package:flclashx/widgets/widgets.dart';
 import 'package:flutter/material.dart';
@@ -196,14 +195,6 @@ class _AccountViewState extends ConsumerState<AccountView> {
           leading: const Icon(Icons.sync),
           title: Text(appLocale.refresh),
           onTap: _fetchSubscribe,
-        ),
-        ListItem.open(
-          leading: const Icon(Icons.store),
-          title: Text(appLocale.shop),
-          delegate: OpenDelegate(
-            title: appLocale.shop,
-            widget: const ShopView(),
-          ),
         ),
         ListItem.open(
           leading: const Icon(Icons.receipt_long),
