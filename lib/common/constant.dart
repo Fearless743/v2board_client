@@ -105,15 +105,12 @@ const mihomoGitHubApiUrl =
     "https://api.github.com/repos/$mihomoRepo/releases/latest";
 const mihomoMirrorPrefixes = [
   '', // direct GitHub
-  'https://mirror.ghproxy.com/',
   'https://gh-proxy.com/',
   'https://ghfast.top/',
 ];
 const apiMirrorPrefixes = [
   '', // direct GitHub API
-  'https://mirror.ghproxy.com/',
   'https://gh-proxy.com/',
-  'https://ghfast.top/',
 ];
 const coreCheckIntervalHours = 24;
 
