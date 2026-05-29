@@ -100,6 +100,7 @@ const defaultPrimaryColors = [
 ];
 
 const mihomoRepo = "MetaCubeX/mihomo";
+const mihomoCoreRepo = "pluralplay/mihomo-core";
 const mihomoGitHubApiUrl =
     "https://api.github.com/repos/$mihomoRepo/releases/latest";
 const mihomoMirrorPrefixes = [
