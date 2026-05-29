@@ -110,9 +110,9 @@ JNI_OnLoad(JavaVM *vm, void *) {
                                                   "(ILjava/lang/String;Ljava/lang/String;I)Ljava/lang/String;");
 
     if (p_registerCallbacks) {
-        p_registerCallbacks(&call_tun_interface_protect_impl,
-                            &call_tun_interface_resolve_process_impl,
-                            &release_jni_object_impl);
+        p_registerCallbacks((void *)&call_tun_interface_protect_impl,
+                            (void *)&call_tun_interface_resolve_process_impl,
+                            (void *)&release_jni_object_impl);
     }
     return JNI_VERSION_1_6;
 }
