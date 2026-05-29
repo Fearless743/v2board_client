@@ -401,7 +401,7 @@ class V2BoardClient {
         if (couponCode != null && couponCode.isNotEmpty)
           'coupon_code': couponCode,
       });
-      final data = _unwrap(response.data);
+      final data = _unwrapData(response.data);
       final tradeNo = data.toString();
       if (tradeNo.isEmpty) {
         throw const V2BoardException('创建订单失败，未返回订单号。');
@@ -588,6 +588,20 @@ class V2BoardClient {
       return data;
     }
     return body;
+  }
+
+  /// Extract data from response, preserving non-Map types (String, int, List, etc.)
+  static dynamic _unwrapData(Map<String, dynamic>? body) {
+    if (body == null) {
+      throw const V2BoardException('V2Board 返回了空响应。');
+    }
+    final status = body['status']?.toString().toLowerCase();
+    if (status == 'fail' || status == 'error') {
+      throw V2BoardException(
+        _extractMessage(body) ?? 'V2Board 请求失败。',
+      );
+    }
+    return body['data'] ?? body;
   }
 
   static List<dynamic> _unwrapList(Map<String, dynamic>? body) {
