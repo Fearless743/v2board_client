@@ -91,7 +91,7 @@ class Navigation {
               PageLabel.tools,
             ),
           ),
-          modes: [NavigationItemMode.desktop, NavigationItemMode.mobile],
+          modes: [],
         ),
         const NavigationItem(
           icon: Icon(Icons.person),
