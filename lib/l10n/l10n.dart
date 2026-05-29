@@ -3615,10 +3615,6 @@ class AppLocalizations {
     return Intl.message('Unlimited', name: 'unlimited', desc: '', args: []);
   }
 
-  String get traffic {
-    return Intl.message('Traffic', name: 'traffic', desc: '', args: []);
-  }
-
   String get speedLimit {
     return Intl.message('Speed Limit', name: 'speedLimit', desc: '', args: []);
   }
@@ -3645,10 +3641,6 @@ class AppLocalizations {
 
   String get orderType4 {
     return Intl.message('Traffic Reset', name: 'orderType4', desc: '', args: []);
-  }
-
-  String get copyLink {
-    return Intl.message('Copy Link', name: 'copyLink', desc: '', args: []);
   }
 
   String get openInBrowser {
