@@ -16,12 +16,14 @@ class CoreUpdateInfo {
     required this.downloadUrl,
     required this.fileName,
     required this.fileSize,
+    required this.isApk,
   });
 
   final String tagName;
   final String downloadUrl;
   final String fileName;
   final int fileSize;
+  final bool isApk;
 }
 
 class CoreUpdaterService {
@@ -67,57 +69,130 @@ class CoreUpdaterService {
     );
   }
 
+  /// Check for core update. On Android, checks FlClashX releases for split
+  /// APK containing updated libclash.so. On desktop, checks mihomo releases.
   Future<CoreUpdateInfo?> checkForCoreUpdate({bool force = false}) async {
     try {
       if (!force && !await _shouldCheck()) return null;
 
-      final response = await _dio.get<Map<String, dynamic>>(
-        mihomoGitHubApiUrl,
-        options: Options(responseType: ResponseType.json),
-      );
-
-      if (response.statusCode != 200 || response.data == null) return null;
-      final data = response.data!;
-      final remoteTag = data['tag_name'] as String?;
-      if (remoteTag == null) return null;
-
-      final remoteVersion = remoteTag.replaceAll('v', '');
-      final installedVersion = await getInstalledCoreVersion();
-      final hasUpdate = utils.compareVersions(
-              remoteVersion, installedVersion.replaceAll('v', '')) >
-          0;
-
-      await _markChecked();
-      if (!hasUpdate) return null;
-
-      final assets = data['assets'] as List<dynamic>?;
-      if (assets == null || assets.isEmpty) return null;
-
-      final globPattern = await _resolveAssetName();
-      if (globPattern == null) return null;
-
-      final matchedName = matchAsset(assets, globPattern);
-      if (matchedName == null) return null;
-
-      Map<String, dynamic>? matchedAsset;
-      for (final asset in assets) {
-        if ((asset as Map<String, dynamic>)['name'] == matchedName) {
-          matchedAsset = asset;
-          break;
-        }
+      if (Platform.isAndroid) {
+        return _checkFlClashXRelease(force: force);
       }
-      if (matchedAsset == null) return null;
-
-      return CoreUpdateInfo(
-        tagName: remoteTag,
-        downloadUrl: matchedAsset['browser_download_url'] as String,
-        fileName: matchedName,
-        fileSize: matchedAsset['size'] as int? ?? 0,
-      );
+      return _checkMihomoRelease(force: force);
     } catch (e) {
       commonPrint.log('Core update check failed: $e');
       return null;
     }
+  }
+
+  /// Check FlClashX releases for Android split APK with updated core.
+  /// The split APK contains libclash.so which we extract via ZIP.
+  Future<CoreUpdateInfo?> _checkFlClashXRelease({bool force = false}) async {
+    final response = await _dio.get<Map<String, dynamic>>(
+      'https://api.github.com/repos/$repository/releases/latest',
+      options: Options(responseType: ResponseType.json),
+    );
+
+    if (response.statusCode != 200 || response.data == null) return null;
+    final data = response.data!;
+    final remoteTag = data['tag_name'] as String?;
+    if (remoteTag == null) return null;
+
+    final remoteVersion = remoteTag.replaceAll('v', '');
+    final installedVersion = await getInstalledCoreVersion();
+    final hasUpdate = utils.compareVersions(
+            remoteVersion, installedVersion.replaceAll('v', '')) >
+        0;
+
+    await _markChecked();
+    if (!hasUpdate) return null;
+
+    final assets = data['assets'] as List<dynamic>?;
+    if (assets == null || assets.isEmpty) return null;
+
+    // Find the split APK for the device's primary ABI
+    final deviceInfo = await DeviceInfoPlugin().androidInfo;
+    final abi = deviceInfo.supportedAbis.isNotEmpty
+        ? deviceInfo.supportedAbis.first
+        : 'arm64-v8a';
+
+    // Map Android ABI to flutter_distributor target name
+    final targetArch = switch (abi) {
+      'arm64-v8a' => 'arm64',
+      'armeabi-v7a' => 'arm',
+      'x86_64' => 'x64',
+      _ => 'arm64',
+    };
+
+    final apkPattern = 'FlClashX-android-$targetArch-*.apk';
+
+    final matchedName = matchAsset(assets, apkPattern);
+    if (matchedName == null) return null;
+
+    Map<String, dynamic>? matchedAsset;
+    for (final asset in assets) {
+      if ((asset as Map<String, dynamic>)['name'] == matchedName) {
+        matchedAsset = asset;
+        break;
+      }
+    }
+    if (matchedAsset == null) return null;
+
+    return CoreUpdateInfo(
+      tagName: remoteTag,
+      downloadUrl: matchedAsset['browser_download_url'] as String,
+      fileName: matchedName,
+      fileSize: matchedAsset['size'] as int? ?? 0,
+      isApk: true,
+    );
+  }
+
+  /// Check mihomo releases for desktop core binary.
+  Future<CoreUpdateInfo?> _checkMihomoRelease({bool force = false}) async {
+    final response = await _dio.get<Map<String, dynamic>>(
+      mihomoGitHubApiUrl,
+      options: Options(responseType: ResponseType.json),
+    );
+
+    if (response.statusCode != 200 || response.data == null) return null;
+    final data = response.data!;
+    final remoteTag = data['tag_name'] as String?;
+    if (remoteTag == null) return null;
+
+    final remoteVersion = remoteTag.replaceAll('v', '');
+    final installedVersion = await getInstalledCoreVersion();
+    final hasUpdate = utils.compareVersions(
+            remoteVersion, installedVersion.replaceAll('v', '')) >
+        0;
+
+    await _markChecked();
+    if (!hasUpdate) return null;
+
+    final assets = data['assets'] as List<dynamic>?;
+    if (assets == null || assets.isEmpty) return null;
+
+    final globPattern = _resolveDesktopAssetName();
+    if (globPattern == null) return null;
+
+    final matchedName = matchAsset(assets, globPattern);
+    if (matchedName == null) return null;
+
+    Map<String, dynamic>? matchedAsset;
+    for (final asset in assets) {
+      if ((asset as Map<String, dynamic>)['name'] == matchedName) {
+        matchedAsset = asset;
+        break;
+      }
+    }
+    if (matchedAsset == null) return null;
+
+    return CoreUpdateInfo(
+      tagName: remoteTag,
+      downloadUrl: matchedAsset['browser_download_url'] as String,
+      fileName: matchedName,
+      fileSize: matchedAsset['size'] as int? ?? 0,
+      isApk: false,
+    );
   }
 
   Future<bool> downloadAndInstall(
@@ -126,10 +201,6 @@ class CoreUpdaterService {
   }) async {
     final tempDirPath = await appPath.tempPath;
     final downloadFile = p.join(tempDirPath, info.fileName);
-    final extractedFile = p.join(
-      tempDirPath,
-      info.fileName.replaceAll('.gz', ''),
-    );
 
     try {
       // Try mirrors in order
@@ -171,35 +242,58 @@ class CoreUpdaterService {
 
       onProgress?.call(1.0, '正在解压...');
 
-      // Extract gzip
-      final compressedBytes = await File(downloadFile).readAsBytes();
-      final gzipBytes = GZipDecoder().decodeBytes(compressedBytes);
-
-      // Install
-      onProgress?.call(1.0, '正在安装内核...');
-
-      if (Platform.isAndroid) {
-        await _installAndroid(gzipBytes);
+      if (info.isApk) {
+        await _extractAndInstallFromApk(downloadFile);
       } else {
-        await _installDesktop(gzipBytes);
+        await _extractAndInstallGzip(downloadFile);
       }
 
       await _saveInstalledVersion(info.tagName);
-
       onProgress?.call(1.0, '内核更新完成');
-
       return true;
     } catch (e) {
       commonPrint.log('Core install failed: $e');
       return false;
     } finally {
-      // Cleanup temp files
       try {
         final dlFile = File(downloadFile);
         if (await dlFile.exists()) await dlFile.delete();
-        final exFile = File(extractedFile);
-        if (await exFile.exists()) await exFile.delete();
       } catch (_) {}
+    }
+  }
+
+  /// Extract libclash.so from a split APK (ZIP archive) and install it.
+  Future<void> _extractAndInstallFromApk(String apkPath) async {
+    final apkBytes = await File(apkPath).readAsBytes();
+    final archive = ZipDecoder().decodeBytes(apkBytes);
+
+    // Find libclash.so in the APK
+    // Path format: lib/{abi}/libclash.so (e.g., lib/arm64-v8a/libclash.so)
+    ArchiveFile? soFile;
+    for (final file in archive) {
+      if (file.name.endsWith('libclash.so') && file.name.startsWith('lib/')) {
+        soFile = file;
+        break;
+      }
+    }
+
+    if (soFile == null) {
+      throw Exception('APK 中未找到 libclash.so');
+    }
+
+    final soBytes = soFile.content as List<int>;
+    await _installSoFile(soBytes);
+  }
+
+  /// Extract a gzip-compressed binary and install it (desktop).
+  Future<void> _extractAndInstallGzip(String filePath) async {
+    final compressedBytes = await File(filePath).readAsBytes();
+    final binaryBytes = GZipDecoder().decodeBytes(compressedBytes);
+
+    if (Platform.isAndroid) {
+      await _installSoFile(binaryBytes);
+    } else {
+      await _installDesktop(binaryBytes);
     }
   }
 
@@ -207,17 +301,14 @@ class CoreUpdaterService {
     final targetPath = appPath.corePath;
     final targetFile = File(targetPath);
 
-    // Write to temp file first for atomic replacement
     final tempPath = '$targetPath.tmp';
     final tempFile = File(tempPath);
     await tempFile.writeAsBytes(binaryBytes, flush: true);
 
-    // Set executable permission
     if (!Platform.isWindows) {
       await Process.run('chmod', ['+x', tempPath]);
     }
 
-    // Atomic rename
     if (await targetFile.exists()) {
       await targetFile.delete();
     }
@@ -226,7 +317,7 @@ class CoreUpdaterService {
 
   static const _channel = MethodChannel('com.follow.clashx/core_updater');
 
-  Future<void> _installAndroid(List<int> soBytes) async {
+  Future<void> _installSoFile(List<int> soBytes) async {
     final coresDir = await appPath.coresDirPath;
     final coresDirectory = Directory(coresDir);
     if (!await coresDirectory.exists()) {
@@ -234,14 +325,11 @@ class CoreUpdaterService {
     }
 
     final targetPath = p.join(coresDir, 'libclash.so');
-
-    // Write to temp file first
     final tempDirPath = await appPath.tempPath;
     final tempPath = p.join(tempDirPath, 'libclash_download.tmp');
     final tempFile = File(tempPath);
     await tempFile.writeAsBytes(soBytes, flush: true);
 
-    // Use Kotlin to copy with proper permissions
     try {
       await _channel.invokeMethod('installCoreBinary', {
         'srcPath': tempPath,
@@ -256,76 +344,37 @@ class CoreUpdaterService {
     }
   }
 
-  Future<String?> _resolveAssetName() async {
-    if (Platform.isAndroid) {
-      return _resolveAndroidAssetName();
-    } else if (Platform.isLinux) {
-      return _resolveLinuxAssetName();
+  String? _resolveDesktopAssetName() {
+    if (Platform.isLinux) {
+      final result = Process.runSync('uname', ['-m']);
+      final machine = result.stdout.toString().trim();
+      final arch = switch (machine) {
+        'x86_64' || 'amd64' => 'amd64',
+        'aarch64' || 'arm64' => 'arm64',
+        'armv7l' => 'armv7',
+        'i686' || 'i386' => '386',
+        _ => null,
+      };
+      if (arch == null) return null;
+      return 'mihomo-linux-$arch-*.gz';
     } else if (Platform.isMacOS) {
-      return _resolveDarwinAssetName();
+      final result = Process.runSync('uname', ['-m']);
+      final machine = result.stdout.toString().trim();
+      final arch = switch (machine) {
+        'arm64' => 'arm64',
+        'x86_64' => 'amd64',
+        _ => null,
+      };
+      if (arch == null) return null;
+      return 'mihomo-darwin-$arch-*.gz';
     } else if (Platform.isWindows) {
-      return _resolveWindowsAssetName();
+      return 'mihomo-windows-amd64-*.gz';
     }
     return null;
   }
 
-  Future<String> _resolveAndroidAssetName() async {
-    final deviceInfo = await DeviceInfoPlugin().androidInfo;
-    final abi = deviceInfo.supportedAbis.isNotEmpty
-        ? deviceInfo.supportedAbis.first
-        : 'arm64-v8a';
-
-    final arch = switch (abi) {
-      'arm64-v8a' => 'arm64-v8',
-      'armeabi-v7a' => 'armv7',
-      'x86_64' => 'amd64',
-      'x86' => '386',
-      _ => 'arm64-v8',
-    };
-
-    // Prefer .so files (for dlopen-based loading)
-    // Fall back to executable if .so not available in release assets
-    return 'libclash-android-$arch-*.so';
-  }
-
-  String? _resolveLinuxAssetName() {
-    // Detect architecture
-    final result = Process.runSync('uname', ['-m']);
-    final machine = result.stdout.toString().trim();
-
-    final arch = switch (machine) {
-      'x86_64' || 'amd64' => 'amd64',
-      'aarch64' || 'arm64' => 'arm64',
-      'armv7l' => 'armv7',
-      'i686' || 'i386' => '386',
-      _ => null,
-    };
-
-    if (arch == null) return null;
-    return 'mihomo-linux-$arch-*.gz';
-  }
-
-  String? _resolveDarwinAssetName() {
-    final result = Process.runSync('uname', ['-m']);
-    final machine = result.stdout.toString().trim();
-
-    final arch = switch (machine) {
-      'arm64' => 'arm64',
-      'x86_64' => 'amd64',
-      _ => null,
-    };
-
-    if (arch == null) return null;
-    return 'mihomo-darwin-$arch-*.gz';
-  }
-
-  String? _resolveWindowsAssetName() {
-    // Windows is almost always amd64
-    return 'mihomo-windows-amd64-*.gz';
-  }
-
   /// Resolve the actual asset name from the glob pattern by matching
-  /// against the release assets list
+  /// against the release assets list.
   static String? matchAsset(List<dynamic> assets, String globPattern) {
     final prefix = globPattern.split('*').first;
     final suffix = globPattern.split('*').last;
@@ -335,13 +384,8 @@ class CoreUpdaterService {
       final name = asset['name'] as String?;
       if (name == null) continue;
       if (name.startsWith(prefix) && name.endsWith(suffix)) {
-        // Prefer the simplest variant (no v1/v2/v3/go suffixes)
-        // The pattern is: mihomo-{os}-{arch}-v{version}.gz
-        // Skip variants like: mihomo-{os}-{arch}-v1-v{version}.gz
-        //                     mihomo-{os}-{arch}-go120-v{version}.gz
         final betweenPrefixAndSuffix =
             name.substring(prefix.length, name.length - suffix.length);
-        // If there's only the version (like "v1.19.25"), it's the base variant
         if (!betweenPrefixAndSuffix.contains('-go') &&
             !betweenPrefixAndSuffix.contains('-v1-') &&
             !betweenPrefixAndSuffix.contains('-v2-') &&
