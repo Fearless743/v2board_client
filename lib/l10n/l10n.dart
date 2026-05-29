@@ -3474,6 +3474,186 @@ class AppLocalizations {
       args: [],
     );
   }
+
+  String get shop {
+    return Intl.message('Shop', name: 'shop', desc: '', args: []);
+  }
+
+  String get orderHistory {
+    return Intl.message('Order History', name: 'orderHistory', desc: '', args: []);
+  }
+
+  String get selectPeriod {
+    return Intl.message('Select Period', name: 'selectPeriod', desc: '', args: []);
+  }
+
+  String get couponCode {
+    return Intl.message('Coupon Code', name: 'couponCode', desc: '', args: []);
+  }
+
+  String get applyCoupon {
+    return Intl.message('Apply', name: 'applyCoupon', desc: '', args: []);
+  }
+
+  String get couponApplied {
+    return Intl.message('Coupon applied', name: 'couponApplied', desc: '', args: []);
+  }
+
+  String get couponInvalid {
+    return Intl.message('Invalid coupon', name: 'couponInvalid', desc: '', args: []);
+  }
+
+  String get purchase {
+    return Intl.message('Purchase', name: 'purchase', desc: '', args: []);
+  }
+
+  String get paymentMethods {
+    return Intl.message('Payment Methods', name: 'paymentMethods', desc: '', args: []);
+  }
+
+  String get selectPayment {
+    return Intl.message('Select Payment Method', name: 'selectPayment', desc: '', args: []);
+  }
+
+  String get orderPending {
+    return Intl.message('Pending', name: 'orderPending', desc: '', args: []);
+  }
+
+  String get orderProcessing {
+    return Intl.message('Processing', name: 'orderProcessing', desc: '', args: []);
+  }
+
+  String get orderCompleted {
+    return Intl.message('Completed', name: 'orderCompleted', desc: '', args: []);
+  }
+
+  String get orderCancelled {
+    return Intl.message('Cancelled', name: 'orderCancelled', desc: '', args: []);
+  }
+
+  String get orderDiscounted {
+    return Intl.message('Discounted', name: 'orderDiscounted', desc: '', args: []);
+  }
+
+  String get cancelOrder {
+    return Intl.message('Cancel Order', name: 'cancelOrder', desc: '', args: []);
+  }
+
+  String get scanQrCode {
+    return Intl.message('Scan QR code to pay', name: 'scanQrCode', desc: '', args: []);
+  }
+
+  String get originalPrice {
+    return Intl.message('Original', name: 'originalPrice', desc: '', args: []);
+  }
+
+  String get finalPrice {
+    return Intl.message('Total', name: 'finalPrice', desc: '', args: []);
+  }
+
+  String get discount {
+    return Intl.message('Discount', name: 'discount', desc: '', args: []);
+  }
+
+  String get balanceDeducted {
+    return Intl.message('Balance Deducted', name: 'balanceDeducted', desc: '', args: []);
+  }
+
+  String get monthPrice {
+    return Intl.message('Monthly', name: 'monthPrice', desc: '', args: []);
+  }
+
+  String get quarterPrice {
+    return Intl.message('Quarterly', name: 'quarterPrice', desc: '', args: []);
+  }
+
+  String get halfYearPrice {
+    return Intl.message('Semi-Annual', name: 'halfYearPrice', desc: '', args: []);
+  }
+
+  String get yearPrice {
+    return Intl.message('Annual', name: 'yearPrice', desc: '', args: []);
+  }
+
+  String get twoYearPrice {
+    return Intl.message('2 Years', name: 'twoYearPrice', desc: '', args: []);
+  }
+
+  String get threeYearPrice {
+    return Intl.message('3 Years', name: 'threeYearPrice', desc: '', args: []);
+  }
+
+  String get onetimePrice {
+    return Intl.message('One-Time', name: 'onetimePrice', desc: '', args: []);
+  }
+
+  String get resetPrice {
+    return Intl.message('Reset Traffic', name: 'resetPrice', desc: '', args: []);
+  }
+
+  String get noPlans {
+    return Intl.message('No plans available', name: 'noPlans', desc: '', args: []);
+  }
+
+  String get noOrders {
+    return Intl.message('No orders yet', name: 'noOrders', desc: '', args: []);
+  }
+
+  String get paymentSuccess {
+    return Intl.message('Payment Successful', name: 'paymentSuccess', desc: '', args: []);
+  }
+
+  String get paymentWaiting {
+    return Intl.message('Waiting for payment...', name: 'paymentWaiting', desc: '', args: []);
+  }
+
+  String get soldOut {
+    return Intl.message('Sold Out', name: 'soldOut', desc: '', args: []);
+  }
+
+  String get unlimited {
+    return Intl.message('Unlimited', name: 'unlimited', desc: '', args: []);
+  }
+
+  String get traffic {
+    return Intl.message('Traffic', name: 'traffic', desc: '', args: []);
+  }
+
+  String get speedLimit {
+    return Intl.message('Speed Limit', name: 'speedLimit', desc: '', args: []);
+  }
+
+  String get deviceLimit {
+    return Intl.message('Device Limit', name: 'deviceLimit', desc: '', args: []);
+  }
+
+  String get perMonth {
+    return Intl.message('/mo', name: 'perMonth', desc: '', args: []);
+  }
+
+  String get orderType1 {
+    return Intl.message('New', name: 'orderType1', desc: '', args: []);
+  }
+
+  String get orderType2 {
+    return Intl.message('Renewal', name: 'orderType2', desc: '', args: []);
+  }
+
+  String get orderType3 {
+    return Intl.message('Upgrade', name: 'orderType3', desc: '', args: []);
+  }
+
+  String get orderType4 {
+    return Intl.message('Traffic Reset', name: 'orderType4', desc: '', args: []);
+  }
+
+  String get copyLink {
+    return Intl.message('Copy Link', name: 'copyLink', desc: '', args: []);
+  }
+
+  String get openInBrowser {
+    return Intl.message('Open in Browser', name: 'openInBrowser', desc: '', args: []);
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<AppLocalizations> {

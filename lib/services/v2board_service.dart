@@ -3,6 +3,7 @@ import 'dart:io';
 
 import 'package:dio/dio.dart';
 import 'package:flclashx/models/profile.dart';
+import 'package:flclashx/models/shop.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 const v2boardSessionKey = 'v2board.session.v1';
@@ -103,12 +104,32 @@ class V2BoardApiConfig {
     this.checkLoginPath = '/api/v1/user/checkLogin',
     this.getSubscribePath = '/api/v1/user/getSubscribe',
     this.subscribePath = '/api/v1/client/subscribe',
+    this.fetchPlansPath = '/api/v1/user/plan/fetch',
+    this.saveOrderPath = '/api/v1/user/order/save',
+    this.fetchOrdersPath = '/api/v1/user/order/fetch',
+    this.fetchOrderDetailPath = '/api/v1/user/order/detail',
+    this.checkoutOrderPath = '/api/v1/user/order/checkout',
+    this.checkOrderPath = '/api/v1/user/order/check',
+    this.cancelOrderPath = '/api/v1/user/order/cancel',
+    this.paymentMethodsPath = '/api/v1/user/order/getPaymentMethod',
+    this.checkCouponPath = '/api/v1/user/coupon/check',
+    this.userBalancePath = '/api/v1/user/user/info',
   });
 
   final String loginPath;
   final String checkLoginPath;
   final String getSubscribePath;
   final String subscribePath;
+  final String fetchPlansPath;
+  final String saveOrderPath;
+  final String fetchOrdersPath;
+  final String fetchOrderDetailPath;
+  final String checkoutOrderPath;
+  final String checkOrderPath;
+  final String cancelOrderPath;
+  final String paymentMethodsPath;
+  final String checkCouponPath;
+  final String userBalancePath;
 
   String endpoint(String baseUrl, String path) {
     if (path.startsWith('http://') || path.startsWith('https://')) {
@@ -317,6 +338,180 @@ class V2BoardClient {
     }
   }
 
+  // --- Shop API ---
+
+  Future<List<ShopPlan>> fetchPlans() async {
+    try {
+      final response = await _getWithAuthFallback(_apiConfig.fetchPlansPath);
+      final list = _unwrapList(response.data);
+      return list
+          .map((e) => ShopPlan.fromJson((e as Map).cast<String, Object?>()))
+          .toList();
+    } on DioException catch (e) {
+      throw V2BoardException(_formatDioError(e, action: '获取套餐列表失败'));
+    }
+  }
+
+  Future<List<ShopOrder>> fetchOrders({int? status}) async {
+    try {
+      var path = _apiConfig.fetchOrdersPath;
+      if (status != null) path = '$path?status=$status';
+      final response = await _getWithAuthFallback(path);
+      final list = _unwrapList(response.data);
+      return list
+          .map((e) => ShopOrder.fromJson((e as Map).cast<String, Object?>()))
+          .toList();
+    } on DioException catch (e) {
+      throw V2BoardException(_formatDioError(e, action: '获取订单列表失败'));
+    }
+  }
+
+  Future<ShopOrder> fetchOrderDetail(String tradeNo) async {
+    try {
+      final response = await _getWithAuthFallback(
+        '${_apiConfig.fetchOrderDetailPath}?trade_no=$tradeNo',
+      );
+      return ShopOrder.fromJson(_unwrap(response.data));
+    } on DioException catch (e) {
+      throw V2BoardException(_formatDioError(e, action: '获取订单详情失败'));
+    }
+  }
+
+  Future<List<PaymentMethod>> fetchPaymentMethods() async {
+    try {
+      final response = await _getWithAuthFallback(_apiConfig.paymentMethodsPath);
+      final list = _unwrapList(response.data);
+      return list
+          .map((e) => PaymentMethod.fromJson((e as Map).cast<String, Object?>()))
+          .toList();
+    } on DioException catch (e) {
+      throw V2BoardException(_formatDioError(e, action: '获取支付方式失败'));
+    }
+  }
+
+  Future<String> saveOrder({
+    required int planId,
+    required String period,
+    String? couponCode,
+  }) async {
+    try {
+      final response = await _postWithAuth(_apiConfig.saveOrderPath, data: {
+        'plan_id': planId,
+        'period': period,
+        if (couponCode != null && couponCode.isNotEmpty)
+          'coupon_code': couponCode,
+      });
+      final data = _unwrap(response.data);
+      final tradeNo = data.toString();
+      if (tradeNo.isEmpty) {
+        throw const V2BoardException('创建订单失败，未返回订单号。');
+      }
+      return tradeNo;
+    } on DioException catch (e) {
+      throw V2BoardException(_formatDioError(e, action: '创建订单失败'));
+    }
+  }
+
+  Future<CheckoutResult> checkoutOrder({
+    required String tradeNo,
+    required int methodId,
+  }) async {
+    try {
+      final response = await _postWithAuth(_apiConfig.checkoutOrderPath, data: {
+        'trade_no': tradeNo,
+        'method': methodId,
+      });
+      return CheckoutResult.fromJson(_unwrap(response.data));
+    } on DioException catch (e) {
+      throw V2BoardException(_formatDioError(e, action: '支付订单失败'));
+    }
+  }
+
+  Future<int> checkOrderStatus(String tradeNo) async {
+    try {
+      final response = await _getWithAuthFallback(
+        '${_apiConfig.checkOrderPath}?trade_no=$tradeNo',
+      );
+      final body = response.data;
+      if (body == null) return 0;
+      final data = body['data'];
+      if (data is int) return data;
+      return int.tryParse(data?.toString() ?? '') ?? 0;
+    } on DioException catch (e) {
+      throw V2BoardException(_formatDioError(e, action: '查询订单状态失败'));
+    }
+  }
+
+  Future<bool> cancelOrder(String tradeNo) async {
+    try {
+      final response = await _postWithAuth(_apiConfig.cancelOrderPath, data: {
+        'trade_no': tradeNo,
+      });
+      _unwrap(response.data);
+      return true;
+    } on DioException catch (e) {
+      throw V2BoardException(_formatDioError(e, action: '取消订单失败'));
+    }
+  }
+
+  Future<CouponCheckResult> checkCoupon({
+    required String code,
+    int? planId,
+    String? period,
+  }) async {
+    try {
+      final response = await _postWithAuth(_apiConfig.checkCouponPath, data: {
+        'code': code,
+        if (planId != null) 'plan_id': planId,
+        if (period != null) 'period': period,
+      });
+      return CouponCheckResult.fromJson(_unwrap(response.data));
+    } on DioException catch (e) {
+      throw V2BoardException(_formatDioError(e, action: '验证优惠券失败'));
+    }
+  }
+
+  Future<int> fetchUserBalance() async {
+    try {
+      final response = await _getWithAuthFallback(_apiConfig.userBalancePath);
+      final data = _unwrap(response.data);
+      return data['balance'] as int? ?? 0;
+    } on DioException catch (e) {
+      throw V2BoardException(_formatDioError(e, action: '获取用户余额失败'));
+    }
+  }
+
+  Future<Response<Map<String, dynamic>>> _postWithAuth(
+    String path, {
+    Map<String, dynamic>? data,
+  }) async {
+    Object? lastError;
+    for (final headers in _authHeaders()) {
+      try {
+        final response = await _dio.post<Map<String, dynamic>>(
+          _apiConfig.endpoint(baseUrl, path),
+          data: data,
+          options: Options(
+            responseType: ResponseType.json,
+            headers: headers,
+            validateStatus: (status) => status != null && status < 500,
+          ),
+        );
+        if (!_isUnauthorized(response)) {
+          return response;
+        }
+        lastError = DioException.badResponse(
+          statusCode: response.statusCode ?? HttpStatus.unauthorized,
+          requestOptions: response.requestOptions,
+          response: response,
+        );
+      } catch (e) {
+        lastError = e;
+      }
+    }
+    throw lastError ?? Exception('V2Board request failed.');
+  }
+
   Future<Response<Map<String, dynamic>>> _getWithAuthFallback(
       String path) async {
     Object? lastError;
@@ -393,6 +588,22 @@ class V2BoardClient {
       return data;
     }
     return body;
+  }
+
+  static List<dynamic> _unwrapList(Map<String, dynamic>? body) {
+    if (body == null) {
+      throw const V2BoardException('V2Board 返回了空响应。');
+    }
+    final status = body['status']?.toString().toLowerCase();
+    if (status == 'fail' || status == 'error') {
+      throw V2BoardException(
+        _extractMessage(body) ?? 'V2Board 请求失败。',
+      );
+    }
+    final data = body['data'];
+    if (data is List) return data;
+    if (data is Map && data['data'] is List) return data['data'] as List;
+    return body.values.whereType<List>().firstOrNull ?? [];
   }
 
   static String _formatDioError(DioException error, {required String action}) {
