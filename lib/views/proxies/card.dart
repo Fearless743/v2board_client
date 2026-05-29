@@ -151,7 +151,6 @@ class ProxyCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final sw = Stopwatch()..start();
     final measure = globalState.measure;
     final delayText = _buildDelayText();
     final proxyNameText = _buildProxyNameText(context);
@@ -225,10 +224,6 @@ class ProxyCard extends StatelessWidget {
           )
       ],
     );
-    if (sw.elapsedMilliseconds > 1) {
-      debugPrint(
-          '[PERF][proxy-card] build ${sw.elapsedMilliseconds}ms group=$groupName proxy=${proxy.name} type=$type');
-    }
     return card;
   }
 }

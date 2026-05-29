@@ -222,7 +222,6 @@ class _ProxiesViewState extends ConsumerState<ProxiesView> with PageMixin {
 
   @override
   Widget build(BuildContext context) {
-    final sw = Stopwatch()..start();
     final proxiesType = ref.watch(
       proxiesStyleSettingProvider.select(
         (state) => state.type,
@@ -234,12 +233,6 @@ class _ProxiesViewState extends ConsumerState<ProxiesView> with PageMixin {
         ),
       ProxiesType.list => const ProxiesListView(),
     };
-    debugPrint(
-        '[PERF][proxies-view] build ${sw.elapsedMilliseconds}ms type=$proxiesType');
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      debugPrint(
-          '[PERF][proxies-view] first-frame ${sw.elapsedMilliseconds}ms type=$proxiesType');
-    });
     return child;
   }
 }
