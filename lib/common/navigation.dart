@@ -14,7 +14,6 @@ class Navigation {
 
   List<NavigationItem> getItems({
     bool openLogs = false,
-    bool hasProxies = false,
   }) =>
       [
         const NavigationItem(
@@ -33,9 +32,7 @@ class Navigation {
               PageLabel.proxies,
             ),
           ),
-          modes: hasProxies
-              ? [NavigationItemMode.mobile, NavigationItemMode.desktop]
-              : [],
+          modes: const [],
         ),
         const NavigationItem(
           icon: Icon(Icons.view_timeline),
