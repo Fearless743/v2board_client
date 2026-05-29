@@ -285,15 +285,6 @@ enum DashboardWidget {
     ),
     platforms: desktopPlatforms,
   ),
-  vpnButton(
-    GridItem(
-      crossAxisCellCount: 4,
-      child: VpnButton(),
-    ),
-    platforms: [
-      SupportPlatform.Android,
-    ],
-  ),
   systemProxyButton(
     GridItem(
       crossAxisCellCount: 4,
