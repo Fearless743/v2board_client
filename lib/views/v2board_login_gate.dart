@@ -1,4 +1,5 @@
 import 'package:flclashx/common/common.dart';
+import 'package:flclashx/controller.dart' show appControllerReady;
 import 'package:flclashx/services/core_updater_service.dart';
 import 'package:flclashx/services/v2board_service.dart';
 import 'package:flclashx/state.dart';
@@ -125,7 +126,7 @@ class _V2BoardLoginGateState extends State<V2BoardLoginGate> {
           _phase = _GatePhase.coreInit;
           _coreStatus = '正在初始化内核...';
         });
-        await globalState.appController.initCoreAndSetReady();
+        await appControllerReady;
         if (!mounted) return;
         setState(() {
           loggedIn = true;
@@ -160,15 +161,17 @@ class _V2BoardLoginGateState extends State<V2BoardLoginGate> {
     });
 
     try {
-      // Initialize core first so it's ready before profile import
-      // triggers debounced applyProfile
-      await globalState.appController.initCoreAndSetReady();
-      if (!mounted) return;
       await globalState.appController.loginAndImportV2Board(
         baseUrl: baseUrl,
         email: email,
         password: password,
       );
+      if (!mounted) return;
+      setState(() {
+        _phase = _GatePhase.coreInit;
+        _coreStatus = '正在初始化内核...';
+      });
+      await appControllerReady;
       if (!mounted) return;
       setState(() {
         loggedIn = true;

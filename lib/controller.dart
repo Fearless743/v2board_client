@@ -1168,10 +1168,7 @@ class AppController {
     await handleExit();
   }
 
-  bool _coreInitialized = false;
-
   Future<void> _initCore() async {
-    if (_coreInitialized) return;
     // On Android, switch to process mode if a downloaded core binary exists
     await clashCore.switchToProcessModeIfNeeded();
 
@@ -1182,24 +1179,7 @@ class AppController {
         globalState.getCoreState(),
       );
     }
-    // Cancel any pending debounced applyProfile to avoid double setupConfig
-    debouncer.cancel(FunctionTag.applyProfile);
-    await _applyProfile();
-    _coreInitialized = true;
-    _ref.read(initProvider.notifier).value = true;
-  }
-
-  /// Initialize the clash core and mark the app as ready.
-  /// Called from the login gate so the start button is available
-  /// immediately when the main page renders.
-  Future<void> initCoreAndSetReady() async {
-    if (_coreInitialized) return;
-    final downloadedVersion = await coreUpdater.getInstalledCoreVersion();
-    if (downloadedVersion != kCoreVersionFromSource) {
-      globalState.coreVersion = downloadedVersion;
-    }
-    await _initCore();
-    await _initStatus();
+    await applyProfile();
   }
 
   Future<void> init() async {
@@ -1208,17 +1188,15 @@ class AppController {
     };
     updateTray(true);
 
-    if (!_coreInitialized) {
-      // Update core version from downloaded core if available
-      final downloadedVersion = await coreUpdater.getInstalledCoreVersion();
-      if (downloadedVersion != kCoreVersionFromSource) {
-        globalState.coreVersion = downloadedVersion;
-      }
-
-      await _initCore();
-      await _initStatus();
+    // Update core version from downloaded core if available
+    final downloadedVersion = await coreUpdater.getInstalledCoreVersion();
+    if (downloadedVersion != kCoreVersionFromSource) {
+      globalState.coreVersion = downloadedVersion;
     }
+
+    await _initCore();
     await syncV2BoardProfile(silent: true);
+    await _initStatus();
     autoLaunch?.updateStatus(
       _ref.read(appSettingProvider).autoLaunch,
     );
@@ -1235,6 +1213,10 @@ class AppController {
       }
     }
     await _handlePreference();
+    _ref.read(initProvider.notifier).value = true;
+    if (!_initCompleter.isCompleted) {
+      _initCompleter.complete();
+    }
   }
 
   Future<void> _initStatus() async {
@@ -1971,3 +1953,10 @@ class AppController {
     savePreferencesDebounce();
   }
 }
+
+/// Completes when AppController.init() finishes.
+/// Used by the login gate to wait for core readiness before showing HomePage.
+final _initCompleter = Completer<void>();
+
+/// Future that completes when the app controller initialization is done.
+Future<void> get appControllerReady => _initCompleter.future;
