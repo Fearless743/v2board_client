@@ -475,7 +475,8 @@ class V2BoardClient {
     try {
       final response = await _getWithAuthFallback(_apiConfig.userBalancePath);
       final data = _unwrap(response.data);
-      return data['balance'] as int? ?? 0;
+      final balance = data['balance'];
+      return balance is int ? balance : (balance is num ? balance.toInt() : int.tryParse(balance?.toString() ?? '') ?? 0);
     } on DioException catch (e) {
       throw V2BoardException(_formatDioError(e, action: '获取用户余额失败'));
     }

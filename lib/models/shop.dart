@@ -230,7 +230,9 @@ class PaymentMethod {
         payment: json['payment'] as String? ?? '',
         icon: json['icon'] as String?,
         handlingFeeFixed: _asInt(json['handling_fee_fixed']),
-        handlingFeePercent: (json['handling_fee_percent'] as num?)?.toDouble(),
+        handlingFeePercent: (json['handling_fee_percent'] is num)
+            ? (json['handling_fee_percent'] as num).toDouble()
+            : double.tryParse(json['handling_fee_percent']?.toString() ?? ''),
       );
 }
 
