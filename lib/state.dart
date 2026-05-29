@@ -122,7 +122,9 @@ class GlobalState {
     );
   }
 
-  String get ua => config.patchClashConfig.globalUa ?? packageInfo.ua;
+  String get ua =>
+      config.patchClashConfig.globalUa ??
+      packageInfo.uaWithCoreVersion(coreVersion);
 
   Future<void> startUpdateTasks([UpdateTasks? tasks]) async {
     if (timer != null && timer!.isActive == true) return;
