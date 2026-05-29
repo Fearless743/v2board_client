@@ -94,6 +94,16 @@ class Navigation {
           modes: [],
         ),
         const NavigationItem(
+          icon: Icon(Icons.store),
+          label: PageLabel.shop,
+          view: ShopView(
+            key: GlobalObjectKey(
+              PageLabel.shop,
+            ),
+          ),
+          modes: [NavigationItemMode.mobile, NavigationItemMode.desktop],
+        ),
+        const NavigationItem(
           icon: Icon(Icons.person),
           label: PageLabel.account,
           view: AccountView(
