@@ -22,6 +22,51 @@ class ProxyCard extends StatelessWidget {
   final ProxyCardType type;
   final String? testUrl;
 
+  Widget _buildProxyNameText(BuildContext context) {
+    if (type == ProxyCardType.oneline) {
+      return Consumer(
+        builder: (context, ref, child) {
+          final isSelected = groupType.isComputedSelected &&
+              ref.watch(getProxyNameProvider(groupName)) == proxy.name;
+          return Padding(
+            padding:
+                isSelected ? const EdgeInsets.only(right: 32) : EdgeInsets.zero,
+            child: child,
+          );
+        },
+        child: SizedBox(
+          height: globalState.measure.bodyMediumHeight * 1,
+          child: EmojiText(
+            proxy.name,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: context.textTheme.bodyMedium,
+          ),
+        ),
+      );
+    } else if (type == ProxyCardType.min) {
+      return SizedBox(
+        height: globalState.measure.bodyMediumHeight * 1,
+        child: EmojiText(
+          proxy.name,
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+          style: context.textTheme.bodyMedium,
+        ),
+      );
+    } else {
+      return SizedBox(
+        height: globalState.measure.bodyMediumHeight * 2,
+        child: EmojiText(
+          proxy.name,
+          maxLines: 2,
+          overflow: TextOverflow.ellipsis,
+          style: context.textTheme.bodyMedium,
+        ),
+      );
+    }
+  }
+
   Future<void> _changeProxy(WidgetRef ref) async {
     final isComputedSelected = groupType.isComputedSelected;
     final isSelector = groupType == GroupType.Selector;
@@ -41,6 +86,8 @@ class ProxyCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final measure = globalState.measure;
+    final proxyNameText = _buildProxyNameText(context);
     final card = Stack(
       children: [
         Consumer(
@@ -57,26 +104,18 @@ class ProxyCard extends StatelessWidget {
           child: Container(
             alignment: Alignment.centerLeft,
             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-            child: Row(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Flexible(
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      EmojiText(
-                        proxy.name,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: context.textTheme.bodyMedium,
-                      ),
-                      if (type != ProxyCardType.oneline) ...[
-                        const SizedBox(height: 4),
-                        _ProxyDesc(proxy: proxy),
-                      ],
-                    ],
+                proxyNameText,
+                if (type != ProxyCardType.oneline) ...[
+                  const SizedBox(height: 8),
+                  SizedBox(
+                    height: measure.bodySmallHeight,
+                    child: _ProxyDesc(proxy: proxy),
                   ),
-                ),
+                ],
               ],
             ),
           ),
@@ -88,6 +127,7 @@ class ProxyCard extends StatelessWidget {
             child: _ProxyComputedMark(
               groupName: groupName,
               proxy: proxy,
+              cardType: type,
             ),
           ),
       ],
@@ -117,18 +157,24 @@ class _ProxyComputedMark extends ConsumerWidget {
   const _ProxyComputedMark({
     required this.groupName,
     required this.proxy,
+    required this.cardType,
   });
   final String groupName;
   final Proxy proxy;
+  final ProxyCardType cardType;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final proxyName = ref.watch(getProxyNameProvider(groupName));
     if (proxyName != proxy.name) return const SizedBox();
 
+    final margin = cardType == ProxyCardType.oneline
+        ? const EdgeInsets.fromLTRB(8, 4, 8, 8)
+        : const EdgeInsets.all(8);
+
     return Container(
       alignment: Alignment.topRight,
-      margin: const EdgeInsets.all(8),
+      margin: margin,
       child: Container(
         padding: const EdgeInsets.all(4),
         decoration: BoxDecoration(

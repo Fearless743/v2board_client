@@ -87,7 +87,7 @@ class _ProxyGroupCardState extends State<ProxyGroupCard>
     );
     final proxies = widget.group.all;
     final rowCount = (proxies.length / columns).ceil();
-    final rowHeight = getItemHeight(ProxyCardType.oneline);
+    final rowHeight = getItemHeight(ProxyCardType.expand);
     final totalHeight = rowCount * rowHeight + max(rowCount - 1, 0) * 4.0;
     final bodyHeight = min(totalHeight, MediaQuery.sizeOf(context).height * 0.72);
 
@@ -175,7 +175,7 @@ class _ProxyGroupCardState extends State<ProxyGroupCard>
                                   child: RepaintBoundary(
                                     child: ProxyCard(
                                       testUrl: widget.group.testUrl,
-                                      type: ProxyCardType.oneline,
+                                      type: ProxyCardType.expand,
                                       groupType: widget.group.type,
                                       key: ValueKey('$groupName.${proxy.name}'),
                                       proxy: proxy,
