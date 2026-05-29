@@ -1,6 +1,11 @@
 import 'package:flclashx/enum/enum.dart';
 import 'package:flclashx/state.dart';
 
+double get listHeaderHeight {
+  final measure = globalState.measure;
+  return 20 + measure.titleMediumHeight + 4 + measure.bodyMediumHeight;
+}
+
 double getItemHeight(ProxyCardType proxyCardType) {
   final measure = globalState.measure;
   final baseHeight =

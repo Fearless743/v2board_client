@@ -22,6 +22,8 @@ class ProxyCard extends StatelessWidget {
   final ProxyCardType type;
   final String? testUrl;
 
+  Measure get measure => globalState.measure;
+
   Widget _buildProxyNameText(BuildContext context) {
     if (type == ProxyCardType.oneline) {
       return Consumer(
@@ -35,7 +37,7 @@ class ProxyCard extends StatelessWidget {
           );
         },
         child: SizedBox(
-          height: globalState.measure.bodyMediumHeight * 1,
+          height: measure.bodyMediumHeight * 1,
           child: EmojiText(
             proxy.name,
             maxLines: 1,
@@ -46,7 +48,7 @@ class ProxyCard extends StatelessWidget {
       );
     } else if (type == ProxyCardType.min) {
       return SizedBox(
-        height: globalState.measure.bodyMediumHeight * 1,
+        height: measure.bodyMediumHeight * 1,
         child: EmojiText(
           proxy.name,
           maxLines: 1,
@@ -56,7 +58,7 @@ class ProxyCard extends StatelessWidget {
       );
     } else {
       return SizedBox(
-        height: globalState.measure.bodyMediumHeight * 2,
+        height: measure.bodyMediumHeight * 2,
         child: EmojiText(
           proxy.name,
           maxLines: 2,
