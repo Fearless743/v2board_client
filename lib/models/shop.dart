@@ -1,3 +1,11 @@
+/// Safely convert a JSON value to int, handling both int and double.
+int? _asInt(dynamic value) {
+  if (value == null) return null;
+  if (value is int) return value;
+  if (value is double) return value.toInt();
+  return int.tryParse(value.toString());
+}
+
 class ShopPlan {
   const ShopPlan({
     required this.id,
@@ -52,30 +60,30 @@ class ShopPlan {
   final int? updatedAt;
 
   factory ShopPlan.fromJson(Map<String, Object?> json) => ShopPlan(
-        id: json['id'] as int,
-        groupId: json['group_id'] as int?,
+        id: _asInt(json['id']) ?? 0,
+        groupId: _asInt(json['group_id']),
         name: json['name'] as String? ?? '',
         tags: (json['tags'] as List?)?.cast<String>(),
         content: json['content'] as String?,
-        monthPrice: json['month_price'] as int?,
-        quarterPrice: json['quarter_price'] as int?,
-        halfYearPrice: json['half_year_price'] as int?,
-        yearPrice: json['year_price'] as int?,
-        twoYearPrice: json['two_year_price'] as int?,
-        threeYearPrice: json['three_year_price'] as int?,
-        onetimePrice: json['onetime_price'] as int?,
-        resetPrice: json['reset_price'] as int?,
+        monthPrice: _asInt(json['month_price']),
+        quarterPrice: _asInt(json['quarter_price']),
+        halfYearPrice: _asInt(json['half_year_price']),
+        yearPrice: _asInt(json['year_price']),
+        twoYearPrice: _asInt(json['two_year_price']),
+        threeYearPrice: _asInt(json['three_year_price']),
+        onetimePrice: _asInt(json['onetime_price']),
+        resetPrice: _asInt(json['reset_price']),
         capacityLimit: json['capacity_limit'],
-        transferEnable: json['transfer_enable'] as int? ?? 0,
-        speedLimit: json['speed_limit'] as int?,
-        deviceLimit: json['device_limit'] as int?,
+        transferEnable: _asInt(json['transfer_enable']) ?? 0,
+        speedLimit: _asInt(json['speed_limit']),
+        deviceLimit: _asInt(json['device_limit']),
         show: json['show'] as bool? ?? true,
         sell: json['sell'] as bool? ?? true,
         renew: json['renew'] as bool? ?? true,
-        resetTrafficMethod: json['reset_traffic_method'] as int?,
-        sort: json['sort'] as int? ?? 0,
-        createdAt: json['created_at'] as int?,
-        updatedAt: json['updated_at'] as int?,
+        resetTrafficMethod: _asInt(json['reset_traffic_method']),
+        sort: _asInt(json['sort']) ?? 0,
+        createdAt: _asInt(json['created_at']),
+        updatedAt: _asInt(json['updated_at']),
       );
 
   bool get isSoldOut => capacityLimit == 'Sold out';
@@ -161,27 +169,27 @@ class ShopOrder {
   final ShopPlan? plan;
 
   factory ShopOrder.fromJson(Map<String, Object?> json) => ShopOrder(
-        id: json['id'] as int,
-        userId: json['user_id'] as int? ?? 0,
-        planId: json['plan_id'] as int? ?? 0,
-        paymentId: json['payment_id'] as int?,
-        couponId: json['coupon_id'] as int?,
+        id: _asInt(json['id']) ?? 0,
+        userId: _asInt(json['user_id']) ?? 0,
+        planId: _asInt(json['plan_id']) ?? 0,
+        paymentId: _asInt(json['payment_id']),
+        couponId: _asInt(json['coupon_id']),
         period: json['period'] as String? ?? '',
         tradeNo: json['trade_no'] as String? ?? '',
         callbackNo: json['callback_no'] as String?,
-        totalAmount: json['total_amount'] as int? ?? 0,
-        handlingAmount: json['handling_amount'] as int?,
-        discountAmount: json['discount_amount'] as int?,
-        surplusAmount: json['surplus_amount'] as int?,
-        refundAmount: json['refund_amount'] as int?,
-        balanceAmount: json['balance_amount'] as int?,
-        type: json['type'] as int? ?? 1,
-        status: json['status'] as int? ?? 0,
-        commissionStatus: json['commission_status'] as int? ?? 0,
-        commissionBalance: json['commission_balance'] as int? ?? 0,
-        paidAt: json['paid_at'] as int?,
-        createdAt: json['created_at'] as int? ?? 0,
-        updatedAt: json['updated_at'] as int? ?? 0,
+        totalAmount: _asInt(json['total_amount']) ?? 0,
+        handlingAmount: _asInt(json['handling_amount']),
+        discountAmount: _asInt(json['discount_amount']),
+        surplusAmount: _asInt(json['surplus_amount']),
+        refundAmount: _asInt(json['refund_amount']),
+        balanceAmount: _asInt(json['balance_amount']),
+        type: _asInt(json['type']) ?? 1,
+        status: _asInt(json['status']) ?? 0,
+        commissionStatus: _asInt(json['commission_status']) ?? 0,
+        commissionBalance: _asInt(json['commission_balance']) ?? 0,
+        paidAt: _asInt(json['paid_at']),
+        createdAt: _asInt(json['created_at']) ?? 0,
+        updatedAt: _asInt(json['updated_at']) ?? 0,
         plan: json['plan'] is Map
             ? ShopPlan.fromJson((json['plan'] as Map).cast<String, Object?>())
             : null,
@@ -217,11 +225,11 @@ class PaymentMethod {
   final double? handlingFeePercent;
 
   factory PaymentMethod.fromJson(Map<String, Object?> json) => PaymentMethod(
-        id: json['id'] as int,
+        id: _asInt(json['id']) ?? 0,
         name: json['name'] as String? ?? '',
         payment: json['payment'] as String? ?? '',
         icon: json['icon'] as String?,
-        handlingFeeFixed: json['handling_fee_fixed'] as int?,
+        handlingFeeFixed: _asInt(json['handling_fee_fixed']),
         handlingFeePercent: (json['handling_fee_percent'] as num?)?.toDouble(),
       );
 }
@@ -245,11 +253,11 @@ class CouponCheckResult {
 
   factory CouponCheckResult.fromJson(Map<String, Object?> json) =>
       CouponCheckResult(
-        id: json['id'] as int,
+        id: _asInt(json['id']) ?? 0,
         code: json['code'] as String? ?? '',
         name: json['name'] as String? ?? '',
-        type: json['type'] as int? ?? 1,
-        value: json['value'] as int? ?? 0,
+        type: _asInt(json['type']) ?? 1,
+        value: _asInt(json['value']) ?? 0,
       );
 
   bool get isFixed => type == 1;
@@ -268,7 +276,7 @@ class CheckoutResult {
 
   factory CheckoutResult.fromJson(Map<String, Object?> json) =>
       CheckoutResult(
-        type: json['type'] as int,
+        type: _asInt(json['type']) ?? 0,
         data: json['data'],
       );
 

@@ -64,43 +64,40 @@ class _ShopViewState extends State<ShopView> {
     final appLocale = AppLocalizations.of(context);
     final theme = Theme.of(context);
 
-    return Scaffold(
-      appBar: AppBar(title: Text(appLocale.shop)),
-      body: _loading
-          ? const Center(child: CircularProgressIndicator())
-          : _error != null
-              ? Center(
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Text(_error!, style: theme.textTheme.bodyLarge),
-                      const SizedBox(height: 16),
-                      FilledButton(
-                        onPressed: _fetchPlans,
-                        child: Text(appLocale.refresh),
-                      ),
-                    ],
-                  ),
-                )
-              : _plans.isEmpty
-                  ? Center(child: Text(appLocale.noPlans))
-                  : RefreshIndicator(
-                      onRefresh: _fetchPlans,
-                      child: ListView.builder(
-                        padding: const EdgeInsets.all(16),
-                        itemCount: _plans.length,
-                        itemBuilder: (_, index) => _PlanCard(
-                          plan: _plans[index],
-                          onTap: () => Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (_) => PlanDetailView(plan: _plans[index]),
-                            ),
+    return _loading
+        ? const Center(child: CircularProgressIndicator())
+        : _error != null
+            ? Center(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(_error!, style: theme.textTheme.bodyLarge),
+                    const SizedBox(height: 16),
+                    FilledButton(
+                      onPressed: _fetchPlans,
+                      child: Text(appLocale.refresh),
+                    ),
+                  ],
+                ),
+              )
+            : _plans.isEmpty
+                ? Center(child: Text(appLocale.noPlans))
+                : RefreshIndicator(
+                    onRefresh: _fetchPlans,
+                    child: ListView.builder(
+                      padding: const EdgeInsets.all(16),
+                      itemCount: _plans.length,
+                      itemBuilder: (_, index) => _PlanCard(
+                        plan: _plans[index],
+                        onTap: () => Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => PlanDetailView(plan: _plans[index]),
                           ),
                         ),
                       ),
                     ),
-    );
+                  );
   }
 }
 
