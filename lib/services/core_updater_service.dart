@@ -76,12 +76,11 @@ class CoreUpdaterService {
     try {
       if (!force && !await _shouldCheck()) return null;
 
-      final response = await _dio.get<Map<String, dynamic>>(
+      final response = await _fetchGitHubApiWithMirrors(
         'https://api.github.com/repos/$mihomoCoreRepo/releases/latest',
-        options: Options(responseType: ResponseType.json),
       );
 
-      if (response.statusCode != 200 || response.data == null) return null;
+      if (response == null || response.statusCode != 200 || response.data == null) return null;
       final data = response.data!;
       final remoteTag = data['tag_name'] as String?;
       if (remoteTag == null) return null;
@@ -236,6 +235,21 @@ class CoreUpdaterService {
     } finally {
       if (await tempFile.exists()) await tempFile.delete();
     }
+  }
+
+  Future<Response<Map<String, dynamic>>?> _fetchGitHubApiWithMirrors(
+    String apiUrl,
+  ) async {
+    for (final prefix in apiMirrorPrefixes) {
+      try {
+        final url = '$prefix$apiUrl';
+        return await _dio.get<Map<String, dynamic>>(
+          url,
+          options: Options(responseType: ResponseType.json),
+        );
+      } catch (_) {}
+    }
+    return null;
   }
 
   Future<String?> _resolveAssetName() async {

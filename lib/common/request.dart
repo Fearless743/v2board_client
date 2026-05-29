@@ -97,13 +97,19 @@ class Request {
   }
 
   Future<Map<String, dynamic>?> checkForUpdate() async {
-    final response = await _dio.get(
-      "https://api.github.com/repos/$repository/releases/latest",
-      options: Options(
-        responseType: ResponseType.json,
-      ),
-    );
-    if (response.statusCode != 200) return null;
+    Response? response;
+    for (final prefix in apiMirrorPrefixes) {
+      try {
+        response = await _dio.get(
+          "${prefix}https://api.github.com/repos/$repository/releases/latest",
+          options: Options(
+            responseType: ResponseType.json,
+          ),
+        );
+        break;
+      } catch (_) {}
+    }
+    if (response == null || response.statusCode != 200) return null;
     final data = response.data as Map<String, dynamic>;
     final remoteVersion = data['tag_name'];
     final version = globalState.packageInfo.version;
