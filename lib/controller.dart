@@ -1296,6 +1296,35 @@ class AppController {
     return profile;
   }
 
+  Future<bool> _clearV2BoardSession() async {
+    await V2BoardSessionStore.clear();
+    await savePreferences();
+    return false;
+  }
+
+  Future<bool> checkV2BoardLogin({
+    bool clearSessionOnInvalid = true,
+    bool silent = true,
+  }) async {
+    final session = await V2BoardSessionStore.load();
+    if (session == null) return false;
+    try {
+      final result = await V2BoardClient(
+        baseUrl: session.baseUrl,
+        token: session.token,
+      ).checkLogin();
+      if (result.isLogin) return true;
+      if (clearSessionOnInvalid) {
+        return _clearV2BoardSession();
+      }
+      return false;
+    } catch (e) {
+      commonPrint.log('Check V2Board Login Failed: $e');
+      if (!silent) rethrow;
+      return false;
+    }
+  }
+
   Future<void> loginAndImportV2Board({
     required String baseUrl,
     required String email,
@@ -1306,6 +1335,10 @@ class AppController {
       password: password,
     );
     final client = V2BoardClient(baseUrl: baseUrl, token: token);
+    final loginStatus = await client.checkLogin();
+    if (!loginStatus.isLogin) {
+      throw const V2BoardException('V2Board 登录状态验证失败，请重新登录。');
+    }
     final userInfo = await client.getSubscribe();
     final subscriptionUrl = await client.subscriptionUrl(userInfo);
     final session = V2BoardSession(
@@ -1331,6 +1364,11 @@ class AppController {
         baseUrl: session.baseUrl,
         token: session.token,
       );
+      final loginStatus = await client.checkLogin();
+      if (!loginStatus.isLogin) {
+        await _clearV2BoardSession();
+        return false;
+      }
       final userInfo = await client.getSubscribe();
       final subscriptionUrl = await client.subscriptionUrl(userInfo);
       await _importV2BoardProfile(

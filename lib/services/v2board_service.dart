@@ -100,11 +100,13 @@ class V2BoardSessionStore {
 class V2BoardApiConfig {
   const V2BoardApiConfig({
     this.loginPath = '/api/v1/passport/auth/login',
+    this.checkLoginPath = '/api/v1/user/checkLogin',
     this.getSubscribePath = '/api/v1/user/getSubscribe',
     this.subscribePath = '/api/v1/client/subscribe',
   });
 
   final String loginPath;
+  final String checkLoginPath;
   final String getSubscribePath;
   final String subscribePath;
 
@@ -114,6 +116,16 @@ class V2BoardApiConfig {
     }
     return '$baseUrl$path';
   }
+}
+
+class V2BoardCheckLoginResult {
+  const V2BoardCheckLoginResult({
+    required this.isLogin,
+    this.isAdmin = false,
+  });
+
+  final bool isLogin;
+  final bool isAdmin;
 }
 
 class V2BoardUserInfo {
@@ -244,6 +256,39 @@ class V2BoardClient {
     }
   }
 
+  Future<V2BoardCheckLoginResult> checkLogin() async {
+    if (_token.isEmpty) {
+      return const V2BoardCheckLoginResult(isLogin: false);
+    }
+    try {
+      final response = await _dio.get<Map<String, dynamic>>(
+        _apiConfig.endpoint(baseUrl, _apiConfig.checkLoginPath),
+        options: Options(
+          responseType: ResponseType.json,
+          headers: {
+            HttpHeaders.authorizationHeader: 'Bearer $_token',
+          },
+          validateStatus: (status) => status != null && status < 500,
+        ),
+      );
+      if (_isUnauthorized(response)) {
+        return const V2BoardCheckLoginResult(isLogin: false);
+      }
+      final data = _unwrap(response.data);
+      if (!data.containsKey('is_login')) {
+        throw const V2BoardException('V2Board checkLogin 返回格式不正确。');
+      }
+      return V2BoardCheckLoginResult(
+        isLogin: _readBool(data['is_login']),
+        isAdmin: _readBool(data['is_admin']),
+      );
+    } on DioException catch (e) {
+      throw V2BoardException(
+        _formatDioError(e, action: '检查 V2Board 登录状态失败'),
+      );
+    }
+  }
+
   Future<V2BoardUserInfo> getSubscribe() async {
     try {
       final response = await _getWithAuthFallback(_apiConfig.getSubscribePath);
@@ -320,6 +365,17 @@ class V2BoardClient {
     return text.contains('未登录') ||
         text.contains('过期') ||
         text.contains('unauth');
+  }
+
+  static bool _readBool(dynamic value) {
+    if (value is bool) {
+      return value;
+    }
+    if (value is num) {
+      return value != 0;
+    }
+    final text = value?.toString().toLowerCase().trim();
+    return text == 'true' || text == '1' || text == 'yes';
   }
 
   static Map<String, dynamic> _unwrap(Map<String, dynamic>? body) {

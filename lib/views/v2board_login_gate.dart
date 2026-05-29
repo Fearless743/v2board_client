@@ -1,7 +1,6 @@
 import 'package:flclashx/common/common.dart';
 import 'package:flclashx/services/v2board_service.dart';
 import 'package:flclashx/state.dart';
-import 'package:flclashx/widgets/widgets.dart';
 import 'package:flutter/material.dart';
 
 class V2BoardLoginGate extends StatefulWidget {
@@ -31,14 +30,37 @@ class _V2BoardLoginGateState extends State<V2BoardLoginGate> {
 
   Future<void> _loadSession() async {
     final session = await V2BoardSessionStore.load();
-    if (!mounted) return;
-    setState(() {
-      loggedIn = session != null;
-      loading = false;
-      error = globalState.v2boardBaseUrl.isEmpty
-          ? '未配置 V2Board 面板地址，请在启动参数中设置 V2BOARD_BASE_URL。'
-          : null;
-    });
+    if (session == null) {
+      if (!mounted) return;
+      setState(() {
+        loggedIn = false;
+        loading = false;
+        error = globalState.v2boardBaseUrl.isEmpty
+            ? '未配置 V2Board 面板地址，请在启动参数中设置 V2BOARD_BASE_URL。'
+            : null;
+      });
+      return;
+    }
+
+    try {
+      final isLoggedIn = await globalState.appController.checkV2BoardLogin(
+        clearSessionOnInvalid: true,
+        silent: false,
+      );
+      if (!mounted) return;
+      setState(() {
+        loggedIn = isLoggedIn;
+        loading = false;
+        error = isLoggedIn ? null : '登录已失效，请重新登录。';
+      });
+    } catch (e) {
+      if (!mounted) return;
+      setState(() {
+        loggedIn = false;
+        loading = false;
+        error = e.toString();
+      });
+    }
   }
 
   Future<void> _login() async {
@@ -133,7 +155,8 @@ class _V2BoardLoginGateState extends State<V2BoardLoginGate> {
                     const SizedBox(height: 12),
                     Text(
                       error!,
-                      style: TextStyle(color: Theme.of(context).colorScheme.error),
+                      style:
+                          TextStyle(color: Theme.of(context).colorScheme.error),
                     ),
                   ],
                   const SizedBox(height: 24),
