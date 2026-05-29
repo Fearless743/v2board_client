@@ -1,11 +1,13 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
+import 'dart:math';
 
 import 'package:flclashx/clash/interface.dart';
 import 'package:flclashx/common/common.dart';
 import 'package:flclashx/models/core.dart';
 import 'package:flclashx/state.dart';
+import 'package:path/path.dart' as p;
 
 class ClashService extends ClashHandlerInterface {
   factory ClashService() {
@@ -27,11 +29,21 @@ class ClashService extends ClashHandlerInterface {
 
   Process? process;
 
+  String _socketPath = '';
+
   Future<void> _initServer() async {
     runZonedGuarded(() async {
+      if (!Platform.isWindows) {
+        final tempDir = await appPath.tempPath;
+        _socketPath = p.join(
+          tempDir,
+          'FlClashXSocket_${Random().nextInt(10000)}.sock',
+        );
+      }
+
       final address = !Platform.isWindows
           ? InternetAddress(
-              unixSocketPath,
+              _socketPath,
               type: InternetAddressType.unix,
             )
           : InternetAddress(
@@ -66,7 +78,6 @@ class ClashService extends ClashHandlerInterface {
       commonPrint.log(error.toString());
       if (error is SocketException) {
         globalState.showNotifier(error.toString());
-        // globalState.appController.restartCore();
       }
     });
   }
@@ -135,8 +146,8 @@ class ClashService extends ClashHandlerInterface {
   }
 
   Future<void> _deleteSocketFile() async {
-    if (!Platform.isWindows) {
-      final file = File(unixSocketPath);
+    if (!Platform.isWindows && _socketPath.isNotEmpty) {
+      final file = File(_socketPath);
       if (await file.exists()) {
         await file.delete();
       }
