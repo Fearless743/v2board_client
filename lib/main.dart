@@ -114,10 +114,7 @@ Future<void> _service(List<String> flags) async {
                 data: json.encode(updateParams),
               ),
             );
-            final handler = clashLibHandler;
-            if (handler != null) {
-              unawaited(handler.invokeAction(actionJson));
-            }
+            unawaited(clashLibHandler.invokeAction(actionJson));
           } catch (e) {
             debugPrint("onChangeMode: live updateConfig error: $e");
           }

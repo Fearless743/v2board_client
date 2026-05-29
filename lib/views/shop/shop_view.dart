@@ -1,7 +1,6 @@
 import 'package:flclashx/l10n/l10n.dart';
 import 'package:flclashx/models/shop.dart';
 import 'package:flclashx/services/v2board_service.dart';
-import 'package:flclashx/state.dart';
 import 'package:flclashx/views/shop/plan_detail_view.dart';
 import 'package:flclashx/widgets/widgets.dart';
 import 'package:flutter/material.dart';

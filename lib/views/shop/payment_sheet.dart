@@ -3,7 +3,6 @@ import 'dart:async';
 import 'package:flclashx/l10n/l10n.dart';
 import 'package:flclashx/models/shop.dart';
 import 'package:flclashx/services/v2board_service.dart';
-import 'package:flclashx/state.dart';
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 
