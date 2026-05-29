@@ -1,5 +1,6 @@
 import 'package:flclashx/common/common.dart';
 import 'package:flclashx/enum/enum.dart';
+import 'package:flclashx/providers/app.dart';
 import 'package:flclashx/providers/state.dart';
 import 'package:flclashx/state.dart';
 import 'package:flclashx/widgets/widgets.dart';
@@ -12,14 +13,21 @@ class ProxySelectorWidget extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final groups = ref.watch(currentGroupsStateProvider).value;
-    if (groups.isEmpty) {
-      return const SizedBox.shrink();
-    }
+    if (groups.isEmpty) return const SizedBox.shrink();
 
     final mainGroup = groups.first;
-    final proxyName = ref
+    final selectedName = ref
         .watch(getSelectedProxyNameProvider(mainGroup.name))
         .getSafeValue("");
+
+    if (selectedName.isEmpty) return const SizedBox.shrink();
+
+    final allGroups = ref.watch(groupsProvider);
+    final subGroup = allGroups.where((g) => g.name == selectedName).firstOrNull;
+
+    final displayText = subGroup != null
+        ? "$selectedName / ${ref.watch(getSelectedProxyNameProvider(subGroup.name)).getSafeValue("-")}"
+        : selectedName;
 
     return CommonCard(
       onPressed: () {
@@ -32,7 +40,7 @@ class ProxySelectorWidget extends ConsumerWidget {
       child: Container(
         padding: baseInfoEdgeInsets.copyWith(top: 4, bottom: 8),
         child: EmojiText(
-          proxyName.isEmpty ? "-" : proxyName,
+          displayText,
           maxLines: 1,
           overflow: TextOverflow.ellipsis,
           style: context.textTheme.bodyMedium,
