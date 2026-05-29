@@ -2,7 +2,6 @@
 
 import 'dart:io';
 
-import 'package:flclashx/views/dashboard/widgets/metainfo_widget.dart';
 import 'package:flclashx/views/dashboard/widgets/widgets.dart';
 import 'package:flclashx/widgets/widgets.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
@@ -277,12 +276,6 @@ enum DashboardWidget {
     GridItem(
       crossAxisCellCount: 8,
       child: OutboundModeV2(),
-    ),
-  ),
-  metainfo(
-    GridItem(
-      crossAxisCellCount: 8,
-      child: MetainfoWidget(),
     ),
   ),
   tunButton(

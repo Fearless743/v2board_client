@@ -41,7 +41,7 @@ const defaultThemeProps = ThemeProps(
 );
 
 const List<DashboardWidget> defaultDashboardWidgets = [
-  DashboardWidget.metainfo,
+  DashboardWidget.networkSpeed,
   DashboardWidget.outboundModeV2,
 ];
 
