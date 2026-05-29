@@ -4,6 +4,8 @@ import 'package:flclashx/services/v2board_service.dart';
 import 'package:flclashx/state.dart';
 import 'package:flclashx/views/shop/payment_sheet.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_markdown/flutter_markdown.dart';
+import 'package:flutter_widget_from_html_core/flutter_widget_from_html_core.dart';
 
 class PlanDetailView extends StatefulWidget {
   const PlanDetailView({super.key, required this.plan});
@@ -193,7 +195,7 @@ class _PlanDetailViewState extends State<PlanDetailView> {
                   ),
                   if (plan.content != null && plan.content!.isNotEmpty) ...[
                     const Divider(height: 24),
-                    Text(plan.content!, style: theme.textTheme.bodyMedium),
+                    _PlanContent(content: plan.content!),
                   ],
                 ],
               ),
@@ -372,5 +374,47 @@ class _PriceRow extends StatelessWidget {
         ],
       ),
     );
+  }
+}
+
+class _PlanContent extends StatelessWidget {
+  const _PlanContent({required this.content});
+
+  final String content;
+
+  static final _htmlTagPattern = RegExp(r'<[a-zA-Z][^>]*>');
+
+  bool get _isHtml => _htmlTagPattern.hasMatch(content);
+
+  bool get _isMarkdown =>
+      !_isHtml &&
+      (content.contains(RegExp(r'^#{1,6}\s', multiLine: true)) ||
+          content.contains(RegExp(r'^\s*[-*+]\s', multiLine: true)) ||
+          content.contains(RegExp(r'\[.+\]\(.+\)')) ||
+          content.contains(RegExp(r'^\s*>\s', multiLine: true)) ||
+          content.contains(RegExp(r'```')));
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
+    if (_isHtml) {
+      return HtmlWidget(
+        content,
+        textStyle: theme.textTheme.bodyMedium,
+      );
+    }
+
+    if (_isMarkdown) {
+      return MarkdownBody(
+        data: content,
+        styleSheet: MarkdownStyleSheet.fromTheme(theme).copyWith(
+          p: theme.textTheme.bodyMedium,
+        ),
+        shrinkWrap: true,
+      );
+    }
+
+    return Text(content, style: theme.textTheme.bodyMedium);
   }
 }
