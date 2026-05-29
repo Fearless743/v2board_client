@@ -14,7 +14,7 @@ on:
         required: false
 
 env:
-  CORE_REPO: pluralplay/mihomo-core
+  CORE_REPO: Fearless743/v2board_client
   MIHOMO_REPO: MetaCubeX/mihomo
 
 jobs:
