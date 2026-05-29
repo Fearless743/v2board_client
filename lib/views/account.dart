@@ -112,6 +112,7 @@ class _AccountViewState extends ConsumerState<AccountView> {
     final isPerpetual = subscriptionInfo == null || subscriptionInfo.expire == 0;
 
     return generateSection(
+      separated: false,
       items: [
         if (email != null && email.isNotEmpty)
           _InfoRow(label: appLocale.email, value: email),
