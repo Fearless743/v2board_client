@@ -76,16 +76,17 @@ class CoreUpdaterService {
     try {
       if (!force && !await _shouldCheck()) return null;
 
-      final response = await _fetchGitHubApiWithMirrors(
-        'https://api.github.com/repos/$mihomoCoreRepo/releases/latest',
-      );
+      final repoUrl = 'https://github.com/$mihomoCoreRepo';
 
-      if (response == null || response.statusCode != 200 || response.data == null) return null;
-      final data = response.data!;
-      final remoteTag = data['tag_name'] as String?;
+      // Try GitHub API first (direct + mirrors), fall back to HTML parsing
+      // when rate-limited (60 req/hr shared across mirror IPs).
+      final apiResult = await _fetchCoreUpdateFromApi(repoUrl);
+      final htmlResult =
+          apiResult == null ? await _fetchCoreUpdateFromHtml(repoUrl) : null;
+
+      final remoteTag = apiResult?.$1 ?? htmlResult?.$1;
       if (remoteTag == null) return null;
 
-      // Tag format: "core-v1.19.25" → extract version
       final remoteVersion =
           remoteTag.replaceFirst('core-v', '').replaceFirst('core-', '');
       final installedVersion = await getInstalledCoreVersion();
@@ -96,33 +97,128 @@ class CoreUpdaterService {
       await _markChecked();
       if (!hasUpdate) return null;
 
-      final assets = data['assets'] as List<dynamic>?;
-      if (assets == null || assets.isEmpty) return null;
-
+      // Try API assets first, then HTML expanded_assets
       final globPattern = await _resolveAssetName();
       if (globPattern == null) return null;
 
-      final matchedName = matchAsset(assets, globPattern);
-      if (matchedName == null) return null;
+      String? matchedName;
+      String? downloadUrl;
+      int fileSize = 0;
 
-      Map<String, dynamic>? matchedAsset;
-      for (final asset in assets) {
-        if ((asset as Map<String, dynamic>)['name'] == matchedName) {
-          matchedAsset = asset;
-          break;
+      final apiAssets = apiResult?.$2;
+      if (apiAssets != null && apiAssets.isNotEmpty) {
+        matchedName = matchAsset(apiAssets, globPattern);
+        if (matchedName != null) {
+          for (final asset in apiAssets) {
+            if ((asset as Map<String, dynamic>)['name'] == matchedName) {
+              downloadUrl =
+                  asset['browser_download_url'] as String?;
+              fileSize = asset['size'] as int? ?? 0;
+              break;
+            }
+          }
         }
       }
-      if (matchedAsset == null) return null;
+
+      if (downloadUrl == null) {
+        final htmlAssets = htmlResult?.$2;
+        if (htmlAssets != null && htmlAssets.isNotEmpty) {
+          matchedName = matchAsset(htmlAssets, globPattern);
+          if (matchedName != null) {
+            downloadUrl =
+                'https://github.com/$mihomoCoreRepo/releases/download/$remoteTag/$matchedName';
+          }
+        }
+      }
+
+      if (matchedName == null || downloadUrl == null) return null;
 
       return CoreUpdateInfo(
         tagName: 'v$remoteVersion',
-        downloadUrl: matchedAsset['browser_download_url'] as String,
+        downloadUrl: downloadUrl,
         fileName: matchedName,
-        fileSize: matchedAsset['size'] as int? ?? 0,
+        fileSize: fileSize,
         isSoGz: matchedName.endsWith('.so.gz'),
       );
     } catch (e) {
       commonPrint.log('Core update check failed: $e');
+      return null;
+    }
+  }
+
+  Future<(String, List<dynamic>)?> _fetchCoreUpdateFromApi(
+    String repoUrl,
+  ) async {
+    try {
+      final apiUrl =
+          'https://api.github.com/repos/$mihomoCoreRepo/releases/latest';
+      final response = await _fetchGitHubApiWithMirrors(apiUrl);
+      if (response?.statusCode != 200 || response?.data == null) return null;
+      final data = response!.data!;
+      final tag = data['tag_name'] as String?;
+      if (tag == null) return null;
+      final assets = data['assets'] as List<dynamic>? ?? [];
+      return (tag, assets);
+    } catch (_) {
+      return null;
+    }
+  }
+
+  Future<(String, List<dynamic>)?> _fetchCoreUpdateFromHtml(
+    String repoUrl,
+  ) async {
+    try {
+      final tag = await _fetchLatestTagFromHtml(repoUrl);
+      if (tag == null) return null;
+      final assets = await _fetchAssetsFromHtml(repoUrl, tag);
+      return (tag, assets ?? <dynamic>[]);
+    } catch (_) {
+      return null;
+    }
+  }
+
+  Future<String?> _fetchLatestTagFromHtml(String repoUrl) async {
+    try {
+      final response = await _dio.get<String>(
+        '$repoUrl/releases/latest',
+        options: Options(responseType: ResponseType.plain),
+      );
+      final html = response.data;
+      if (html == null) return null;
+      // href="/{owner}/{repo}/releases/tag/{tag}" — skip "/releases/tag/*name"
+      final matches = RegExp(r'/releases/tag/([^"]+)').allMatches(html);
+      for (final m in matches) {
+        final tag = m.group(1)!;
+        if (tag != '*name') return tag;
+      }
+      return null;
+    } catch (_) {
+      return null;
+    }
+  }
+
+  Future<List<Map<String, dynamic>>?> _fetchAssetsFromHtml(
+    String repoUrl,
+    String tag,
+  ) async {
+    try {
+      final response = await _dio.get<String>(
+        '$repoUrl/releases/expanded_assets/$tag',
+        options: Options(responseType: ResponseType.plain),
+      );
+      final html = response.data;
+      if (html == null) return null;
+      final matches = RegExp(r'href="([^"]*releases/download/[^"]*)"')
+          .allMatches(html);
+      return matches.map((m) {
+        final href = m.group(1)!;
+        final name = href.split('/').last;
+        return <String, dynamic>{
+          'name': name,
+          'browser_download_url': 'https://github.com$href',
+        };
+      }).toList();
+    } catch (_) {
       return null;
     }
   }

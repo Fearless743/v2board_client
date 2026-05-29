@@ -97,14 +97,18 @@ class Request {
   }
 
   Future<Map<String, dynamic>?> checkForUpdate() async {
+    final data = await _checkUpdateViaApi();
+    if (data != null) return data;
+    return await _checkUpdateViaHtml();
+  }
+
+  Future<Map<String, dynamic>?> _checkUpdateViaApi() async {
     Response? response;
     for (final prefix in apiMirrorPrefixes) {
       try {
         response = await _dio.get(
           "${prefix}https://api.github.com/repos/$repository/releases/latest",
-          options: Options(
-            responseType: ResponseType.json,
-          ),
+          options: Options(responseType: ResponseType.json),
         );
         break;
       } catch (_) {}
@@ -115,8 +119,34 @@ class Request {
     final version = globalState.packageInfo.version;
     final hasUpdate =
         utils.compareVersions(remoteVersion.replaceAll('v', ''), version) > 0;
-    if (!hasUpdate) return null;
-    return data;
+    return hasUpdate ? data : null;
+  }
+
+  Future<Map<String, dynamic>?> _checkUpdateViaHtml() async {
+    try {
+      final response = await _dio.get<String>(
+        "https://github.com/$repository/releases/latest",
+        options: Options(responseType: ResponseType.plain),
+      );
+      final html = response.data;
+      if (html == null) return null;
+      final matches = RegExp(r'/releases/tag/([^"]+)').allMatches(html);
+      String? tag;
+      for (final m in matches) {
+        final t = m.group(1)!;
+        if (t != '*name') {
+          tag = t;
+          break;
+        }
+      }
+      if (tag == null) return null;
+      final remoteVersion = tag.replaceAll('v', '');
+      final version = globalState.packageInfo.version;
+      if (utils.compareVersions(remoteVersion, version) <= 0) return null;
+      return {'tag_name': tag, 'body': ''};
+    } catch (_) {
+      return null;
+    }
   }
 
   final Map<String, IpInfo Function(Map<String, dynamic>)> _ipInfoSources = {
