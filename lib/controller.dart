@@ -6,6 +6,8 @@ import 'dart:isolate';
 import 'package:archive/archive.dart';
 import 'package:flclashx/clash/clash.dart';
 import 'package:flclashx/common/archive.dart';
+import 'package:flclashx/core_version.dart';
+import 'package:flclashx/services/core_updater_service.dart';
 import 'package:flclashx/services/subscription_notification_service.dart';
 import 'package:flclashx/services/v2board_service.dart';
 import 'package:flclashx/enum/enum.dart';
@@ -133,7 +135,13 @@ class AppController {
 
   Future<void> restartCore() async {
     commonPrint.log("restart core");
-    await clashService?.reStart();
+    // On Android with downloaded core, the clashInterface is a ClashService
+    // instance managed by ClashCore. On desktop, clashService is the global one.
+    if (clashService != null) {
+      await clashService!.reStart();
+    } else if (clashCore.useProcessMode) {
+      await (clashCore.clashInterface as ClashService).reStart();
+    }
     await _initCore();
     if (_ref.read(runTimeProvider.notifier).isStart) {
       await globalState.handleStart();
@@ -1161,6 +1169,9 @@ class AppController {
   }
 
   Future<void> _initCore() async {
+    // On Android, switch to process mode if a downloaded core binary exists
+    await clashCore.switchToProcessModeIfNeeded();
+
     final isInit = await clashCore.isInit;
     if (!isInit) {
       await clashCore.init();
@@ -1176,6 +1187,13 @@ class AppController {
       commonPrint.log(details.stack.toString());
     };
     updateTray(true);
+
+    // Update core version from downloaded core if available
+    final downloadedVersion = await coreUpdater.getInstalledCoreVersion();
+    if (downloadedVersion != kCoreVersionFromSource) {
+      globalState.coreVersion = downloadedVersion;
+    }
+
     await _initCore();
     await syncV2BoardProfile(silent: true);
     await _initStatus();

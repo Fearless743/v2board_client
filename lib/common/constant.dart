@@ -100,6 +100,17 @@ const defaultPrimaryColors = [
   0XFF665390,
 ];
 
+const mihomoRepo = "MetaCubeX/mihomo";
+const mihomoGitHubApiUrl =
+    "https://api.github.com/repos/$mihomoRepo/releases/latest";
+const mihomoMirrorPrefixes = [
+  '', // direct GitHub
+  'https://mirror.ghproxy.com/',
+  'https://gh-proxy.com/',
+  'https://ghfast.top/',
+];
+const coreCheckIntervalHours = 24;
+
 const scriptTemplate = """
 const main = (config) => {
   return config;

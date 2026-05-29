@@ -6,7 +6,6 @@ import 'package:path/path.dart';
 import 'package:path_provider/path_provider.dart';
 
 class AppPath {
-
   factory AppPath() {
     _instance ??= AppPath._internal();
     return _instance!;
@@ -47,7 +46,8 @@ class AppPath {
     return join(executableDirPath, "FlClashCore$executableExtension");
   }
 
-  String get helperPath => join(executableDirPath, "$appHelperService$executableExtension");
+  String get helperPath =>
+      join(executableDirPath, "$appHelperService$executableExtension");
 
   Future<String> get downloadDirPath async {
     final directory = await downloadDir.future;
@@ -106,6 +106,23 @@ class AppPath {
   Future<String> get tempPath async {
     final directory = await tempDir.future;
     return directory.path;
+  }
+
+  Future<String> get coresDirPath async {
+    final directory = await dataDir.future;
+    return join(directory.path, "cores");
+  }
+
+  Future<String> get downloadedCorePath async {
+    if (Platform.isAndroid) {
+      return join(await coresDirPath, "mihomo");
+    }
+    return corePath;
+  }
+
+  Future<bool> get hasDownloadedCore async {
+    final path = await downloadedCorePath;
+    return File(path).exists();
   }
 }
 

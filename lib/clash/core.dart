@@ -13,7 +13,6 @@ import 'package:flutter/services.dart';
 import 'package:path/path.dart';
 
 class ClashCore {
-
   factory ClashCore() {
     _instance ??= ClashCore._internal();
     return _instance!;
@@ -28,8 +27,21 @@ class ClashCore {
   }
   static ClashCore? _instance;
   late ClashHandlerInterface clashInterface;
+  bool useProcessMode = false;
 
   Future<bool> preload() => clashInterface.preload();
+
+  /// Switch to process mode (subprocess) when a downloaded core binary exists.
+  /// Must be called before init() when the downloaded binary may be available.
+  Future<void> switchToProcessModeIfNeeded() async {
+    if (!Platform.isAndroid) return;
+    final hasDownloaded = await appPath.hasDownloadedCore;
+    if (hasDownloaded && !useProcessMode) {
+      useProcessMode = true;
+      final service = ClashService();
+      clashInterface = service;
+    }
+  }
 
   static Future<void> initGeo() async {
     final homePath = await appPath.homeDirPath;
@@ -86,11 +98,14 @@ class ClashCore {
 
   FutureOr<bool> get isInit => clashInterface.isInit;
 
-  FutureOr<String> validateConfig(String data) => clashInterface.validateConfig(data);
+  FutureOr<String> validateConfig(String data) =>
+      clashInterface.validateConfig(data);
 
-  Future<String> updateConfig(UpdateParams updateParams) => clashInterface.updateConfig(updateParams);
+  Future<String> updateConfig(UpdateParams updateParams) =>
+      clashInterface.updateConfig(updateParams);
 
-  Future<String> setupConfig(SetupParams setupParams) => clashInterface.setupConfig(setupParams);
+  Future<String> setupConfig(SetupParams setupParams) =>
+      clashInterface.setupConfig(setupParams);
 
   Future<List<Group>> getProxiesGroups() async {
     final proxies = await clashInterface.getProxies();
@@ -119,7 +134,8 @@ class ClashCore {
         .toList();
   }
 
-  FutureOr<String> changeProxy(ChangeProxyParams changeProxyParams) async => await clashInterface.changeProxy(changeProxyParams);
+  FutureOr<String> changeProxy(ChangeProxyParams changeProxyParams) async =>
+      await clashInterface.changeProxy(changeProxyParams);
 
   Future<List<Connection>> getConnections() async {
     final res = await clashInterface.getConnections();
@@ -172,17 +188,20 @@ class ClashCore {
     return ExternalProvider.fromJson(json.decode(externalProvidersRawString));
   }
 
-  Future<String> updateGeoData(UpdateGeoDataParams params) => clashInterface.updateGeoData(params);
+  Future<String> updateGeoData(UpdateGeoDataParams params) =>
+      clashInterface.updateGeoData(params);
 
   Future<String> sideLoadExternalProvider({
     required String providerName,
     required String data,
-  }) => clashInterface.sideLoadExternalProvider(
-        providerName: providerName, data: data);
+  }) =>
+      clashInterface.sideLoadExternalProvider(
+          providerName: providerName, data: data);
 
   Future<String> updateExternalProvider({
     required String providerName,
-  }) async => clashInterface.updateExternalProvider(providerName);
+  }) async =>
+      clashInterface.updateExternalProvider(providerName);
 
   Future<void> startListener() async {
     await clashInterface.startListener();

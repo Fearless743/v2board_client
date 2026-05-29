@@ -8,7 +8,6 @@ import 'package:flclashx/models/core.dart';
 import 'package:flclashx/state.dart';
 
 class ClashService extends ClashHandlerInterface {
-
   factory ClashService() {
     _instance ??= ClashService._internal();
     return _instance!;
@@ -92,15 +91,20 @@ class ClashService extends ClashHandlerInterface {
         return;
       }
     }
-    
+
     final homeDirPath = await appPath.homeDirPath;
     final environment = Map<String, String>.from(Platform.environment);
     // Set SAFE_PATHS to prevent "path is not subpath of home directory" errors
     // This ensures the core can access provider files before SetHomeDir is called
     environment['SAFE_PATHS'] = homeDirPath;
-    
+
+    // Use downloaded core path if available, otherwise fall back to default
+    final hasDownloaded = await appPath.hasDownloadedCore;
+    final executablePath =
+        hasDownloaded ? await appPath.downloadedCorePath : appPath.corePath;
+
     process = await Process.start(
-      appPath.corePath,
+      executablePath,
       [
         arg,
       ],
