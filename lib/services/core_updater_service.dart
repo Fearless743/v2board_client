@@ -6,7 +6,7 @@ import 'package:device_info_plus/device_info_plus.dart';
 import 'package:dio/dio.dart';
 import 'package:flclashx/common/common.dart';
 import 'package:flclashx/core_version.dart';
-
+import 'package:flutter/services.dart';
 import 'package:path/path.dart' as p;
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -224,6 +224,8 @@ class CoreUpdaterService {
     await tempFile.rename(targetPath);
   }
 
+  static const _channel = MethodChannel('com.follow.clashx/core_updater');
+
   Future<void> _installAndroid(List<int> binaryBytes) async {
     final coresDir = await appPath.coresDirPath;
     final coresDirectory = Directory(coresDir);
@@ -232,11 +234,29 @@ class CoreUpdaterService {
     }
 
     final targetPath = p.join(coresDir, 'mihomo');
-    final targetFile = File(targetPath);
-    await targetFile.writeAsBytes(binaryBytes, flush: true);
 
-    // Set executable permission
-    await Process.run('chmod', ['+x', targetPath]);
+    // Write to temp file first
+    final tempDirPath = await appPath.tempPath;
+    final tempPath = p.join(tempDirPath, 'mihomo_download.tmp');
+    final tempFile = File(tempPath);
+    await tempFile.writeAsBytes(binaryBytes, flush: true);
+
+    // Use Kotlin to copy and set executable permission
+    // (Java File API handles permissions more reliably on Android)
+    try {
+      await _channel.invokeMethod('installCoreBinary', {
+        'srcPath': tempPath,
+        'destPath': targetPath,
+      });
+    } on MissingPluginException {
+      // Fallback for when channel isn't available (e.g., unit tests)
+      final targetFile = File(targetPath);
+      if (await targetFile.exists()) await targetFile.delete();
+      await tempFile.copy(targetPath);
+      await Process.run('chmod', ['755', targetPath]);
+    } finally {
+      if (await tempFile.exists()) await tempFile.delete();
+    }
   }
 
   Future<String?> _resolveAssetName() async {

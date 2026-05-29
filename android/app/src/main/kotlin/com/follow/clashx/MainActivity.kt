@@ -63,6 +63,47 @@ class MainActivity : FlutterActivity() {
                     result.notImplemented()
                 }
             }
+
+        // Platform Channel for core binary installation
+        MethodChannel(flutterEngine.dartExecutor.binaryMessenger, "com.follow.clashx/core_updater")
+            .setMethodCallHandler { call, result ->
+                when (call.method) {
+                    "installCoreBinary" -> {
+                        try {
+                            val srcPath = call.argument<String>("srcPath")!!
+                            val destPath = call.argument<String>("destPath")!!
+                            val srcFile = java.io.File(srcPath)
+                            val destFile = java.io.File(destPath)
+
+                            if (!srcFile.exists()) {
+                                result.error("FILE_NOT_FOUND", "Source file not found: $srcPath", null)
+                                return@setMethodCallHandler
+                            }
+
+                            // Remove old file
+                            if (destFile.exists()) {
+                                destFile.delete()
+                            }
+
+                            // Copy file
+                            srcFile.copyTo(destFile, overwrite = true)
+
+                            // Set executable permission
+                            destFile.setExecutable(true, false)
+
+                            // Verify
+                            if (destFile.exists() && destFile.canExecute()) {
+                                result.success(true)
+                            } else {
+                                result.error("INSTALL_FAILED", "Failed to set executable permission", null)
+                            }
+                        } catch (e: Exception) {
+                            result.error("INSTALL_ERROR", e.message, null)
+                        }
+                    }
+                    else -> result.notImplemented()
+                }
+            }
         
         flutterEngine.plugins.add(AppPlugin())
         flutterEngine.plugins.add(ServicePlugin)
