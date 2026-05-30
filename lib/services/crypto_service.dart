@@ -10,6 +10,9 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 const _prefPublicKey = 'subscribe_encryption_public_key';
 const _prefPrivateKey = 'subscribe_encryption_private_key';
+const _prefKeyCreatedAt = 'subscribe_encryption_key_created_at';
+
+const keyValidityDuration = Duration(days: 30);
 
 class CryptoService {
   static const int _rsaKeyBits = 2048;
@@ -22,8 +25,18 @@ class CryptoService {
 
   static Future<bool> hasKeyPair() async {
     final prefs = await SharedPreferences.getInstance();
-    return prefs.getString(_prefPublicKey) != null &&
-        prefs.getString(_prefPrivateKey) != null;
+    if (prefs.getString(_prefPublicKey) == null ||
+        prefs.getString(_prefPrivateKey) == null) {
+      return false;
+    }
+    final createdAtMs = prefs.getInt(_prefKeyCreatedAt);
+    if (createdAtMs == null) return false;
+    final createdAt = DateTime.fromMillisecondsSinceEpoch(createdAtMs);
+    if (DateTime.now().difference(createdAt) > keyValidityDuration) {
+      await clearKeyPair();
+      return false;
+    }
+    return true;
   }
 
   static Future<String> getPublicKeyBase64() async {
@@ -67,9 +80,19 @@ class CryptoService {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setString(_prefPublicKey, base64.encode(pubBytes));
     await prefs.setString(_prefPrivateKey, base64.encode(privBytes));
+    await prefs.setInt(_prefKeyCreatedAt, DateTime.now().millisecondsSinceEpoch);
 
     _cachedPublicKey = base64.encode(pubBytes);
     _cachedPrivateKey = base64.encode(privBytes);
+  }
+
+  static Future<void> clearKeyPair() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.remove(_prefPublicKey);
+    await prefs.remove(_prefPrivateKey);
+    await prefs.remove(_prefKeyCreatedAt);
+    _cachedPublicKey = null;
+    _cachedPrivateKey = null;
   }
 
   static Uint8List decryptHybrid(

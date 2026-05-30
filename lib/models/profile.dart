@@ -204,6 +204,11 @@ extension ProfileExtension on Profile {
       headers: headers.isNotEmpty ? headers : null,
     );
 
+    if (response.statusCode == 403) {
+      await CryptoService.clearKeyPair();
+      throw Exception("Encryption key rejected by server. Keys have been reset, please retry.");
+    }
+
     final disposition = response.headers.value("content-disposition");
     final userinfo = response.headers.value('subscription-userinfo');
 
