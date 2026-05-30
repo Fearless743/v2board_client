@@ -193,8 +193,11 @@ extension ProfileExtension on Profile {
       if (details.model != null) headers['x-device-model'] = details.model;
     }
 
-    final hasEncryptionKeys = await CryptoService.hasKeyPair();
-    if (hasEncryptionKeys) {
+    if (await CryptoService.hasKeyPair()) {
+      final publicKeyBase64 = await CryptoService.getPublicKeyBase64();
+      headers['x-public-key'] = publicKeyBase64;
+    } else {
+      await CryptoService.generateKeyPair();
       final publicKeyBase64 = await CryptoService.getPublicKeyBase64();
       headers['x-public-key'] = publicKeyBase64;
     }
@@ -216,7 +219,7 @@ extension ProfileExtension on Profile {
     final isResponseEncrypted =
         response.headers.value('x-encrypted') == 'true';
 
-    if (isResponseEncrypted && hasEncryptionKeys) {
+    if (isResponseEncrypted) {
       final publicKey = await CryptoService.getPublicKey();
       plaintextBytes = CryptoService.decryptHybrid(responseData, publicKey);
     } else {
@@ -262,11 +265,9 @@ extension ProfileExtension on Profile {
       autoUpdateDuration: durationFromHeader ?? autoUpdateDuration,
       providerHeaders: providerHeaders,
     ).saveFile(
-      isResponseEncrypted && hasEncryptionKeys ? responseData : plaintextBytes,
-      isEncrypted: isResponseEncrypted && hasEncryptionKeys,
-      plaintextForValidation: isResponseEncrypted && hasEncryptionKeys
-          ? plaintextBytes
-          : null,
+      isResponseEncrypted ? responseData : plaintextBytes,
+      isEncrypted: isResponseEncrypted,
+      plaintextForValidation: isResponseEncrypted ? plaintextBytes : null,
     );
   }
 
