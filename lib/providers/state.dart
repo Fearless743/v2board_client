@@ -1,4 +1,3 @@
-import 'package:dynamic_color/dynamic_color.dart';
 import 'package:flclashx/common/common.dart';
 import 'package:flclashx/enum/enum.dart';
 import 'package:flclashx/models/models.dart';
@@ -591,33 +590,15 @@ ColorScheme genColorScheme(
   Ref ref,
   Brightness brightness, {
   Color? color,
-  bool ignoreConfig = false,
 }) {
-  final vm2 = ref.watch(
-    themeSettingProvider.select(
-      (state) => VM2(
-        a: state.primaryColor,
-        b: state.schemeVariant,
-      ),
-    ),
-  );
-  if (color == null && (ignoreConfig == true || vm2.a == null)) {
-    // if (globalState.corePalette != null) {
-    //   return globalState.corePalette!.toColorScheme(brightness: brightness);
-    // }
-    return ColorScheme.fromSeed(
-      seedColor: globalState.corePalette
-              ?.toColorScheme(brightness: brightness)
-              .primary ??
-          globalState.accentColor,
-      brightness: brightness,
-      dynamicSchemeVariant: vm2.b,
-    );
-  }
+  final seedColor = color ??
+      (globalState.buildPrimaryColor != null
+          ? Color(globalState.buildPrimaryColor!)
+          : globalState.accentColor);
   return ColorScheme.fromSeed(
-    seedColor: color ?? Color(vm2.a!),
+    seedColor: seedColor,
     brightness: brightness,
-    dynamicSchemeVariant: vm2.b,
+    dynamicSchemeVariant: globalState.buildSchemeVariant,
   );
 }
 

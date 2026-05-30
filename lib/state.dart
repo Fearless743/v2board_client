@@ -44,6 +44,8 @@ class GlobalState {
   String v2boardBaseUrl = "";
   String? coreSHA256;
   String? coreVersion;
+  int? buildPrimaryColor;
+  DynamicSchemeVariant buildSchemeVariant = DynamicSchemeVariant.content;
   late PackageInfo packageInfo;
   Function? updateCurrentDelayDebounce;
   late Measure measure;
@@ -88,6 +90,20 @@ class GlobalState {
         coreVersionEnv.isEmpty ? kCoreVersionFromSource : coreVersionEnv;
     isPre = const String.fromEnvironment("APP_ENV") != 'stable';
     v2boardBaseUrl = const String.fromEnvironment("V2BOARD_BASE_URL").trim();
+    final primaryColorEnv = const String.fromEnvironment("PRIMARY_COLOR").trim();
+    if (primaryColorEnv.isNotEmpty) {
+      buildPrimaryColor = int.tryParse(primaryColorEnv.replaceFirst('0x', '').replaceFirst('0X', ''), radix: 16);
+      if (buildPrimaryColor != null && buildPrimaryColor! <= 0xFFFFFF) {
+        buildPrimaryColor = buildPrimaryColor! | 0xFF000000;
+      }
+    }
+    final schemeVariantEnv = const String.fromEnvironment("SCHEME_VARIANT").trim().toLowerCase();
+    if (schemeVariantEnv.isNotEmpty) {
+      buildSchemeVariant = DynamicSchemeVariant.values.firstWhere(
+        (v) => v.name.toLowerCase() == schemeVariantEnv,
+        orElse: () => DynamicSchemeVariant.content,
+      );
+    }
     appState = AppState(
       version: version,
       viewSize: Size.zero,

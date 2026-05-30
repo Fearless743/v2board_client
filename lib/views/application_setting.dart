@@ -362,6 +362,53 @@ class AnimateTabItem extends ConsumerWidget {
   }
 }
 
+class TextScaleItem extends ConsumerWidget {
+  const TextScaleItem({super.key});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final textScale = ref.watch(
+      themeSettingProvider.select((state) => state.textScale),
+    );
+    final percent = "${((textScale.scale * 100) as double).round()}%";
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        ListItem.switchItem(
+          title: Text(appLocalizations.textScale),
+          subtitle: Text(percent),
+          delegate: SwitchDelegate(
+            value: textScale.enable,
+            onChanged: (value) {
+              ref.read(themeSettingProvider.notifier).updateState(
+                    (state) => state.copyWith.textScale(enable: value),
+                  );
+            },
+          ),
+        ),
+        DisabledMask(
+          status: !textScale.enable,
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            child: Slider(
+              min: minTextScale,
+              max: maxTextScale,
+              value: textScale.scale,
+              onChanged: textScale.enable
+                  ? (value) {
+                      ref.read(themeSettingProvider.notifier).updateState(
+                            (state) => state.copyWith.textScale(scale: value),
+                          );
+                    }
+                  : null,
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+}
+
 class OpenLogsItem extends ConsumerWidget {
   const OpenLogsItem({super.key});
 
@@ -441,6 +488,7 @@ class ApplicationSettingView extends StatelessWidget {
         HiddenItem(),
       ],
       AnimateTabItem(),
+      TextScaleItem(),
       OpenLogsItem(),
       CloseConnectionsItem(),
       AutoCheckUpdateItem(),

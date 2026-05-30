@@ -2021,11 +2021,7 @@ ThemeProps _$ThemePropsFromJson(Map<String, dynamic> json) {
 
 /// @nodoc
 mixin _$ThemeProps {
-  int? get primaryColor => throw _privateConstructorUsedError;
-  List<int> get primaryColors => throw _privateConstructorUsedError;
   ThemeMode get themeMode => throw _privateConstructorUsedError;
-  DynamicSchemeVariant get schemeVariant => throw _privateConstructorUsedError;
-  bool get pureBlack => throw _privateConstructorUsedError;
   TextScale get textScale => throw _privateConstructorUsedError;
 
   /// Serializes this ThemeProps to a JSON map.
@@ -2044,13 +2040,7 @@ abstract class $ThemePropsCopyWith<$Res> {
           ThemeProps value, $Res Function(ThemeProps) then) =
       _$ThemePropsCopyWithImpl<$Res, ThemeProps>;
   @useResult
-  $Res call(
-      {int? primaryColor,
-      List<int> primaryColors,
-      ThemeMode themeMode,
-      DynamicSchemeVariant schemeVariant,
-      bool pureBlack,
-      TextScale textScale});
+  $Res call({ThemeMode themeMode, TextScale textScale});
 
   $TextScaleCopyWith<$Res> get textScale;
 }
@@ -2070,34 +2060,14 @@ class _$ThemePropsCopyWithImpl<$Res, $Val extends ThemeProps>
   @pragma('vm:prefer-inline')
   @override
   $Res call({
-    Object? primaryColor = freezed,
-    Object? primaryColors = null,
     Object? themeMode = null,
-    Object? schemeVariant = null,
-    Object? pureBlack = null,
     Object? textScale = null,
   }) {
     return _then(_value.copyWith(
-      primaryColor: freezed == primaryColor
-          ? _value.primaryColor
-          : primaryColor // ignore: cast_nullable_to_non_nullable
-              as int?,
-      primaryColors: null == primaryColors
-          ? _value.primaryColors
-          : primaryColors // ignore: cast_nullable_to_non_nullable
-              as List<int>,
       themeMode: null == themeMode
           ? _value.themeMode
           : themeMode // ignore: cast_nullable_to_non_nullable
               as ThemeMode,
-      schemeVariant: null == schemeVariant
-          ? _value.schemeVariant
-          : schemeVariant // ignore: cast_nullable_to_non_nullable
-              as DynamicSchemeVariant,
-      pureBlack: null == pureBlack
-          ? _value.pureBlack
-          : pureBlack // ignore: cast_nullable_to_non_nullable
-              as bool,
       textScale: null == textScale
           ? _value.textScale
           : textScale // ignore: cast_nullable_to_non_nullable
@@ -2124,13 +2094,7 @@ abstract class _$$ThemePropsImplCopyWith<$Res>
       __$$ThemePropsImplCopyWithImpl<$Res>;
   @override
   @useResult
-  $Res call(
-      {int? primaryColor,
-      List<int> primaryColors,
-      ThemeMode themeMode,
-      DynamicSchemeVariant schemeVariant,
-      bool pureBlack,
-      TextScale textScale});
+  $Res call({ThemeMode themeMode, TextScale textScale});
 
   @override
   $TextScaleCopyWith<$Res> get textScale;
@@ -2149,34 +2113,14 @@ class __$$ThemePropsImplCopyWithImpl<$Res>
   @pragma('vm:prefer-inline')
   @override
   $Res call({
-    Object? primaryColor = freezed,
-    Object? primaryColors = null,
     Object? themeMode = null,
-    Object? schemeVariant = null,
-    Object? pureBlack = null,
     Object? textScale = null,
   }) {
     return _then(_$ThemePropsImpl(
-      primaryColor: freezed == primaryColor
-          ? _value.primaryColor
-          : primaryColor // ignore: cast_nullable_to_non_nullable
-              as int?,
-      primaryColors: null == primaryColors
-          ? _value._primaryColors
-          : primaryColors // ignore: cast_nullable_to_non_nullable
-              as List<int>,
       themeMode: null == themeMode
           ? _value.themeMode
           : themeMode // ignore: cast_nullable_to_non_nullable
               as ThemeMode,
-      schemeVariant: null == schemeVariant
-          ? _value.schemeVariant
-          : schemeVariant // ignore: cast_nullable_to_non_nullable
-              as DynamicSchemeVariant,
-      pureBlack: null == pureBlack
-          ? _value.pureBlack
-          : pureBlack // ignore: cast_nullable_to_non_nullable
-              as bool,
       textScale: null == textScale
           ? _value.textScale
           : textScale // ignore: cast_nullable_to_non_nullable
@@ -2189,44 +2133,22 @@ class __$$ThemePropsImplCopyWithImpl<$Res>
 @JsonSerializable()
 class _$ThemePropsImpl implements _ThemeProps {
   const _$ThemePropsImpl(
-      {this.primaryColor,
-      final List<int> primaryColors = defaultPrimaryColors,
-      this.themeMode = ThemeMode.dark,
-      this.schemeVariant = DynamicSchemeVariant.content,
-      this.pureBlack = false,
-      this.textScale = const TextScale()})
-      : _primaryColors = primaryColors;
+      {this.themeMode = ThemeMode.system,
+      this.textScale = const TextScale()});
 
   factory _$ThemePropsImpl.fromJson(Map<String, dynamic> json) =>
       _$$ThemePropsImplFromJson(json);
-
-  @override
-  final int? primaryColor;
-  final List<int> _primaryColors;
-  @override
-  @JsonKey()
-  List<int> get primaryColors {
-    if (_primaryColors is EqualUnmodifiableListView) return _primaryColors;
-    // ignore: implicit_dynamic_type
-    return EqualUnmodifiableListView(_primaryColors);
-  }
 
   @override
   @JsonKey()
   final ThemeMode themeMode;
   @override
   @JsonKey()
-  final DynamicSchemeVariant schemeVariant;
-  @override
-  @JsonKey()
-  final bool pureBlack;
-  @override
-  @JsonKey()
   final TextScale textScale;
 
   @override
   String toString() {
-    return 'ThemeProps(primaryColor: $primaryColor, primaryColors: $primaryColors, themeMode: $themeMode, schemeVariant: $schemeVariant, pureBlack: $pureBlack, textScale: $textScale)';
+    return 'ThemeProps(themeMode: $themeMode, textScale: $textScale)';
   }
 
   @override
@@ -2234,30 +2156,15 @@ class _$ThemePropsImpl implements _ThemeProps {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
             other is _$ThemePropsImpl &&
-            (identical(other.primaryColor, primaryColor) ||
-                other.primaryColor == primaryColor) &&
-            const DeepCollectionEquality()
-                .equals(other._primaryColors, _primaryColors) &&
             (identical(other.themeMode, themeMode) ||
                 other.themeMode == themeMode) &&
-            (identical(other.schemeVariant, schemeVariant) ||
-                other.schemeVariant == schemeVariant) &&
-            (identical(other.pureBlack, pureBlack) ||
-                other.pureBlack == pureBlack) &&
             (identical(other.textScale, textScale) ||
                 other.textScale == textScale));
   }
 
   @JsonKey(includeFromJson: false, includeToJson: false)
   @override
-  int get hashCode => Object.hash(
-      runtimeType,
-      primaryColor,
-      const DeepCollectionEquality().hash(_primaryColors),
-      themeMode,
-      schemeVariant,
-      pureBlack,
-      textScale);
+  int get hashCode => Object.hash(runtimeType, themeMode, textScale);
 
   /// Create a copy of ThemeProps
   /// with the given fields replaced by the non-null parameter values.
@@ -2277,26 +2184,14 @@ class _$ThemePropsImpl implements _ThemeProps {
 
 abstract class _ThemeProps implements ThemeProps {
   const factory _ThemeProps(
-      {final int? primaryColor,
-      final List<int> primaryColors,
-      final ThemeMode themeMode,
-      final DynamicSchemeVariant schemeVariant,
-      final bool pureBlack,
+      {final ThemeMode themeMode,
       final TextScale textScale}) = _$ThemePropsImpl;
 
   factory _ThemeProps.fromJson(Map<String, dynamic> json) =
       _$ThemePropsImpl.fromJson;
 
   @override
-  int? get primaryColor;
-  @override
-  List<int> get primaryColors;
-  @override
   ThemeMode get themeMode;
-  @override
-  DynamicSchemeVariant get schemeVariant;
-  @override
-  bool get pureBlack;
   @override
   TextScale get textScale;
 

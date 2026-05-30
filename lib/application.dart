@@ -41,7 +41,6 @@ class ApplicationState extends ConsumerState<Application> {
 
   ColorScheme _getAppColorScheme({
     required Brightness brightness,
-    int? primaryColor,
   }) =>
       ref.read(genColorSchemeProvider(brightness));
 
@@ -139,7 +138,6 @@ class ApplicationState extends ConsumerState<Application> {
             builder: (_, ref, child) {
               final locale =
                   ref.watch(appSettingProvider.select((state) => state.locale));
-              final themeProps = ref.watch(themeSettingProvider);
               return MaterialApp(
                 debugShowCheckedModeBanner: false,
                 navigatorKey: globalState.navigatorKey,
@@ -177,15 +175,13 @@ class ApplicationState extends ConsumerState<Application> {
                 title: appName,
                 locale: utils.getLocaleForString(locale),
                 supportedLocales: AppLocalizations.delegate.supportedLocales,
-                themeMode: themeProps.themeMode,
+                themeMode: ThemeMode.system,
                 theme: ThemeData(
                   useMaterial3: true,
                   pageTransitionsTheme: _pageTransitionsTheme,
                   colorScheme: _getAppColorScheme(
                     brightness: Brightness.light,
-                    primaryColor: themeProps.primaryColor,
                   ),
-                  // Reduce animation duration for snappier feel
                   visualDensity: VisualDensity.adaptivePlatformDensity,
                 ),
                 darkTheme: ThemeData(
@@ -193,9 +189,7 @@ class ApplicationState extends ConsumerState<Application> {
                   pageTransitionsTheme: _pageTransitionsTheme,
                   colorScheme: _getAppColorScheme(
                     brightness: Brightness.dark,
-                    primaryColor: themeProps.primaryColor,
-                  ).toPureBlack(themeProps.pureBlack),
-                  // Reduce animation duration for snappier feel
+                  ),
                   visualDensity: VisualDensity.adaptivePlatformDensity,
                 ),
                 home: child,

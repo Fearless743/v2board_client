@@ -36,9 +36,7 @@ const defaultNetworkProps = NetworkProps();
 const defaultProxiesStyle = ProxiesStyle();
 const defaultWindowProps = WindowProps();
 const defaultAccessControl = AccessControl();
-const defaultThemeProps = ThemeProps(
-  primaryColor: defaultPrimaryColor,
-);
+const defaultThemeProps = ThemeProps();
 
 const List<DashboardWidget> defaultDashboardWidgets = [
   DashboardWidget.networkSpeed,
@@ -184,11 +182,7 @@ class TextScale with _$TextScale {
 @freezed
 class ThemeProps with _$ThemeProps {
   const factory ThemeProps({
-    int? primaryColor,
-    @Default(defaultPrimaryColors) List<int> primaryColors,
-    @Default(ThemeMode.dark) ThemeMode themeMode,
-    @Default(DynamicSchemeVariant.content) DynamicSchemeVariant schemeVariant,
-    @Default(false) bool pureBlack,
+    @Default(ThemeMode.system) ThemeMode themeMode,
     @Default(TextScale()) TextScale textScale,
   }) = _ThemeProps;
 

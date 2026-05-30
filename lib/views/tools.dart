@@ -14,7 +14,6 @@ import 'package:intl/intl.dart';
 import 'package:path/path.dart' show dirname, join;
 
 import 'developer.dart';
-import 'theme.dart';
 
 class ToolsView extends ConsumerStatefulWidget {
   const ToolsView({super.key});
@@ -62,7 +61,6 @@ class _ToolboxViewState extends ConsumerState<ToolsView> {
         title: AppLocalizations.of(context).settings,
         items: [
           const _LocaleItem(),
-          const _ThemeItem(),
           if (Platform.isWindows) const _LoopbackItem(),
           if (Platform.isAndroid) const _AccessItem(),
           const _ConfigItem(),
@@ -133,24 +131,6 @@ class _LocaleItem extends ConsumerWidget {
         },
         textBuilder: (locale) => _getLocaleString(context, locale),
         value: currentLocale,
-      ),
-    );
-  }
-}
-
-class _ThemeItem extends StatelessWidget {
-  const _ThemeItem();
-
-  @override
-  Widget build(BuildContext context) {
-    final appLocale = AppLocalizations.of(context);
-    return ListItem.open(
-      leading: const Icon(Icons.style),
-      title: Text(appLocale.theme),
-      subtitle: Text(appLocale.themeDesc),
-      delegate: OpenDelegate(
-        title: appLocale.theme,
-        widget: const ThemeView(),
       ),
     );
   }
