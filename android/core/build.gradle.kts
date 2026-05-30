@@ -11,7 +11,9 @@ val localProperties = Properties().apply {
         localPropertiesFile.inputStream().use { load(it) }
     }
 }
-val appTitle = localProperties.getProperty("app.title", "FlClashX")
+val appTitle = System.getenv("APP_TITLE")
+    ?: localProperties.getProperty("app.title")
+    ?: "FlClashX"
 
 android {
     namespace = "com.follow.clashx.core"

@@ -13,7 +13,9 @@ val localProperties = Properties().apply {
     }
 }
 
-val appTitle = localProperties.getProperty("app.title", "FlClashX")
+val appTitle = System.getenv("APP_TITLE")
+    ?: localProperties.getProperty("app.title")
+    ?: "FlClashX"
 val appId = "com.${appTitle.lowercase()}.clash"
 
 val mStoreFile: File = file("keystore.jks")
