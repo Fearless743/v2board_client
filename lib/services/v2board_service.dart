@@ -159,6 +159,7 @@ class V2BoardUserInfo {
     this.expiredAt = 0,
     this.token,
     this.subscribeUrl,
+    this.subscribeUrlEncrypted,
     this.resetDay = 0,
     this.speedLimit = 0,
   });
@@ -181,6 +182,8 @@ class V2BoardUserInfo {
       subscribeUrl:
           (json['subscribe_url'] ?? json['subscribeUrl'] ?? json['url'])
               ?.toString(),
+      subscribeUrlEncrypted:
+          json['subscribe_url_encrypted']?.toString(),
       resetDay: _readInt(json['reset_day']),
       speedLimit: _readInt(json['speed_limit'] ??
           (plan is Map<String, dynamic> ? plan['speed_limit'] : null)),
@@ -195,6 +198,7 @@ class V2BoardUserInfo {
   final int expiredAt;
   final String? token;
   final String? subscribeUrl;
+  final String? subscribeUrlEncrypted;
   final int resetDay;
   final int speedLimit;
 
@@ -322,6 +326,10 @@ class V2BoardClient {
   Future<String> subscriptionUrl([V2BoardUserInfo? userInfo]) async {
     try {
       final info = userInfo ?? await getSubscribe();
+      final encryptedUrl = info.subscribeUrlEncrypted;
+      if (encryptedUrl != null && encryptedUrl.isNotEmpty) {
+        return encryptedUrl;
+      }
       final directUrl = info.subscribeUrl;
       if (directUrl != null && directUrl.isNotEmpty) {
         return directUrl;
