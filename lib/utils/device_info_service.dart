@@ -27,8 +27,8 @@ class DeviceDetails {
 class DeviceInfoService {
   final DeviceInfoPlugin _deviceInfoPlugin = DeviceInfoPlugin();
   static const String _hwidStorageKey = 'app_persistent_hwid';
-  static const MethodChannel _channel =
-      MethodChannel('com.follow.clashx/device_id');
+  static final MethodChannel _channel =
+      MethodChannel('$packageName/device_id');
 
   String _generateCompact16CharId(String fullId) {
     final bytes = utf8.encode(fullId);
