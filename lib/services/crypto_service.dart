@@ -110,13 +110,13 @@ class CryptoService {
 
     final aesKeyHex = aesKey.map((b) => b.toRadixString(16).padLeft(2, '0')).join();
     final nonceHex = nonce.map((b) => b.toRadixString(16).padLeft(2, '0')).join();
-    final encKeyFirst4 = rsaEncryptedKey.length >= 4
-        ? rsaEncryptedKey.sublist(0, 4).map((b) => b.toRadixString(16).padLeft(2, '0')).join()
-        : 'short';
-    print('[DecryptDebug] rsaKeyLen=$rsaKeyLen encKeyFirst4=$encKeyFirst4 '
+    print('[DecryptDebug] rsaKeyLen=$rsaKeyLen '
         'aesKeyLen=${aesKey.length} aesKey=$aesKeyHex nonce=$nonceHex ctLen=${ciphertext.length}');
 
-    return _aesGcmDecrypt(ciphertext, aesKey, nonce);
+    // Separate ciphertext and tag (last 16 bytes)
+    final tag = ciphertext.sublist(ciphertext.length - 16);
+    final rawCipher = ciphertext.sublist(0, ciphertext.length - 16);
+    return _aesGcmDecrypt(rawCipher, aesKey, nonce, tag);
   }
 
   static Uint8List _rsaDecryptKey(
@@ -132,6 +132,7 @@ class CryptoService {
     Uint8List ciphertext,
     Uint8List key,
     Uint8List nonce,
+    Uint8List tag,
   ) {
     final cipher = GCMBlockCipher(AESEngine());
     cipher.init(
@@ -144,17 +145,20 @@ class CryptoService {
       ),
     );
 
-    final plaintext = Uint8List(ciphertext.length);
+    // PointyCastle GCM expects ciphertext+tag as input
+    final input = Uint8List.fromList([...ciphertext, ...tag]);
+    final plaintext = Uint8List(input.length);
     var offset = 0;
-    for (var i = 0; i < ciphertext.length;) {
-      final remaining = ciphertext.length - i;
+    for (var i = 0; i < input.length;) {
+      final remaining = input.length - i;
       final chunkSize = remaining < 4096 ? remaining : 4096;
-      offset += cipher.processBytes(ciphertext, i, chunkSize, plaintext, offset);
+      offset += cipher.processBytes(input, i, chunkSize, plaintext, offset);
       i += chunkSize;
     }
     cipher.doFinal(plaintext, offset);
 
-    return plaintext;
+    // Strip the tag bytes that PointyCastle includes in the output
+    return plaintext.sublist(0, ciphertext.length);
   }
 
   static RSAPublicKey _decodePublicKey(Uint8List bytes) {
