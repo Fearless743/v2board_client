@@ -153,8 +153,7 @@ class _EditProfileViewState extends State<EditProfileView> {
         if (await encFile.exists()) {
           try {
             final encBytes = await encFile.readAsBytes();
-            final publicKey = await CryptoService.getPublicKey();
-            final plainBytes = CryptoService.decryptHybrid(encBytes, publicKey);
+            final plainBytes = await CryptoService.decryptHybrid(encBytes);
             rawText = utf8.decode(plainBytes);
           } catch (e) {
             rawText = null;

@@ -667,8 +667,7 @@ class GlobalState {
         return {};
       }
       final encBytes = await encFile.readAsBytes();
-      final publicKey = await CryptoService.getPublicKey();
-      final plaintextBytes = CryptoService.decryptHybrid(encBytes, publicKey);
+      final plaintextBytes = await CryptoService.decryptHybrid(encBytes);
       final profilePath = await appPath.getProfilePath(profileId);
       final profileFile = File(profilePath);
       final hadPlainFile = await profileFile.exists();

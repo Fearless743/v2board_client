@@ -224,8 +224,7 @@ extension ProfileExtension on Profile {
         response.headers.value('x-encrypted') == 'true';
 
     if (isResponseEncrypted) {
-      final publicKey = await CryptoService.getPublicKey();
-      plaintextBytes = CryptoService.decryptHybrid(responseData, publicKey);
+      plaintextBytes = await CryptoService.decryptHybrid(responseData);
     } else {
       plaintextBytes = responseData;
     }

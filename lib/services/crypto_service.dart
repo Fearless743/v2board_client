@@ -95,10 +95,10 @@ class CryptoService {
     _cachedPrivateKey = null;
   }
 
-  static Uint8List decryptHybrid(
+  static Future<Uint8List> decryptHybrid(
     Uint8List encryptedPayload,
-    RSAPublicKey publicKey,
-  ) {
+  ) async {
+    final privateKey = await _getPrivateKey();
     final reader = _ByteReader(encryptedPayload);
 
     final rsaKeyLen = reader.readUint32();
@@ -106,21 +106,20 @@ class CryptoService {
     final nonce = reader.readBytes(_gcmNonceLen);
     final ciphertext = reader.readRemaining();
 
-    final aesKey = _rsaDecryptKey(rsaEncryptedKey, publicKey);
+    final aesKey = _rsaDecryptKey(rsaEncryptedKey, privateKey);
 
     return _aesGcmDecrypt(ciphertext, aesKey, nonce);
   }
 
   static Uint8List _rsaDecryptKey(
     Uint8List encryptedKey,
-    RSAPublicKey publicKey,
+    RSAPrivateKey privateKey,
   ) {
     final engine = RSAEngine();
-    engine.init(false, PublicKeyParameter<RSAPublicKey>(publicKey));
+    engine.init(false, PrivateKeyParameter<RSAPrivateKey>(privateKey));
     final decoded = engine.process(encryptedKey);
 
-    // PKCS1 v1.5 type 2 unpadding (matches PHP manual padding)
-    // Format: 0x00 0x02 [non-zero padding] 0x00 [data]
+    // PKCS1 v1.5 type 2 unpadding: 0x00 0x02 [non-zero] 0x00 [data]
     if (decoded.length < 2 || decoded[0] != 0x00 || decoded[1] != 0x02) {
       throw Exception('Invalid PKCS1 v1.5 padding');
     }
@@ -128,7 +127,7 @@ class CryptoService {
     while (i < decoded.length && decoded[i] != 0x00) {
       i++;
     }
-    if (i >= decoded.length || decoded[i] != 0x00) {
+    if (i >= decoded.length) {
       throw Exception('Invalid PKCS1 v1.5 separator');
     }
     return decoded.sublist(i + 1);
