@@ -171,7 +171,11 @@ class CommonNavigationBar extends ConsumerWidget {
     final visibleItems = navigationItems
         .where((e) => e.label != PageLabel.proxies)
         .toList();
+    final currentLabel = navigationItems[currentIndex].label;
     if (viewMode == ViewMode.mobile) {
+      final selectedIndex = visibleItems.indexWhere(
+        (e) => e.label == currentLabel,
+      ).clamp(0, visibleItems.length - 1);
       return NavigationBarTheme(
         data: _NavigationBarDefaultsM3(context),
         child: NavigationBar(
@@ -186,16 +190,14 @@ class CommonNavigationBar extends ConsumerWidget {
           onDestinationSelected: (index) {
             globalState.appController.toPage(visibleItems[index].label);
           },
-          selectedIndex: visibleItems.indexWhere(
-            (e) => e.label == navigationItems[currentIndex].label,
-          ),
+          selectedIndex: selectedIndex,
         ),
       );
     }
     final showLabel = ref.watch(appSettingProvider).showLabel;
     final sidebarSelectedIndex = visibleItems.indexWhere(
-      (e) => e.label == navigationItems[currentIndex].label,
-    );
+      (e) => e.label == currentLabel,
+    ).clamp(0, visibleItems.length - 1);
     return Material(
       color: context.colorScheme.surfaceContainer,
       child: Column(
@@ -271,9 +273,7 @@ class CommonNavigationBar extends ConsumerWidget {
                           .toPage(visibleItems[index].label);
                     },
                     extended: false,
-                    selectedIndex: sidebarSelectedIndex == -1
-                        ? 0
-                        : sidebarSelectedIndex,
+                    selectedIndex: sidebarSelectedIndex,
                     labelType: showLabel
                         ? NavigationRailLabelType.all
                         : NavigationRailLabelType.none,
