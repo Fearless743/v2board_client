@@ -74,6 +74,7 @@ class CommonScaffold extends ConsumerStatefulWidget {
 class CommonScaffoldState extends ConsumerState<CommonScaffold> {
   late final ValueNotifier<AppBarState> _appBarState;
   final ValueNotifier<Widget?> _floatingActionButton = ValueNotifier(null);
+  final ValueNotifier<Widget?> _leading = ValueNotifier(null);
   final ValueNotifier<List<String>> _keywordsNotifier = ValueNotifier([]);
   final ValueNotifier<bool> _loading = ValueNotifier(false);
 
@@ -85,6 +86,10 @@ class CommonScaffoldState extends ConsumerState<CommonScaffold> {
 
   set actions(List<Widget> actions) {
     _appBarState.value = _appBarState.value.copyWith(actions: actions);
+  }
+
+  set leading(Widget? leading) {
+    _leading.value = leading;
   }
 
   bool get _isSearch => _appBarState.value.searchState?.isSearch == true;
@@ -208,6 +213,7 @@ class CommonScaffoldState extends ConsumerState<CommonScaffold> {
     _appBarState.dispose();
     _textController.dispose();
     _floatingActionButton.dispose();
+    _leading.dispose();
     super.dispose();
   }
 
@@ -217,6 +223,7 @@ class CommonScaffoldState extends ConsumerState<CommonScaffold> {
     if (oldWidget.title != widget.title) {
       _appBarState.value = const AppBarState();
       _floatingActionButton.value = null;
+      _leading.value = null;
       _textController.text = "";
       _keywordsNotifier.value = [];
       _onKeywordsUpdate = null;
@@ -249,12 +256,13 @@ class CommonScaffoldState extends ConsumerState<CommonScaffold> {
         icon: const Icon(Icons.close),
       );
     }
-    return _isSearch
-        ? IconButton(
-            onPressed: _handleExitSearching,
-            icon: const Icon(Icons.arrow_back),
-          )
-        : widget.leading;
+    if (_isSearch) {
+      return IconButton(
+        onPressed: _handleExitSearching,
+        icon: const Icon(Icons.arrow_back),
+      );
+    }
+    return _leading.value ?? widget.leading;
   }
 
   Widget _buildTitle(AppBarSearchState? startState) => _isSearch
@@ -378,25 +386,29 @@ class CommonScaffoldState extends ConsumerState<CommonScaffold> {
           alignment: Alignment.bottomCenter,
           children: [
             widget.appBar ??
-                ValueListenableBuilder<AppBarState>(
-                  valueListenable: _appBarState,
-                  builder: (_, state, __) => _buildAppBarWrap(
-                      AppBar(
-                        backgroundColor: isTransparent ? Colors.transparent : null,
-                        elevation: isTransparent ? 0 : null,
-                        centerTitle: widget.centerTitle ?? false,
-                        automaticallyImplyLeading:
-                            widget.automaticallyImplyLeading,
-                        leading: _buildLeading(),
-                        title: _buildTitle(state.searchState),
-                        actions: _buildActions(
-                          state.searchState,
-                          state.actions.isNotEmpty
-                              ? state.actions
-                              : widget.actions ?? [],
+                ValueListenableBuilder<Widget?>(
+                  valueListenable: _leading,
+                  builder: (_, __, ___) =>
+                      ValueListenableBuilder<AppBarState>(
+                    valueListenable: _appBarState,
+                    builder: (_, state, __) => _buildAppBarWrap(
+                        AppBar(
+                          backgroundColor: isTransparent ? Colors.transparent : null,
+                          elevation: isTransparent ? 0 : null,
+                          centerTitle: widget.centerTitle ?? false,
+                          automaticallyImplyLeading:
+                              widget.automaticallyImplyLeading,
+                          leading: _buildLeading(),
+                          title: _buildTitle(state.searchState),
+                          actions: _buildActions(
+                            state.searchState,
+                            state.actions.isNotEmpty
+                                ? state.actions
+                                : widget.actions ?? [],
+                          ),
                         ),
                       ),
-                    ),
+                  ),
                 ),
             ValueListenableBuilder(
               valueListenable: _loading,

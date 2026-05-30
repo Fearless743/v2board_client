@@ -28,6 +28,7 @@ mixin PageMixin<T extends StatefulWidget> on State<T> {
   void initPageState() {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       final commonScaffoldState = context.commonScaffoldState;
+      commonScaffoldState?.leading = leading;
       commonScaffoldState?.actions = actions;
       commonScaffoldState?.floatingActionButton = floatingActionButton;
       commonScaffoldState?.onKeywordsUpdate = onKeywordsUpdate;
@@ -44,6 +45,8 @@ mixin PageMixin<T extends StatefulWidget> on State<T> {
   void onPageHidden() {}
 
   List<Widget> get actions => [];
+
+  Widget? get leading => null;
 
   Widget? get floatingActionButton => null;
 
