@@ -6,6 +6,7 @@ import 'dart:typed_data';
 import 'package:dio/dio.dart';
 import 'package:dio/io.dart';
 import 'package:flclashx/common/common.dart';
+import 'package:flclashx/common/retry_interceptor.dart';
 import 'package:flclashx/models/models.dart';
 import 'package:flclashx/state.dart';
 import 'package:flutter/cupertino.dart';
@@ -19,8 +20,9 @@ class Request {
           "User-Agent": browserUa,
         },
       ),
-    );
+    )..interceptors.add(RetryInterceptor());
     _clashDio = Dio();
+    _clashDio.interceptors.add(RetryInterceptor());
     _clashDio.httpClientAdapter = IOHttpClientAdapter(createHttpClient: () {
       final client = HttpClient();
       client.findProxy = (uri) {

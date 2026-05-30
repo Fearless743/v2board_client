@@ -5,6 +5,7 @@ import 'package:archive/archive.dart';
 import 'package:device_info_plus/device_info_plus.dart';
 import 'package:dio/dio.dart';
 import 'package:flclashx/common/common.dart';
+import 'package:flclashx/common/retry_interceptor.dart';
 import 'package:flclashx/core_version.dart';
 import 'package:flutter/services.dart';
 import 'package:path/path.dart' as p;
@@ -42,7 +43,7 @@ class CoreUpdaterService {
       connectTimeout: const Duration(seconds: 15),
       receiveTimeout: const Duration(minutes: 5),
     ),
-  );
+  )..interceptors.add(RetryInterceptor());
 
   Future<String> getInstalledCoreVersion() async {
     final prefs = await SharedPreferences.getInstance();

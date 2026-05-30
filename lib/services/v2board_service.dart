@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:dio/dio.dart';
+import 'package:flclashx/common/retry_interceptor.dart';
 import 'package:flclashx/models/profile.dart';
 import 'package:flclashx/models/shop.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -249,7 +250,7 @@ class V2BoardClient {
             HttpHeaders.acceptHeader: 'application/json',
             HttpHeaders.userAgentHeader: 'clash-verge/2.0.0',
           },
-        ));
+        ))..interceptors.add(RetryInterceptor());
 
   final String baseUrl;
   final String _token;
