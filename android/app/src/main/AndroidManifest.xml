@@ -27,7 +27,7 @@
         android:banner="@mipmap/ic_banner"
         android:hardwareAccelerated="true"
         android:icon="@mipmap/ic_launcher"
-        android:label="FlClashX"
+        android:label="@string/app_name"
         android:memtagMode="off">
         <activity
             android:name=".MainActivity"
@@ -118,7 +118,7 @@
             android:name=".services.FlClashXTileService"
             android:exported="true"
             android:icon="@drawable/ic"
-            android:label="FlClashX"
+            android:label="@string/app_name"
             android:permission="android.permission.BIND_QUICK_SETTINGS_TILE"
             tools:targetApi="n">
             <intent-filter>
