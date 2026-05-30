@@ -115,22 +115,9 @@ class CryptoService {
     Uint8List encryptedKey,
     RSAPrivateKey privateKey,
   ) {
-    final engine = RSAEngine();
-    engine.init(false, PrivateKeyParameter<RSAPrivateKey>(privateKey));
-    final decoded = engine.process(encryptedKey);
-
-    // PKCS1 v1.5 type 2 unpadding: 0x00 0x02 [non-zero] 0x00 [data]
-    if (decoded.length < 2 || decoded[0] != 0x00 || decoded[1] != 0x02) {
-      throw Exception('Invalid PKCS1 v1.5 padding');
-    }
-    var i = 2;
-    while (i < decoded.length && decoded[i] != 0x00) {
-      i++;
-    }
-    if (i >= decoded.length) {
-      throw Exception('Invalid PKCS1 v1.5 separator');
-    }
-    return decoded.sublist(i + 1);
+    final cipher = PKCS1Encoding(RSAEngine());
+    cipher.init(false, PrivateKeyParameter<RSAPrivateKey>(privateKey));
+    return cipher.process(encryptedKey);
   }
 
   static Uint8List _aesGcmDecrypt(
