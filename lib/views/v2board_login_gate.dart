@@ -240,7 +240,7 @@ class _V2BoardLoginGateState extends State<V2BoardLoginGate> {
                   ),
                   const SizedBox(height: 24),
                   Text(
-                    'FlClashX',
+                    appName,
                     style: Theme.of(context).textTheme.headlineSmall,
                     textAlign: TextAlign.center,
                   ),
@@ -298,7 +298,7 @@ class _V2BoardLoginGateState extends State<V2BoardLoginGate> {
                   ),
                   const SizedBox(height: 24),
                   Text(
-                    'FlClashX',
+                    appName,
                     style: Theme.of(context).textTheme.headlineSmall,
                     textAlign: TextAlign.center,
                   ),

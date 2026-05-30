@@ -37,7 +37,7 @@ class ClashService extends ClashHandlerInterface {
         final tempDir = await appPath.tempPath;
         _socketPath = p.join(
           tempDir,
-          'FlClashXSocket_${Random().nextInt(10000)}.sock',
+          '${appName}Socket_${Random().nextInt(10000)}.sock',
         );
       }
 

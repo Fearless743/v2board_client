@@ -8,12 +8,13 @@ import 'package:flclashx/enum/enum.dart';
 import 'package:flclashx/models/models.dart';
 import 'package:flutter/material.dart';
 
-const appName = "FlClashX";
+const appName = String.fromEnvironment("APP_TITLE", defaultValue: "FlClashX");
 const appHelperService = "FlClashHelperService";
 const coreName = "clashx.meta";
 const browserUa =
     "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36";
-const packageName = "com.follow.clashx";
+const packageName =
+    String.fromEnvironment("PACKAGE_NAME", defaultValue: "com.flclashx.clash");
 const helperPort = 47890;
 const maxTextScale = 1.4;
 const minTextScale = 0.8;
@@ -85,9 +86,9 @@ double getWidgetHeight(num lines) => max(lines * 84 + (lines - 1) * 16, 0).ap;
 
 const maxLength = 150;
 
-const mainIsolate = "FlClashXMainIsolate";
+const mainIsolate = "${appName}MainIsolate";
 
-const serviceIsolate = "FlClashXServiceIsolate";
+const serviceIsolate = "${appName}ServiceIsolate";
 
 const mihomoRepo = "MetaCubeX/mihomo";
 const mihomoCoreRepo = "Fearless743/v2board_client";
