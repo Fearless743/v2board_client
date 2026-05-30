@@ -296,6 +296,27 @@ flclashx-androidsecure: true
 
 **Переопределение на стороне клиента:** Пользователи могут включить "Переопределить настройки провайдера" или "Переопределить сетевые настройки" в настройках приложения, чтобы применять свою локальную конфигурацию вместо настроек из подписки. Это полезно, когда нужны кастомные сетевые настройки.
 
+## Параметры сборки
+
+Параметры передаются через `--dart-define` при запуске или сборке:
+
+```bash
+flutter run -d linux \
+  --dart-define=APP_ENV=pre \
+  --dart-define=PRIMARY_COLOR=0xFF6750A4 \
+  --dart-define=SCHEME_VARIANT=tonalSpot \
+  --dart-define=V2BOARD_BASE_URL=https://example.com
+```
+
+| Параметр | Описание | По умолчанию |
+|---|---|---|
+| `APP_ENV` | Режим окружения. `stable` — релиз, `pre` — предрелиз (отключает проверку обновлений) | `pre` |
+| `PRIMARY_COLOR` | Основной цвет интерфейса в формате `0xAARRGGBB` | Цвет системы |
+| `SCHEME_VARIANT` | Вариант цветовой схемы Material 3: `tonalSpot`, `content`, `fidelity`, `monochrome`, `neutral`, `vibrant`, `expressive`, `rainbow`, `fruitSalad` | `content` |
+| `CORE_VERSION` | Версия ядра mihomo. Если не указана, используется версия из `lib/core_version.dart` | — |
+| `CORE_SHA256` | SHA-256 хеш исполняемого файла ядра (только Windows) | — |
+| `V2BOARD_BASE_URL` | Базовый URL панели V2Board | — |
+
 ## Использование
 
 ### Linux

@@ -197,6 +197,27 @@ By default, the following configuration parameters received from the subscriptio
 
 **Client-side override:** Users can enable "Override provider settings" or "Override network settings" in Application Settings to apply their local configuration instead of subscription settings. This is useful when you need custom network settings.
 
+## Build Parameters
+
+Parameters are passed via `--dart-define` when running or building:
+
+```bash
+flutter run -d linux \
+  --dart-define=APP_ENV=pre \
+  --dart-define=PRIMARY_COLOR=0xFF6750A4 \
+  --dart-define=SCHEME_VARIANT=tonalSpot \
+  --dart-define=V2BOARD_BASE_URL=https://example.com
+```
+
+| Parameter | Description | Default |
+|---|---|---|
+| `APP_ENV` | Environment mode. `stable` for release builds, `pre` for pre-release (disables update checks) | `pre` |
+| `PRIMARY_COLOR` | Primary UI color as `0xAARRGGBB` hex value | System accent |
+| `SCHEME_VARIANT` | Material 3 color scheme variant: `tonalSpot`, `content`, `fidelity`, `monochrome`, `neutral`, `vibrant`, `expressive`, `rainbow`, `fruitSalad` | `content` |
+| `CORE_VERSION` | Mihomo core version string. Falls back to `lib/core_version.dart` if omitted | — |
+| `CORE_SHA256` | SHA-256 hash of the core binary (Windows only) | — |
+| `V2BOARD_BASE_URL` | V2Board panel base URL | — |
+
 ## Application Usage
 
 ### Linux
