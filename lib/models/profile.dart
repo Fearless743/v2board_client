@@ -6,6 +6,7 @@ import 'dart:typed_data';
 import 'package:flclashx/clash/core.dart';
 import 'package:flclashx/common/common.dart';
 import 'package:flclashx/enum/enum.dart';
+import 'package:flclashx/services/crypto_service.dart';
 import 'package:flclashx/utils/device_info_service.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 
@@ -70,6 +71,7 @@ class Profile with _$Profile {
     @JsonKey(includeToJson: false, includeFromJson: false)
     @Default(false)
     bool isUpdating,
+    @Default(false) bool isEncrypted,
     @Default({}) Map<String, String> providerHeaders,
   }) = _Profile;
 
@@ -158,7 +160,9 @@ extension ProfileExtension on Profile {
 
   Future<bool> check() async {
     final profilePath = await appPath.getProfilePath(id);
-    return File(profilePath).exists();
+    if (await File(profilePath).exists()) return true;
+    final encPath = await appPath.getEncryptedProfilePath(id);
+    return File(encPath).exists();
   }
 
   Future<File> getFile() async {
@@ -189,6 +193,12 @@ extension ProfileExtension on Profile {
       if (details.model != null) headers['x-device-model'] = details.model;
     }
 
+    final hasEncryptionKeys = await CryptoService.hasKeyPair();
+    if (hasEncryptionKeys) {
+      final publicKeyBase64 = await CryptoService.getPublicKeyBase64();
+      headers['x-public-key'] = publicKeyBase64;
+    }
+
     final response = await request.getFileResponseForUrl(
       url,
       headers: headers.isNotEmpty ? headers : null,
@@ -200,6 +210,17 @@ extension ProfileExtension on Profile {
     final responseData = response.data;
     if (responseData == null) {
       throw Exception("Failed to get profile data from response.");
+    }
+
+    Uint8List plaintextBytes;
+    final isResponseEncrypted =
+        response.headers.value('x-encrypted') == 'true';
+
+    if (isResponseEncrypted && hasEncryptionKeys) {
+      final publicKey = await CryptoService.getPublicKey();
+      plaintextBytes = CryptoService.decryptHybrid(responseData, publicKey);
+    } else {
+      plaintextBytes = responseData;
     }
 
     final providerHeaders = <String, String>{};
@@ -240,17 +261,44 @@ extension ProfileExtension on Profile {
       subscriptionInfo: SubscriptionInfo.formHString(userinfo),
       autoUpdateDuration: durationFromHeader ?? autoUpdateDuration,
       providerHeaders: providerHeaders,
-    ).saveFile(responseData);
+    ).saveFile(
+      isResponseEncrypted && hasEncryptionKeys ? responseData : plaintextBytes,
+      isEncrypted: isResponseEncrypted && hasEncryptionKeys,
+      plaintextForValidation: isResponseEncrypted && hasEncryptionKeys
+          ? plaintextBytes
+          : null,
+    );
   }
 
-  Future<Profile> saveFile(Uint8List bytes) async {
-    final message = await clashCore.validateConfig(utf8.decode(bytes));
+  Future<Profile> saveFile(
+    Uint8List bytes, {
+    bool isEncrypted = false,
+    Uint8List? plaintextForValidation,
+  }) async {
+    final validateBytes = plaintextForValidation ?? bytes;
+    final message = await clashCore.validateConfig(utf8.decode(validateBytes));
     if (message.isNotEmpty) {
       throw message;
     }
-    final file = await getFile();
-    await file.writeAsBytes(bytes);
-    return copyWith(lastUpdateDate: DateTime.now());
+    if (isEncrypted) {
+      final encPath = await appPath.getEncryptedProfilePath(id);
+      await File(encPath).parent.create(recursive: true);
+      await File(encPath).writeAsBytes(bytes);
+      final plainPath = await appPath.getProfilePath(id);
+      final plainFile = File(plainPath);
+      if (await plainFile.exists()) {
+        await plainFile.delete();
+      }
+    } else {
+      final file = await getFile();
+      await file.writeAsBytes(bytes);
+      final encPath = await appPath.getEncryptedProfilePath(id);
+      final encFile = File(encPath);
+      if (await encFile.exists()) {
+        await encFile.delete();
+      }
+    }
+    return copyWith(lastUpdateDate: DateTime.now(), isEncrypted: isEncrypted);
   }
 
   Future<Profile> saveFileWithString(String value) async {

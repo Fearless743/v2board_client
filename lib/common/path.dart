@@ -38,9 +38,8 @@ class AppPath {
 
   String get corePath {
     if (Platform.isMacOS) {
-      // Core is stored in Application Support/{bundleId}/cores/ (copied by Swift code on launch)
       final home = Platform.environment['HOME'] ?? '';
-      return '$home/Library/Application Support/com.follow.clash/cores/FlClashCore';
+      return '$home/Library/Application Support/$packageName/cores/FlClashCore';
     }
     return join(executableDirPath, "FlClashCore$executableExtension");
   }
@@ -76,6 +75,11 @@ class AppPath {
   Future<String> getProfilePath(String id) async {
     final directory = await profilesPath;
     return join(directory, "$id.yaml");
+  }
+
+  Future<String> getEncryptedProfilePath(String id) async {
+    final directory = await profilesPath;
+    return join(directory, "$id.yaml.enc");
   }
 
   Future<String> getProvidersDirPath(String id) async {

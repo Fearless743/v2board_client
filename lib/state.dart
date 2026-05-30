@@ -1,7 +1,8 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:ffi' show Pointer;
-import 'dart:io' show Platform;
+import 'dart:io' show File, Platform;
+import 'dart:typed_data' show Uint8List;
 
 import 'package:animations/animations.dart';
 import 'package:dynamic_color/dynamic_color.dart';
@@ -22,6 +23,7 @@ import 'common/common.dart';
 import 'controller.dart';
 import 'core_version.dart';
 import 'models/models.dart';
+import 'services/crypto_service.dart';
 
 typedef UpdateTasks = List<FutureOr Function()>;
 
@@ -657,6 +659,42 @@ class GlobalState {
   }
 
   Future<Map<String, dynamic>> getProfileConfig(String profileId) async {
+    final profile = config.profiles.getProfile(profileId);
+    if (profile?.isEncrypted == true) {
+      final encPath = await appPath.getEncryptedProfilePath(profileId);
+      final encFile = File(encPath);
+      if (!await encFile.exists()) {
+        return {};
+      }
+      final encBytes = await encFile.readAsBytes();
+      final publicKey = await CryptoService.getPublicKey();
+      final plaintextBytes = CryptoService.decryptHybrid(encBytes, publicKey);
+      final profilePath = await appPath.getProfilePath(profileId);
+      final profileFile = File(profilePath);
+      final hadPlainFile = await profileFile.exists();
+      Uint8List? originalBytes;
+      if (hadPlainFile) {
+        originalBytes = await profileFile.readAsBytes();
+      }
+      try {
+        await profileFile.writeAsBytes(plaintextBytes);
+        final configMap = await switch (clashLibHandler != null) {
+          true => clashLibHandler!.getConfig(profileId),
+          false => clashCore.getConfig(profileId),
+        };
+        configMap["rules"] = configMap["rule"];
+        configMap.remove("rule");
+        return configMap;
+      } finally {
+        if (hadPlainFile && originalBytes != null) {
+          await profileFile.writeAsBytes(originalBytes);
+        } else {
+          if (await profileFile.exists()) {
+            await profileFile.delete();
+          }
+        }
+      }
+    }
     final configMap = await switch (clashLibHandler != null) {
       true => clashLibHandler!.getConfig(profileId),
       false => clashCore.getConfig(profileId),

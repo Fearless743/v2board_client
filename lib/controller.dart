@@ -1490,12 +1490,18 @@ class AppController {
 
   Future<Null> clearEffect(String profileId) async {
     final profilePath = await appPath.getProfilePath(profileId);
+    final encProfilePath = await appPath.getEncryptedProfilePath(profileId);
     final providersDirPath = await appPath.getProvidersDirPath(profileId);
     return Isolate.run(() async {
       final profileFile = File(profilePath);
       final isExists = await profileFile.exists();
       if (isExists) {
         unawaited(profileFile.delete(recursive: true));
+      }
+      final encFile = File(encProfilePath);
+      final encExists = await encFile.exists();
+      if (encExists) {
+        unawaited(encFile.delete(recursive: true));
       }
       final providersFileDir = File(providersDirPath);
       final providersFileIsExists = await providersFileDir.exists();

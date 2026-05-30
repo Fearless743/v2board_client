@@ -241,6 +241,7 @@ mixin _$Profile {
   OverrideData get overrideData => throw _privateConstructorUsedError;
   @JsonKey(includeToJson: false, includeFromJson: false)
   bool get isUpdating => throw _privateConstructorUsedError;
+  bool get isEncrypted => throw _privateConstructorUsedError;
   Map<String, String> get providerHeaders => throw _privateConstructorUsedError;
 
   /// Serializes this Profile to a JSON map.
@@ -270,6 +271,7 @@ abstract class $ProfileCopyWith<$Res> {
       Set<String> unfoldSet,
       OverrideData overrideData,
       @JsonKey(includeToJson: false, includeFromJson: false) bool isUpdating,
+      bool isEncrypted,
       Map<String, String> providerHeaders});
 
   $SubscriptionInfoCopyWith<$Res>? get subscriptionInfo;
@@ -303,6 +305,7 @@ class _$ProfileCopyWithImpl<$Res, $Val extends Profile>
     Object? unfoldSet = null,
     Object? overrideData = null,
     Object? isUpdating = null,
+    Object? isEncrypted = null,
     Object? providerHeaders = null,
   }) {
     return _then(_value.copyWith(
@@ -406,6 +409,7 @@ abstract class _$$ProfileImplCopyWith<$Res> implements $ProfileCopyWith<$Res> {
       Set<String> unfoldSet,
       OverrideData overrideData,
       @JsonKey(includeToJson: false, includeFromJson: false) bool isUpdating,
+      bool isEncrypted,
       Map<String, String> providerHeaders});
 
   @override
@@ -439,6 +443,7 @@ class __$$ProfileImplCopyWithImpl<$Res>
     Object? unfoldSet = null,
     Object? overrideData = null,
     Object? isUpdating = null,
+    Object? isEncrypted = null,
     Object? providerHeaders = null,
   }) {
     return _then(_$ProfileImpl(
@@ -490,6 +495,10 @@ class __$$ProfileImplCopyWithImpl<$Res>
           ? _value.isUpdating
           : isUpdating // ignore: cast_nullable_to_non_nullable
               as bool,
+      isEncrypted: null == isEncrypted
+          ? _value.isEncrypted
+          : isEncrypted // ignore: cast_nullable_to_non_nullable
+              as bool,
       providerHeaders: null == providerHeaders
           ? _value._providerHeaders
           : providerHeaders // ignore: cast_nullable_to_non_nullable
@@ -515,6 +524,7 @@ class _$ProfileImpl implements _Profile {
       this.overrideData = const OverrideData(),
       @JsonKey(includeToJson: false, includeFromJson: false)
       this.isUpdating = false,
+      this.isEncrypted = false,
       final Map<String, String> providerHeaders = const {}})
       : _selectedMap = selectedMap,
         _unfoldSet = unfoldSet,
@@ -565,6 +575,9 @@ class _$ProfileImpl implements _Profile {
   @override
   @JsonKey(includeToJson: false, includeFromJson: false)
   final bool isUpdating;
+  @override
+  @JsonKey()
+  final bool isEncrypted;
   final Map<String, String> _providerHeaders;
   @override
   @JsonKey()
@@ -605,6 +618,8 @@ class _$ProfileImpl implements _Profile {
                 other.overrideData == overrideData) &&
             (identical(other.isUpdating, isUpdating) ||
                 other.isUpdating == isUpdating) &&
+            (identical(other.isEncrypted, isEncrypted) ||
+                other.isEncrypted == isEncrypted) &&
             const DeepCollectionEquality()
                 .equals(other._providerHeaders, _providerHeaders));
   }
@@ -625,6 +640,7 @@ class _$ProfileImpl implements _Profile {
       const DeepCollectionEquality().hash(_unfoldSet),
       overrideData,
       isUpdating,
+      isEncrypted,
       const DeepCollectionEquality().hash(_providerHeaders));
 
   /// Create a copy of Profile
@@ -658,6 +674,7 @@ abstract class _Profile implements Profile {
       final OverrideData overrideData,
       @JsonKey(includeToJson: false, includeFromJson: false)
       final bool isUpdating,
+      final bool isEncrypted,
       final Map<String, String> providerHeaders}) = _$ProfileImpl;
 
   factory _Profile.fromJson(Map<String, dynamic> json) = _$ProfileImpl.fromJson;
@@ -687,6 +704,8 @@ abstract class _Profile implements Profile {
   @override
   @JsonKey(includeToJson: false, includeFromJson: false)
   bool get isUpdating;
+  @override
+  bool get isEncrypted;
   @override
   Map<String, String> get providerHeaders;
 

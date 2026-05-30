@@ -55,6 +55,7 @@ _$ProfileImpl _$$ProfileImplFromJson(Map<String, dynamic> json) =>
             (k, e) => MapEntry(k, e as String),
           ) ??
           const {},
+      isEncrypted: json['isEncrypted'] as bool? ?? false,
     );
 
 Map<String, dynamic> _$$ProfileImplToJson(_$ProfileImpl instance) =>
@@ -70,6 +71,7 @@ Map<String, dynamic> _$$ProfileImplToJson(_$ProfileImpl instance) =>
       'selectedMap': instance.selectedMap,
       'unfoldSet': instance.unfoldSet.toList(),
       'overrideData': instance.overrideData,
+      'isEncrypted': instance.isEncrypted,
       'providerHeaders': instance.providerHeaders,
     };
 

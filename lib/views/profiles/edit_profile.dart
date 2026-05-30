@@ -7,6 +7,7 @@ import 'package:flclashx/common/common.dart';
 import 'package:flclashx/enum/enum.dart';
 import 'package:flclashx/models/models.dart';
 import 'package:flclashx/pages/editor.dart';
+import 'package:flclashx/services/crypto_service.dart';
 import 'package:flclashx/state.dart';
 import 'package:flclashx/widgets/widgets.dart';
 import 'package:flutter/material.dart';
@@ -47,7 +48,12 @@ class _EditProfileViewState extends State<EditProfileView> {
       text: widget.profile.autoUpdateDuration.inMinutes.toString(),
     );
     appPath.getProfilePath(widget.profile.id).then((path) async {
-      fileInfoNotifier.value = await _getFileInfo(path);
+      if (widget.profile.isEncrypted) {
+        final encPath = await appPath.getEncryptedProfilePath(widget.profile.id);
+        fileInfoNotifier.value = await _getFileInfo(encPath);
+      } else {
+        fileInfoNotifier.value = await _getFileInfo(path);
+      }
     });
   }
 
@@ -141,10 +147,25 @@ class _EditProfileViewState extends State<EditProfileView> {
 
   Future<void> _editProfileFile() async {
     if (rawText == null) {
-      final profilePath = await appPath.getProfilePath(widget.profile.id);
-      final file = File(profilePath);
-      if (await file.exists()) {
-        rawText = await file.readAsString();
+      if (widget.profile.isEncrypted) {
+        final encPath = await appPath.getEncryptedProfilePath(widget.profile.id);
+        final encFile = File(encPath);
+        if (await encFile.exists()) {
+          try {
+            final encBytes = await encFile.readAsBytes();
+            final publicKey = await CryptoService.getPublicKey();
+            final plainBytes = CryptoService.decryptHybrid(encBytes, publicKey);
+            rawText = utf8.decode(plainBytes);
+          } catch (e) {
+            rawText = null;
+          }
+        }
+      } else {
+        final profilePath = await appPath.getProfilePath(widget.profile.id);
+        final file = File(profilePath);
+        if (await file.exists()) {
+          rawText = await file.readAsString();
+        }
       }
     }
     if (!mounted) return;

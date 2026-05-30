@@ -216,8 +216,8 @@ class ClashCore {
     return Delay.fromJson(json.decode(data));
   }
 
-  Future<Map<String, dynamic>> getConfig(String id) async {
-    final profilePath = await appPath.getProfilePath(id);
+  Future<Map<String, dynamic>> getConfig(String id, {String? filePath}) async {
+    final profilePath = filePath ?? await appPath.getProfilePath(id);
     final res = await clashInterface.getConfig(profilePath);
     if (res.isSuccess) {
       return res.data as Map<String, dynamic>;

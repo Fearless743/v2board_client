@@ -62,6 +62,7 @@ dependencies:
   flutter_cache_manager: ^3.4.1
   cached_network_image: ^3.4.1
   crypto: ^3.0.7
+  pointycastle: ^3.9.1
   flutter_widget_from_html_core: ^0.17.2
   flutter_markdown: ^0.7.7+1
   markdown: ^7.3.1
