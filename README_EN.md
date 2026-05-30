@@ -199,14 +199,15 @@ By default, the following configuration parameters received from the subscriptio
 
 ## Build Parameters
 
-Parameters are passed via `--dart-define` when running or building:
+Parameters are passed via environment variables:
 
 ```bash
-flutter run -d linux \
-  --dart-define=APP_ENV=pre \
-  --dart-define=PRIMARY_COLOR=0xFF6750A4 \
-  --dart-define=SCHEME_VARIANT=tonalSpot \
-  --dart-define=V2BOARD_BASE_URL=https://example.com
+APP_TITLE=MyProxy \
+APP_ENV=stable \
+PRIMARY_COLOR=0xFF6750A4 \
+SCHEME_VARIANT=tonalSpot \
+V2BOARD_BASE_URL=https://example.com \
+  flutter run -d linux
 ```
 
 | Parameter | Description | Default |

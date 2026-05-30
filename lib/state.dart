@@ -84,20 +84,20 @@ class GlobalState {
   }
 
   Future<void> initApp(int version) async {
-    coreSHA256 = const String.fromEnvironment("CORE_SHA256");
-    final coreVersionEnv = const String.fromEnvironment("CORE_VERSION");
+    coreSHA256 = Platform.environment['CORE_SHA256'] ?? '';
+    final coreVersionEnv = Platform.environment['CORE_VERSION'] ?? '';
     coreVersion =
         coreVersionEnv.isEmpty ? kCoreVersionFromSource : coreVersionEnv;
-    isPre = const String.fromEnvironment("APP_ENV") != 'stable';
-    v2boardBaseUrl = const String.fromEnvironment("V2BOARD_BASE_URL").trim();
-    final primaryColorEnv = const String.fromEnvironment("PRIMARY_COLOR").trim();
+    isPre = Platform.environment['APP_ENV'] != 'stable';
+    v2boardBaseUrl = (Platform.environment['V2BOARD_BASE_URL'] ?? '').trim();
+    final primaryColorEnv = (Platform.environment['PRIMARY_COLOR'] ?? '').trim();
     if (primaryColorEnv.isNotEmpty) {
       buildPrimaryColor = int.tryParse(primaryColorEnv.replaceFirst('0x', '').replaceFirst('0X', ''), radix: 16);
       if (buildPrimaryColor != null && buildPrimaryColor! <= 0xFFFFFF) {
         buildPrimaryColor = buildPrimaryColor! | 0xFF000000;
       }
     }
-    final schemeVariantEnv = const String.fromEnvironment("SCHEME_VARIANT").trim().toLowerCase();
+    final schemeVariantEnv = (Platform.environment['SCHEME_VARIANT'] ?? '').trim().toLowerCase();
     if (schemeVariantEnv.isNotEmpty) {
       buildSchemeVariant = DynamicSchemeVariant.values.firstWhere(
         (v) => v.name.toLowerCase() == schemeVariantEnv,

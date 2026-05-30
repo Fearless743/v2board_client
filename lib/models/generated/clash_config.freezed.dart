@@ -1442,7 +1442,7 @@ class __$$TunImplCopyWithImpl<$Res> extends _$TunCopyWithImpl<$Res, _$TunImpl>
 class _$TunImpl implements _Tun {
   const _$TunImpl(
       {this.enable = true,
-      this.device = appName,
+      this.device = "FlClashX",
       @JsonKey(name: "auto-route") this.autoRoute = false,
       this.stack = TunStack.mixed,
       @JsonKey(name: "dns-hijack")
