@@ -223,6 +223,16 @@ extension ProfileExtension on Profile {
     final isResponseEncrypted =
         response.headers.value('x-encrypted') == 'true';
 
+    // Debug: log response info
+    final respLen = responseData.length;
+    final contentType = response.headers.value('content-type') ?? '';
+    final firstBytes = responseData.length >= 4
+        ? responseData.sublist(0, 4).map((b) => b.toRadixString(16).padLeft(2, '0')).join(' ')
+        : 'short';
+    print('[EncryptDebug] status=${response.statusCode} encrypted=$isResponseEncrypted '
+        'content-type=$contentType len=$respLen firstBytes=$firstBytes '
+        'url=$requestUrl');
+
     if (isResponseEncrypted) {
       plaintextBytes = await CryptoService.decryptHybrid(responseData);
     } else {
