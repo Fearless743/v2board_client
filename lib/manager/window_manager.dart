@@ -302,7 +302,7 @@ class _WindowHeaderState extends State<WindowHeader> {
             ),
             // Content
             if (Platform.isMacOS)
-              Center(child: Text(appName))
+              const Center(child: Text(appName))
             else
               Row(
                 children: [
@@ -433,7 +433,7 @@ class AppIcon extends StatelessWidget {
   @override
   Widget build(BuildContext context) => Container(
       margin: const EdgeInsets.only(left: 8),
-      child: Row(
+      child: const Row(
         children: [
           SizedBox(
             width: 24,

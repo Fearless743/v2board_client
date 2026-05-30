@@ -8,8 +8,7 @@ import 'package:flclashx/enum/enum.dart';
 import 'package:flclashx/models/models.dart';
 import 'package:flutter/material.dart';
 
-final appName = Platform.environment['APP_TITLE'] ??
-    const String.fromEnvironment('APP_TITLE', defaultValue: 'FlClashX');
+const appName = String.fromEnvironment("APP_TITLE", defaultValue: "FlClashX");
 const appHelperService = "FlClashHelperService";
 const coreName = "clashx.meta";
 const browserUa =
@@ -86,9 +85,9 @@ double getWidgetHeight(num lines) => max(lines * 84 + (lines - 1) * 16, 0).ap;
 
 const maxLength = 150;
 
-final mainIsolate = "${appName}MainIsolate";
+const mainIsolate = "${appName}MainIsolate";
 
-final serviceIsolate = "${appName}ServiceIsolate";
+const serviceIsolate = "${appName}ServiceIsolate";
 
 const mihomoRepo = "MetaCubeX/mihomo";
 const mihomoCoreRepo = "Fearless743/v2board_client";

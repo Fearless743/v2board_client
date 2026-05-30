@@ -83,30 +83,21 @@ class GlobalState {
     isInit = true;
   }
 
-  /// Read from environment variable first (desktop), fall back to
-  /// compile-time --dart-define (Android/mobile).
-  static String _env(String key, [String dartDefine = '', String defaultVal = '']) {
-    final env = Platform.environment[key];
-    if (env != null && env.isNotEmpty) return env;
-    if (dartDefine.isNotEmpty) return dartDefine;
-    return defaultVal;
-  }
-
   Future<void> initApp(int version) async {
-    coreSHA256 = _env('CORE_SHA256');
-    final coreVersionEnv = _env('CORE_VERSION');
+    coreSHA256 = const String.fromEnvironment("CORE_SHA256");
+    final coreVersionEnv = const String.fromEnvironment("CORE_VERSION");
     coreVersion =
         coreVersionEnv.isEmpty ? kCoreVersionFromSource : coreVersionEnv;
-    isPre = _env('APP_ENV', const String.fromEnvironment('APP_ENV', defaultValue: 'pre')) != 'stable';
-    v2boardBaseUrl = _env('V2BOARD_BASE_URL', const String.fromEnvironment('V2BOARD_BASE_URL')).trim();
-    final primaryColorEnv = _env('PRIMARY_COLOR', const String.fromEnvironment('PRIMARY_COLOR')).trim();
+    isPre = const String.fromEnvironment("APP_ENV") != 'stable';
+    v2boardBaseUrl = const String.fromEnvironment("V2BOARD_BASE_URL").trim();
+    final primaryColorEnv = const String.fromEnvironment("PRIMARY_COLOR").trim();
     if (primaryColorEnv.isNotEmpty) {
       buildPrimaryColor = int.tryParse(primaryColorEnv.replaceFirst('0x', '').replaceFirst('0X', ''), radix: 16);
       if (buildPrimaryColor != null && buildPrimaryColor! <= 0xFFFFFF) {
         buildPrimaryColor = buildPrimaryColor! | 0xFF000000;
       }
     }
-    final schemeVariantEnv = _env('SCHEME_VARIANT', const String.fromEnvironment('SCHEME_VARIANT')).trim().toLowerCase();
+    final schemeVariantEnv = const String.fromEnvironment("SCHEME_VARIANT").trim().toLowerCase();
     if (schemeVariantEnv.isNotEmpty) {
       buildSchemeVariant = DynamicSchemeVariant.values.firstWhere(
         (v) => v.name.toLowerCase() == schemeVariantEnv,
