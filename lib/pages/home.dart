@@ -168,11 +168,14 @@ class CommonNavigationBar extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, ref) {
+    final visibleItems = navigationItems
+        .where((e) => e.label != PageLabel.proxies)
+        .toList();
     if (viewMode == ViewMode.mobile) {
       return NavigationBarTheme(
         data: _NavigationBarDefaultsM3(context),
         child: NavigationBar(
-          destinations: navigationItems
+          destinations: visibleItems
               .map(
                 (e) => NavigationDestination(
                   icon: e.icon,
@@ -181,13 +184,18 @@ class CommonNavigationBar extends ConsumerWidget {
               )
               .toList(),
           onDestinationSelected: (index) {
-            globalState.appController.toPage(navigationItems[index].label);
+            globalState.appController.toPage(visibleItems[index].label);
           },
-          selectedIndex: currentIndex,
+          selectedIndex: visibleItems.indexWhere(
+            (e) => e.label == navigationItems[currentIndex].label,
+          ),
         ),
       );
     }
     final showLabel = ref.watch(appSettingProvider).showLabel;
+    final sidebarSelectedIndex = visibleItems.indexWhere(
+      (e) => e.label == navigationItems[currentIndex].label,
+    );
     return Material(
       color: context.colorScheme.surfaceContainer,
       child: Column(
@@ -248,7 +256,7 @@ class CommonNavigationBar extends ConsumerWidget {
                         context.textTheme.labelLarge!.copyWith(
                       color: context.colorScheme.onSurface,
                     ),
-                    destinations: navigationItems
+                    destinations: visibleItems
                         .map(
                           (e) => NavigationRailDestination(
                             icon: e.icon,
@@ -260,10 +268,12 @@ class CommonNavigationBar extends ConsumerWidget {
                         .toList(),
                     onDestinationSelected: (index) {
                       globalState.appController
-                          .toPage(navigationItems[index].label);
+                          .toPage(visibleItems[index].label);
                     },
                     extended: false,
-                    selectedIndex: currentIndex,
+                    selectedIndex: sidebarSelectedIndex == -1
+                        ? 0
+                        : sidebarSelectedIndex,
                     labelType: showLabel
                         ? NavigationRailLabelType.all
                         : NavigationRailLabelType.none,

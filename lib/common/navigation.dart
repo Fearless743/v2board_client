@@ -24,15 +24,14 @@ class Navigation {
             key: GlobalObjectKey(PageLabel.dashboard),
           ),
         ),
-        NavigationItem(
-          icon: const Icon(Icons.article),
+        const NavigationItem(
+          icon: Icon(Icons.article),
           label: PageLabel.proxies,
-          view: const ProxiesView(
+          view: ProxiesView(
             key: GlobalObjectKey(
               PageLabel.proxies,
             ),
           ),
-          modes: const [],
         ),
         const NavigationItem(
           icon: Icon(Icons.view_timeline),
