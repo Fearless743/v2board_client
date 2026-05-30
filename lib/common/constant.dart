@@ -8,7 +8,8 @@ import 'package:flclashx/enum/enum.dart';
 import 'package:flclashx/models/models.dart';
 import 'package:flutter/material.dart';
 
-final appName = Platform.environment['APP_TITLE'] ?? 'FlClashX';
+final appName = Platform.environment['APP_TITLE'] ??
+    const String.fromEnvironment('APP_TITLE', defaultValue: 'FlClashX');
 const appHelperService = "FlClashHelperService";
 const coreName = "clashx.meta";
 const browserUa =
