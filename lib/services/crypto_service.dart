@@ -92,16 +92,23 @@ class CryptoService {
     Uint8List encryptedKey,
     RSAPublicKey publicKey,
   ) {
-    final cipher = PKCS1Encoding(RSAEngine());
-    cipher.init(false, PublicKeyParameter<RSAPublicKey>(publicKey));
+    final engine = RSAEngine();
+    engine.init(false, PublicKeyParameter<RSAPublicKey>(publicKey));
+    final decoded = engine.process(encryptedKey);
 
-    final decoded = cipher.process(encryptedKey);
-
-    if (decoded.isEmpty || decoded[0] != 0x00) {
-      throw Exception('Invalid PKCS1 padding in encrypted key');
+    // PKCS1 v1.5 type 1 unpadding (matches PHP openssl_private_encrypt)
+    // Format: 0x00 0x01 [0xFF padding] 0x00 [data]
+    if (decoded.length < 2 || decoded[0] != 0x00 || decoded[1] != 0x01) {
+      throw Exception('Invalid PKCS1 v1.5 padding');
     }
-
-    return decoded.sublist(1);
+    var i = 2;
+    while (i < decoded.length && decoded[i] == 0xFF) {
+      i++;
+    }
+    if (i >= decoded.length || decoded[i] != 0x00) {
+      throw Exception('Invalid PKCS1 v1.5 separator');
+    }
+    return decoded.sublist(i + 1);
   }
 
   static Uint8List _aesGcmDecrypt(
