@@ -108,6 +108,14 @@ class CryptoService {
 
     final aesKey = _rsaDecryptKey(rsaEncryptedKey, privateKey);
 
+    final aesKeyHex = aesKey.map((b) => b.toRadixString(16).padLeft(2, '0')).join();
+    final nonceHex = nonce.map((b) => b.toRadixString(16).padLeft(2, '0')).join();
+    final encKeyFirst4 = rsaEncryptedKey.length >= 4
+        ? rsaEncryptedKey.sublist(0, 4).map((b) => b.toRadixString(16).padLeft(2, '0')).join()
+        : 'short';
+    print('[DecryptDebug] rsaKeyLen=$rsaKeyLen encKeyFirst4=$encKeyFirst4 '
+        'aesKeyLen=${aesKey.length} aesKey=$aesKeyHex nonce=$nonceHex ctLen=${ciphertext.length}');
+
     return _aesGcmDecrypt(ciphertext, aesKey, nonce);
   }
 
