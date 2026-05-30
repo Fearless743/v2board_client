@@ -8,9 +8,9 @@ import 'package:pointycastle/asn1/primitives/asn1_sequence.dart';
 import 'package:pointycastle/export.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-const _prefPublicKey = 'subscribe_encryption_public_key';
-const _prefPrivateKey = 'subscribe_encryption_private_key';
-const _prefKeyCreatedAt = 'subscribe_encryption_key_created_at';
+const _prefPublicKey = 'subscribe_encryption_public_key_v2';
+const _prefPrivateKey = 'subscribe_encryption_private_key_v2';
+const _prefKeyCreatedAt = 'subscribe_encryption_key_created_at_v2';
 
 const keyValidityDuration = Duration(days: 7);
 
@@ -169,10 +169,37 @@ class CryptoService {
   }
 
   static Uint8List _encodePublicKey(RSAPublicKey publicKey) {
-    final seq = ASN1Sequence();
-    seq.add(ASN1Integer(publicKey.modulus));
-    seq.add(ASN1Integer(publicKey.publicExponent));
-    return seq.encode();
+    // Build raw RSA PKCS#1 DER: SEQUENCE { INTEGER(n), INTEGER(e) }
+    final rsaSeq = ASN1Sequence()
+      ..add(ASN1Integer(publicKey.modulus))
+      ..add(ASN1Integer(publicKey.publicExponent));
+    final rsaDer = rsaSeq.encode();
+
+    // Wrap in SubjectPublicKeyInfo so PHP openssl_pkey_get_public() accepts it
+    // AlgorithmIdentifier: SEQUENCE { OID(rsaEncryption), NULL }
+    final algId = Uint8List.fromList([
+      0x30, 0x0d,
+      0x06, 0x09, 0x2a, 0x86, 0x48, 0x86, 0xf7, 0x0d, 0x01, 0x01, 0x01,
+      0x05, 0x00,
+    ]);
+
+    // BIT STRING: tag(0x03) + length + 0x00(unused bits) + rsaDer
+    final bsInnerLen = 1 + rsaDer.length;
+    final bsLenBytes = _encodeAsn1Length(bsInnerLen);
+    final bitString = Uint8List.fromList([
+      0x03, ...bsLenBytes, 0x00, ...rsaDer,
+    ]);
+
+    // Top-level SEQUENCE
+    final totalLen = algId.length + bitString.length;
+    final seqLenBytes = _encodeAsn1Length(totalLen);
+    return Uint8List.fromList([0x30, ...seqLenBytes, ...algId, ...bitString]);
+  }
+
+  static List<int> _encodeAsn1Length(int len) {
+    if (len < 0x80) return [len];
+    if (len < 0x100) return [0x81, len];
+    return [0x82, (len >> 8) & 0xFF, len & 0xFF];
   }
 
   static Uint8List _encodePrivateKey(RSAPrivateKey privateKey) {
