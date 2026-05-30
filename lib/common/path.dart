@@ -38,8 +38,9 @@ class AppPath {
 
   String get corePath {
     if (Platform.isMacOS) {
+      // Core is stored in Application Support/{bundleId}/cores/ (copied by Swift code on launch)
       final home = Platform.environment['HOME'] ?? '';
-      return '$home/Library/Application Support/$packageName/cores/FlClashCore';
+      return '$home/Library/Application Support/com.follow.clash/cores/FlClashCore';
     }
     return join(executableDirPath, "FlClashCore$executableExtension");
   }

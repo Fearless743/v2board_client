@@ -304,7 +304,7 @@ class CoreUpdaterService {
     await tempFile.rename(targetPath);
   }
 
-  static final _channel = MethodChannel('$packageName/core_updater');
+  static const _channel = MethodChannel('com.follow.clashx/core_updater');
 
   Future<void> _installSoFile(List<int> soBytes) async {
     final coresDir = await appPath.coresDirPath;
