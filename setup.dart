@@ -6,6 +6,7 @@ import 'dart:io';
 import 'package:args/command_runner.dart';
 import 'package:path/path.dart';
 import 'package:crypto/crypto.dart';
+import 'package:image/image.dart' as img;
 
 enum Target {
   windows,
@@ -926,6 +927,309 @@ class BuildCommand extends Command {
   }
 }
 
+class BuildAllCommand extends Command {
+  BuildAllCommand() {
+    argParser.addOption('icon', help: 'Path to 1024x1024 PNG icon');
+    argParser.addOption('out', help: 'Output directory for built artifacts');
+    argParser.addOption('title', defaultsTo: 'FlClashX', help: 'APP_TITLE');
+    argParser.addOption('primary-color', help: 'PRIMARY_COLOR (e.g. 0xFF6750A4)');
+    argParser.addOption('scheme-variant', help: 'SCHEME_VARIANT (e.g. tonalSpot)');
+    argParser.addOption('env', defaultsTo: 'pre', help: 'APP_ENV (pre|stable)');
+    argParser.addOption('v2board-base-url', help: 'V2BOARD_BASE_URL');
+  }
+
+  @override
+  String get name => 'build-all';
+
+  @override
+  String get description => 'Build all platforms with custom icon and params';
+
+  @override
+  Future<void> run() async {
+    final iconPath = argResults?['icon'] as String?;
+    final outDir = argResults?['out'] as String?;
+    final title = argResults?['title'] as String? ?? 'FlClashX';
+    final primaryColor = argResults?['primary-color'] as String?;
+    final schemeVariant = argResults?['scheme-variant'] as String?;
+    final env = argResults?['env'] as String? ?? 'pre';
+    final v2boardBaseUrl = argResults?['v2board-base-url'] as String?;
+
+    if (outDir == null) {
+      throw 'Missing required argument: --out';
+    }
+
+    // Replace icons if provided
+    if (iconPath != null) {
+      print('Replacing icons from $iconPath ...');
+      await _replaceIcons(iconPath, title);
+    }
+
+    // Build dart-define args
+    final defines = <String>[
+      '--build-dart-define=APP_TITLE=$title',
+      '--build-dart-define=APP_ENV=$env',
+      if (primaryColor != null) '--build-dart-define=PRIMARY_COLOR=$primaryColor',
+      if (schemeVariant != null) '--build-dart-define=SCHEME_VARIANT=$schemeVariant',
+      if (v2boardBaseUrl != null) '--build-dart-define=V2BOARD_BASE_URL=$v2boardBaseUrl',
+    ];
+    final defineStr = defines.join(' ');
+
+    // Set APP_TITLE env for Gradle
+    final buildEnv = Map<String, String>.from(Platform.environment);
+    buildEnv['APP_TITLE'] = title;
+
+    await Build.syncCoreVersionDartFile();
+    final coreVersion = await Build.extractCoreVersion();
+
+    final out = Directory(outDir);
+    if (!out.existsSync()) out.createSync(recursive: true);
+
+    // Build Android
+    print('\n=== Building Android ===');
+    await _buildAndroid(coreVersion, defineStr, buildEnv);
+    await _collectOutput(outDir, 'android', Build.distPath);
+
+    // Build current-host desktop platform
+    final hostTarget = currentHostTarget;
+    if (hostTarget == Target.linux) {
+      print('\n=== Building Linux ===');
+      await _buildLinux(coreVersion, defineStr, buildEnv);
+      await _collectOutput(outDir, 'linux', Build.distPath);
+    } else if (hostTarget == Target.macos) {
+      print('\n=== Building macOS ===');
+      await _buildMacos(coreVersion, defineStr, buildEnv);
+      await _collectOutput(outDir, 'macos', Build.distPath);
+    } else if (hostTarget == Target.windows) {
+      print('\n=== Building Windows ===');
+      await _buildWindows(coreVersion, defineStr, buildEnv);
+      await _collectOutput(outDir, 'windows', Build.distPath);
+    }
+
+    // Restore original icons
+    if (iconPath != null) {
+      print('\nRestoring original icons ...');
+      await Process.run('git', ['checkout', '--',
+        'assets/images/',
+        'android/app/src/main/res/',
+        'macos/Runner/Assets.xcassets/AppIcon.appiconset/',
+        'windows/runner/resources/app_icon.ico',
+      ]);
+    }
+
+    print('\n=== Build complete. Output: $outDir ===');
+  }
+
+  // --- Icon replacement ---
+
+  Future<void> _replaceIcons(String iconPath, String title) async {
+    final bytes = File(iconPath).readAsBytesSync();
+    final src = img.decodeImage(bytes);
+    if (src == null) throw 'Failed to decode icon: $iconPath';
+
+    // 1. In-app assets
+    _savePng(src, 'assets/images/icon.png', 1024);
+    _savePng(_makeWhite(src), 'assets/images/icon_white.png', 1024);
+    _savePng(_makeBlack(src), 'assets/images/icon_black.png', 1024);
+    _savePng(_makeIco(src), 'assets/images/icon.ico', 256);
+    _savePng(_makeWhite(src), 'assets/images/icon_white.ico', 256);
+
+    // Stopped-state icons (dimmed version)
+    final stopped = _makeStopped(src);
+    _savePng(_makeWhite(stopped), 'assets/images/icon_stop_white.png', 256);
+    _savePng(_makeBlack(stopped), 'assets/images/icon_stop_black.png', 256);
+
+    // 2. Android mipmap (legacy launcher icons)
+    final androidSizes = {
+      'mipmap-mdpi': 48, 'mipmap-hdpi': 72, 'mipmap-xhdpi': 96,
+      'mipmap-xxhdpi': 144, 'mipmap-xxxhdpi': 192,
+    };
+    for (final e in androidSizes.entries) {
+      _savePng(src, 'android/app/src/main/res/${e.key}/ic_launcher.png', e.value);
+    }
+
+    // Android drawable (adaptive icon foreground + monochrome)
+    final drawableSizes = {
+      'drawable-mdpi': 108, 'drawable-hdpi': 162, 'drawable-xhdpi': 216,
+      'drawable-xxhdpi': 324, 'drawable-xxxhdpi': 432,
+    };
+    for (final e in drawableSizes.entries) {
+      _savePng(src, 'android/app/src/main/res/${e.key}/ic_launcher_foreground.png', e.value);
+      _savePng(_makeWhite(src), 'android/app/src/main/res/${e.key}/ic_launcher_monochrome.png', e.value);
+    }
+
+    // Android TV banner
+    _savePng(src, 'android/app/src/main/res/mipmap-xhdpi/ic_banner.png', 320, height: 180);
+
+    // 3. macOS icon set
+    final macSizes = [16, 32, 64, 128, 256, 512, 1024];
+    for (final s in macSizes) {
+      _savePng(src, 'macos/Runner/Assets.xcassets/AppIcon.appiconset/app_icon_$s.png', s);
+    }
+
+    // 4. Windows ICO
+    _saveIco(src, 'windows/runner/resources/app_icon.ico');
+
+    print('Icons replaced for all platforms.');
+  }
+
+  void _savePng(img.Image src, String path, int size, {int? height}) {
+    final resized = img.copyResize(src, width: size, height: height ?? size,
+        interpolation: img.Interpolation.cubic);
+    File(path).writeAsBytesSync(img.encodePng(resized));
+  }
+
+  void _saveIco(img.Image src, String path) {
+    // Encode ICO with 256px as the primary size
+    final resized = img.copyResize(src, width: 256, height: 256,
+        interpolation: img.Interpolation.cubic);
+    File(path).writeAsBytesSync(img.encodeIco(resized));
+  }
+
+  img.Image _makeWhite(img.Image src) {
+    final out = img.Image(width: src.width, height: src.height, numChannels: 4);
+    for (final p in out) {
+      final s = src.getPixel(p.x, p.y);
+      final a = s.a.toInt();
+      if (a > 0) {
+        p.setRgba(255, 255, 255, a);
+      }
+    }
+    return out;
+  }
+
+  img.Image _makeBlack(img.Image src) {
+    final out = img.Image(width: src.width, height: src.height, numChannels: 4);
+    for (final p in out) {
+      final s = src.getPixel(p.x, p.y);
+      final a = s.a.toInt();
+      if (a > 0) {
+        p.setRgba(0, 0, 0, a);
+      }
+    }
+    return out;
+  }
+
+  img.Image _makeStopped(img.Image src) {
+    return img.adjustColor(src, saturation: -0.8, brightness: 0.1);
+  }
+
+  img.Image _makeIco(img.Image src) => src;
+
+  // --- Platform builds ---
+
+  Future<void> _buildAndroid(String coreVersion, String defines, Map<String, String> env) async {
+    // Build core for all ABIs
+    for (final bi in Build.buildItems.where((b) => b.target == Target.android)) {
+      await Build.buildCore(target: bi.target, arch: bi.arch, mode: Mode.lib, coreVersion: coreVersion);
+    }
+    // flutter_launcher_icons
+    await Build.exec(name: 'icons', Build.getExecutable('dart run flutter_launcher_icons'));
+    // Build APKs
+    await Build.getDistributor();
+    final allTargets = Build.buildItems
+        .where((b) => b.target == Target.android)
+        .map((b) => 'android-${b.archName}')
+        .join(',');
+    // Split per ABI
+    await Build.exec(
+      name: 'android-split',
+      Build.getExecutable(
+        'dart pub global run flutter_distributor:main package --skip-clean --platform android --targets apk,split-per-abi --flutter-build-args=verbose --build-target-platform $allTargets --build-dart-define=CORE_VERSION=$coreVersion $defines',
+      ),
+      environment: env,
+    );
+    // Universal
+    await Build.exec(
+      name: 'android-universal',
+      Build.getExecutable(
+        'dart pub global run flutter_distributor:main package --skip-clean --platform android --targets apk --flutter-build-args=verbose --build-target-platform $allTargets --build-dart-define=CORE_VERSION=$coreVersion $defines',
+      ),
+      environment: env,
+    );
+  }
+
+  Future<void> _buildLinux(String coreVersion, String defines, Map<String, String> env) async {
+    final arch = _hostArch();
+    if (arch == null) throw 'Cannot determine host architecture';
+    await Build.buildCore(target: Target.linux, arch: arch, mode: Mode.core, coreVersion: coreVersion);
+    final targetMap = {Arch.arm64: 'linux-arm64', Arch.amd64: 'linux-x64'};
+    final targets = ['deb', if (arch == Arch.amd64) 'appimage', if (arch == Arch.amd64) 'rpm'].join(',');
+    await Build.getDistributor();
+    await Build.exec(
+      name: 'linux',
+      Build.getExecutable(
+        'dart pub global run flutter_distributor:main package --skip-clean --platform linux --targets $targets --flutter-build-args=verbose --description ${arch.name} --build-target-platform ${targetMap[arch]} --build-dart-define=CORE_VERSION=$coreVersion $defines',
+      ),
+      environment: env,
+    );
+  }
+
+  Future<void> _buildWindows(String coreVersion, String defines, Map<String, String> env) async {
+    final arch = _hostArch();
+    if (arch == null) throw 'Cannot determine host architecture';
+    final corePaths = await Build.buildCore(target: Target.windows, arch: arch, mode: Mode.core, coreVersion: coreVersion);
+    final token = await Build.calcSha256(corePaths.first);
+    Build.buildHelper(Target.windows, token, arch: arch);
+    await Build.getDistributor();
+    await Build.exec(
+      name: 'windows',
+      Build.getExecutable(
+        'dart pub global run flutter_distributor:main package --skip-clean --platform windows --targets exe,zip --flutter-build-args=verbose --description ${arch.name} --build-dart-define=CORE_SHA256=$token --build-dart-define=CORE_VERSION=$coreVersion $defines',
+      ),
+      environment: env,
+    );
+  }
+
+  Future<void> _buildMacos(String coreVersion, String defines, Map<String, String> env) async {
+    final arch = _hostArch();
+    if (arch == null) throw 'Cannot determine host architecture';
+    await Build.buildCore(target: Target.macos, arch: arch, mode: Mode.core, coreVersion: coreVersion);
+    // macOS uses direct flutter build, not distributor
+    final dartDefines = defines.replaceAll('--build-dart-define=', '--dart-define=');
+    await Build.exec(
+      name: 'macos',
+      Build.getExecutable('flutter build macos --release $dartDefines --dart-define=CORE_VERSION=$coreVersion'),
+      environment: env,
+    );
+    // Create DMG
+    final archName = arch.name;
+    final dmgPath = join(Build.distPath, '${Build.appName}-macos-$archName.dmg');
+    await Process.run('create-dmg', [
+      '--volname', '${Build.appName}',
+      '--window-pos', '200', '120',
+      '--window-size', '600', '400',
+      '--icon-size', '100',
+      '--icon', '${Build.appName}.app', '175', '190',
+      '--hide-extension', '${Build.appName}.app',
+      '--app-drop-link', '425', '190',
+      dmgPath,
+      'build/macos/Build/Products/Release/${Build.appName}.app',
+    ]);
+  }
+
+  Arch? _hostArch() {
+    final result = Process.runSync('uname', ['-m']);
+    final machine = result.stdout.toString().trim();
+    return switch (machine) {
+      'x86_64' || 'amd64' => Arch.amd64,
+      'aarch64' || 'arm64' => Arch.arm64,
+      _ => null,
+    };
+  }
+
+  Future<void> _collectOutput(String outDir, String platform, String distPath) async {
+    final platDir = Directory(join(outDir, platform));
+    if (!platDir.existsSync()) platDir.createSync(recursive: true);
+    final dist = Directory(distPath);
+    if (!dist.existsSync()) return;
+    for (final f in dist.listSync().whereType<File>()) {
+      final name = basename(f.path);
+      f.copySync(join(platDir.path, name));
+      print('  -> ${join(platform, name)}');
+    }
+  }
+}
+
 main(args) async {
   final runner = CommandRunner("setup", "build Application");
   runner.addCommand(DevCommand());
@@ -933,5 +1237,6 @@ main(args) async {
   runner.addCommand(BuildCommand(target: Target.linux));
   runner.addCommand(BuildCommand(target: Target.windows));
   runner.addCommand(BuildCommand(target: Target.macos));
+  runner.addCommand(BuildAllCommand());
   runner.run(args);
 }
