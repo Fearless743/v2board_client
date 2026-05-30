@@ -12,7 +12,7 @@ const _prefPublicKey = 'subscribe_encryption_public_key';
 const _prefPrivateKey = 'subscribe_encryption_private_key';
 const _prefKeyCreatedAt = 'subscribe_encryption_key_created_at';
 
-const keyValidityDuration = Duration(days: 30);
+const keyValidityDuration = Duration(days: 7);
 
 class CryptoService {
   static const int _rsaKeyBits = 2048;
