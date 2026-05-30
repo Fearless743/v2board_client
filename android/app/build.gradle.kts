@@ -13,6 +13,9 @@ val localProperties = Properties().apply {
     }
 }
 
+val appTitle = localProperties.getProperty("app.title", "FlClashX")
+val appId = "com.${appTitle.lowercase()}.clash"
+
 val mStoreFile: File = file("keystore.jks")
 val mStorePassword: String? = localProperties.getProperty("storePassword")
 val mKeyAlias: String? = localProperties.getProperty("keyAlias")
@@ -23,7 +26,7 @@ val isRelease = mStoreFile.exists()
         && mKeyPassword != null
 
 android {
-    namespace = "com.follow.clashx"
+    namespace = appId
     compileSdk = 36
     ndkVersion = "28.0.13004108"
 
@@ -38,7 +41,7 @@ android {
     }
 
     defaultConfig {
-        applicationId = "com.follow.clashx"
+        applicationId = appId
         minSdk = flutter.minSdkVersion
         targetSdk = flutter.targetSdkVersion
         versionCode = flutter.versionCode

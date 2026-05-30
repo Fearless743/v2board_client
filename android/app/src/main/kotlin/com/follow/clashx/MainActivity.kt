@@ -6,6 +6,7 @@ import android.os.Bundle
 import android.provider.Settings
 import androidx.appcompat.app.AppCompatDelegate
 import com.follow.clashx.plugins.AppPlugin
+import com.follow.clashx.BuildConfig
 import com.follow.clashx.core.Core
 import com.follow.clashx.plugins.ServicePlugin
 import com.follow.clashx.plugins.TilePlugin
@@ -58,7 +59,7 @@ class MainActivity : FlutterActivity() {
         }
         
         // Platform Channel for getting Android ID
-        MethodChannel(flutterEngine.dartExecutor.binaryMessenger, "com.follow.clashx/device_id")
+        MethodChannel(flutterEngine.dartExecutor.binaryMessenger, "${BuildConfig.APPLICATION_ID}/device_id")
             .setMethodCallHandler { call, result ->
                 if (call.method == "getAndroidId") {
                     try {
@@ -76,7 +77,7 @@ class MainActivity : FlutterActivity() {
             }
 
         // Platform Channel for core binary installation
-        MethodChannel(flutterEngine.dartExecutor.binaryMessenger, "com.follow.clashx/core_updater")
+        MethodChannel(flutterEngine.dartExecutor.binaryMessenger, "${BuildConfig.APPLICATION_ID}/core_updater")
             .setMethodCallHandler { call, result ->
                 when (call.method) {
                     "installCoreBinary" -> {

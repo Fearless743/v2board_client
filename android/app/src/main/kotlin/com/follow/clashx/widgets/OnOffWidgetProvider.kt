@@ -9,6 +9,7 @@ import android.content.Intent
 import android.util.Log
 import android.widget.RemoteViews
 import androidx.lifecycle.Observer
+import com.follow.clashx.BuildConfig
 import com.follow.clashx.GlobalState
 import com.follow.clashx.R
 import com.follow.clashx.RunState
@@ -24,7 +25,7 @@ class OnOffWidgetProvider : AppWidgetProvider() {
     companion object {
         private const val TAG = "OnOffWidgetProvider"
 
-        const val ACTION_TOGGLE = "com.follow.clashx.widget.ACTION_ONOFF_TOGGLE"
+        val ACTION_TOGGLE = "${BuildConfig.APPLICATION_ID}.widget.ACTION_ONOFF_TOGGLE"
 
         @Volatile
         private var observersAttached = false

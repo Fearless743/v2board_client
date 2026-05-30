@@ -3,8 +3,17 @@ plugins {
     id("org.jetbrains.kotlin.android")
 }
 
+val localPropertiesFile = rootProject.file("local.properties")
+val localProperties = java.util.Properties().apply {
+    if (localPropertiesFile.exists()) {
+        localPropertiesFile.inputStream().use { load(it) }
+    }
+}
+val appTitle = localProperties.getProperty("app.title", "FlClashX")
+val appCoreId = "com.${appTitle.lowercase()}.clash.core"
+
 android {
-    namespace = "com.follow.clashx.core"
+    namespace = appCoreId
     compileSdk = 36
     ndkVersion = "28.0.13004108"
 

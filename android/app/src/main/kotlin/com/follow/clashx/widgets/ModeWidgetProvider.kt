@@ -10,6 +10,7 @@ import android.util.Log
 import android.view.View
 import android.widget.RemoteViews
 import androidx.lifecycle.Observer
+import com.follow.clashx.BuildConfig
 import com.follow.clashx.GlobalState
 import com.follow.clashx.R
 import com.follow.clashx.RunState
@@ -29,10 +30,11 @@ class ModeWidgetProvider : AppWidgetProvider() {
     companion object {
         private const val TAG = "ModeWidgetProvider"
 
-        const val ACTION_TOGGLE = "com.follow.clashx.widget.ACTION_TOGGLE"
-        const val ACTION_MODE_RULE = "com.follow.clashx.widget.ACTION_MODE_RULE"
-        const val ACTION_MODE_GLOBAL = "com.follow.clashx.widget.ACTION_MODE_GLOBAL"
-        const val ACTION_MODE_DIRECT = "com.follow.clashx.widget.ACTION_MODE_DIRECT"
+        private fun action(name: String) = "${BuildConfig.APPLICATION_ID}.$name"
+        val ACTION_TOGGLE = action("widget.ACTION_TOGGLE")
+        val ACTION_MODE_RULE = action("widget.ACTION_MODE_RULE")
+        val ACTION_MODE_GLOBAL = action("widget.ACTION_MODE_GLOBAL")
+        val ACTION_MODE_DIRECT = action("widget.ACTION_MODE_DIRECT")
 
         @Volatile
         private var observersAttached = false
