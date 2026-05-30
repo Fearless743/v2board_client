@@ -85,9 +85,9 @@ double getWidgetHeight(num lines) => max(lines * 84 + (lines - 1) * 16, 0).ap;
 
 const maxLength = 150;
 
-const mainIsolate = "${appName}MainIsolate";
+final mainIsolate = "${appName}MainIsolate";
 
-const serviceIsolate = "${appName}ServiceIsolate";
+final serviceIsolate = "${appName}ServiceIsolate";
 
 const mihomoRepo = "MetaCubeX/mihomo";
 const mihomoCoreRepo = "Fearless743/v2board_client";

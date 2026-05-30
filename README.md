@@ -298,12 +298,12 @@ flclashx-androidsecure: true
 
 ## Параметры сборки
 
-Параметры передаются через `--dart-define` при запуске или сборке. Для Android Gradle также читает `APP_TITLE` из переменной окружения:
+Параметры передаются через `--dart-define` при запуске или сборке:
 
 ```bash
-APP_TITLE=MyProxy flutter run -d linux \
+flutter run -d linux \
   --dart-define=APP_TITLE=MyProxy \
-  --dart-define=APP_ENV=pre \
+  --dart-define=APP_ENV=stable \
   --dart-define=PRIMARY_COLOR=0xFF6750A4 \
   --dart-define=SCHEME_VARIANT=tonalSpot \
   --dart-define=V2BOARD_BASE_URL=https://example.com

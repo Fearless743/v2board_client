@@ -199,12 +199,12 @@ By default, the following configuration parameters received from the subscriptio
 
 ## Build Parameters
 
-Parameters are passed via `--dart-define` when running or building. For Android, Gradle also reads `APP_TITLE` from the environment:
+Parameters are passed via `--dart-define` when running or building:
 
 ```bash
-APP_TITLE=MyProxy flutter run -d linux \
+flutter run -d linux \
   --dart-define=APP_TITLE=MyProxy \
-  --dart-define=APP_ENV=pre \
+  --dart-define=APP_ENV=stable \
   --dart-define=PRIMARY_COLOR=0xFF6750A4 \
   --dart-define=SCHEME_VARIANT=tonalSpot \
   --dart-define=V2BOARD_BASE_URL=https://example.com
