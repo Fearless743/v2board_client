@@ -12,10 +12,9 @@ val localProperties = Properties().apply {
     }
 }
 val appTitle = localProperties.getProperty("app.title", "FlClashX")
-val appCoreId = "com.${appTitle.lowercase()}.clash.core"
 
 android {
-    namespace = appCoreId
+    namespace = "com.follow.clashx.core"
     compileSdk = 36
     ndkVersion = "28.0.13004108"
 

@@ -26,7 +26,7 @@ val isRelease = mStoreFile.exists()
         && mKeyPassword != null
 
 android {
-    namespace = appId
+    namespace = "com.follow.clashx"
     compileSdk = 36
     ndkVersion = "28.0.13004108"
 
