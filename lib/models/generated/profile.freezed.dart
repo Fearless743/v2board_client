@@ -242,6 +242,7 @@ mixin _$Profile {
   @JsonKey(includeToJson: false, includeFromJson: false)
   bool get isUpdating => throw _privateConstructorUsedError;
   bool get isEncrypted => throw _privateConstructorUsedError;
+  String? get encryptedUrl => throw _privateConstructorUsedError;
   Map<String, String> get providerHeaders => throw _privateConstructorUsedError;
 
   /// Serializes this Profile to a JSON map.
@@ -272,6 +273,7 @@ abstract class $ProfileCopyWith<$Res> {
       OverrideData overrideData,
       @JsonKey(includeToJson: false, includeFromJson: false) bool isUpdating,
       bool isEncrypted,
+      String? encryptedUrl,
       Map<String, String> providerHeaders});
 
   $SubscriptionInfoCopyWith<$Res>? get subscriptionInfo;
@@ -306,6 +308,7 @@ class _$ProfileCopyWithImpl<$Res, $Val extends Profile>
     Object? overrideData = null,
     Object? isUpdating = null,
     Object? isEncrypted = null,
+    Object? encryptedUrl = freezed,
     Object? providerHeaders = null,
   }) {
     return _then(_value.copyWith(
@@ -410,6 +413,7 @@ abstract class _$$ProfileImplCopyWith<$Res> implements $ProfileCopyWith<$Res> {
       OverrideData overrideData,
       @JsonKey(includeToJson: false, includeFromJson: false) bool isUpdating,
       bool isEncrypted,
+      String? encryptedUrl,
       Map<String, String> providerHeaders});
 
   @override
@@ -444,6 +448,7 @@ class __$$ProfileImplCopyWithImpl<$Res>
     Object? overrideData = null,
     Object? isUpdating = null,
     Object? isEncrypted = null,
+    Object? encryptedUrl = freezed,
     Object? providerHeaders = null,
   }) {
     return _then(_$ProfileImpl(
@@ -499,6 +504,10 @@ class __$$ProfileImplCopyWithImpl<$Res>
           ? _value.isEncrypted
           : isEncrypted // ignore: cast_nullable_to_non_nullable
               as bool,
+      encryptedUrl: freezed == encryptedUrl
+          ? _value.encryptedUrl
+          : encryptedUrl // ignore: cast_nullable_to_non_nullable
+              as String?,
       providerHeaders: null == providerHeaders
           ? _value._providerHeaders
           : providerHeaders // ignore: cast_nullable_to_non_nullable
@@ -525,6 +534,7 @@ class _$ProfileImpl implements _Profile {
       @JsonKey(includeToJson: false, includeFromJson: false)
       this.isUpdating = false,
       this.isEncrypted = false,
+      this.encryptedUrl,
       final Map<String, String> providerHeaders = const {}})
       : _selectedMap = selectedMap,
         _unfoldSet = unfoldSet,
@@ -578,6 +588,8 @@ class _$ProfileImpl implements _Profile {
   @override
   @JsonKey()
   final bool isEncrypted;
+  @override
+  final String? encryptedUrl;
   final Map<String, String> _providerHeaders;
   @override
   @JsonKey()
@@ -620,6 +632,8 @@ class _$ProfileImpl implements _Profile {
                 other.isUpdating == isUpdating) &&
             (identical(other.isEncrypted, isEncrypted) ||
                 other.isEncrypted == isEncrypted) &&
+            (identical(other.encryptedUrl, encryptedUrl) ||
+                other.encryptedUrl == encryptedUrl) &&
             const DeepCollectionEquality()
                 .equals(other._providerHeaders, _providerHeaders));
   }
@@ -641,6 +655,7 @@ class _$ProfileImpl implements _Profile {
       overrideData,
       isUpdating,
       isEncrypted,
+      encryptedUrl,
       const DeepCollectionEquality().hash(_providerHeaders));
 
   /// Create a copy of Profile
@@ -675,6 +690,7 @@ abstract class _Profile implements Profile {
       @JsonKey(includeToJson: false, includeFromJson: false)
       final bool isUpdating,
       final bool isEncrypted,
+      final String? encryptedUrl,
       final Map<String, String> providerHeaders}) = _$ProfileImpl;
 
   factory _Profile.fromJson(Map<String, dynamic> json) = _$ProfileImpl.fromJson;
@@ -706,6 +722,8 @@ abstract class _Profile implements Profile {
   bool get isUpdating;
   @override
   bool get isEncrypted;
+  @override
+  String? get encryptedUrl;
   @override
   Map<String, String> get providerHeaders;
 

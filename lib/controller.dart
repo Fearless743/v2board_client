@@ -1204,6 +1204,8 @@ class AppController {
     final profile = updatedProfile.copyWith(
       subscriptionInfo: subscriptionInfo,
       providerHeaders: providerHeaders,
+      encryptedUrl: updatedProfile.encryptedUrl ??
+          (subscriptionUrl.contains('/encrypted/') ? subscriptionUrl : null),
     );
     _applyAllHeaderSettings(profile, isNewProfile: fallbackProfile == null);
     _ref.read(profilesProvider.notifier).setProfile(profile);

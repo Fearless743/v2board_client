@@ -72,6 +72,7 @@ class Profile with _$Profile {
     @Default(false)
     bool isUpdating,
     @Default(false) bool isEncrypted,
+    String? encryptedUrl,
     @Default({}) Map<String, String> providerHeaders,
   }) = _Profile;
 
@@ -199,8 +200,9 @@ extension ProfileExtension on Profile {
     final publicKeyBase64 = await CryptoService.getPublicKeyBase64();
     headers['x-public-key'] = publicKeyBase64;
 
+    final requestUrl = encryptedUrl ?? url;
     final response = await request.getFileResponseForUrl(
-      url,
+      requestUrl,
       headers: headers.isNotEmpty ? headers : null,
     );
 
@@ -266,6 +268,7 @@ extension ProfileExtension on Profile {
       subscriptionInfo: SubscriptionInfo.formHString(userinfo),
       autoUpdateDuration: durationFromHeader ?? autoUpdateDuration,
       providerHeaders: providerHeaders,
+      encryptedUrl: isResponseEncrypted ? requestUrl : encryptedUrl,
     ).saveFile(
       isResponseEncrypted ? responseData : plaintextBytes,
       isEncrypted: isResponseEncrypted,
