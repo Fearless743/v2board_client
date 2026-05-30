@@ -108,11 +108,6 @@ class CryptoService {
 
     final aesKey = _rsaDecryptKey(rsaEncryptedKey, privateKey);
 
-    final aesKeyHex = aesKey.map((b) => b.toRadixString(16).padLeft(2, '0')).join();
-    final nonceHex = nonce.map((b) => b.toRadixString(16).padLeft(2, '0')).join();
-    print('[DecryptDebug] rsaKeyLen=$rsaKeyLen '
-        'aesKeyLen=${aesKey.length} aesKey=$aesKeyHex nonce=$nonceHex ctLen=${ciphertext.length}');
-
     // Separate ciphertext and tag (last 16 bytes)
     final tag = ciphertext.sublist(ciphertext.length - 16);
     final rawCipher = ciphertext.sublist(0, ciphertext.length - 16);
