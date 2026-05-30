@@ -193,17 +193,15 @@ extension ProfileExtension on Profile {
       if (details.model != null) headers['x-device-model'] = details.model;
     }
 
-    if (await CryptoService.hasKeyPair()) {
-      final publicKeyBase64 = await CryptoService.getPublicKeyBase64();
-      headers['x-public-key'] = publicKeyBase64;
-    } else {
+    if (!await CryptoService.hasKeyPair()) {
       await CryptoService.generateKeyPair();
-      final publicKeyBase64 = await CryptoService.getPublicKeyBase64();
-      headers['x-public-key'] = publicKeyBase64;
     }
+    final publicKeyBase64 = await CryptoService.getPublicKeyBase64();
+    headers['x-public-key'] = publicKeyBase64;
 
+    final requestUrl = _buildEncryptedUrl(url);
     final response = await request.getFileResponseForUrl(
-      url,
+      requestUrl,
       headers: headers.isNotEmpty ? headers : null,
     );
 
@@ -311,4 +309,14 @@ extension ProfileExtension on Profile {
     await file.writeAsString(value);
     return copyWith(lastUpdateDate: DateTime.now());
   }
+}
+
+String _buildEncryptedUrl(String originalUrl) {
+  final uri = Uri.parse(originalUrl);
+  final segments = uri.pathSegments.toList();
+  if (segments.isEmpty) return originalUrl;
+  final lastSegment = segments.removeLast();
+  segments.add('encrypted');
+  segments.add(lastSegment);
+  return uri.replace(pathSegments: segments).toString();
 }
