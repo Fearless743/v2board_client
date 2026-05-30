@@ -119,13 +119,13 @@ class CryptoService {
     engine.init(false, PublicKeyParameter<RSAPublicKey>(publicKey));
     final decoded = engine.process(encryptedKey);
 
-    // PKCS1 v1.5 type 1 unpadding (matches PHP openssl_private_encrypt)
-    // Format: 0x00 0x01 [0xFF padding] 0x00 [data]
-    if (decoded.length < 2 || decoded[0] != 0x00 || decoded[1] != 0x01) {
+    // PKCS1 v1.5 type 2 unpadding (matches PHP manual padding)
+    // Format: 0x00 0x02 [non-zero padding] 0x00 [data]
+    if (decoded.length < 2 || decoded[0] != 0x00 || decoded[1] != 0x02) {
       throw Exception('Invalid PKCS1 v1.5 padding');
     }
     var i = 2;
-    while (i < decoded.length && decoded[i] == 0xFF) {
+    while (i < decoded.length && decoded[i] != 0x00) {
       i++;
     }
     if (i >= decoded.length || decoded[i] != 0x00) {
