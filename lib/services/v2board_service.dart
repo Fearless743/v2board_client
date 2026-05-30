@@ -219,8 +219,8 @@ class V2BoardUserInfo {
           'v2board-plan-name': planName!,
           'flclashx-servicename': planName!,
         },
-        if (subscribeUrl != null && subscribeUrl!.isNotEmpty)
-          'v2board-subscribe-url': subscribeUrl!,
+        if (subscribeUrlEncrypted != null && subscribeUrlEncrypted!.isNotEmpty)
+          'v2board-subscribe-url': subscribeUrlEncrypted!,
         if (resetDay > 0) 'v2board-reset-day': resetDay.toString(),
         if (speedLimit > 0) 'v2board-speed-limit': speedLimit.toString(),
       };
@@ -329,10 +329,6 @@ class V2BoardClient {
       final encryptedUrl = info.subscribeUrlEncrypted;
       if (encryptedUrl != null && encryptedUrl.isNotEmpty) {
         return encryptedUrl;
-      }
-      final directUrl = info.subscribeUrl;
-      if (directUrl != null && directUrl.isNotEmpty) {
-        return directUrl;
       }
 
       final token = info.token?.isNotEmpty == true ? info.token! : _token;
