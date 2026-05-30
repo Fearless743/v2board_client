@@ -211,8 +211,7 @@ flutter run -d linux \
 
 | Parameter | Description | Default |
 |---|---|---|
-| `APP_TITLE` | Application name. Used in window titles, notifications, logs, etc. | `FlClashX` |
-| `PACKAGE_NAME` | Package identifier. Format: `com.{name}.clash` | `com.flclashx.clash` |
+| `APP_TITLE` | Application name. Also generates package ID `com.{lowercase}.clash` automatically | `FlClashX` |
 | `APP_ENV` | Environment mode. `stable` for release builds, `pre` for pre-release (disables update checks) | `pre` |
 | `PRIMARY_COLOR` | Primary UI color as `0xAARRGGBB` hex value | System accent |
 | `SCHEME_VARIANT` | Material 3 color scheme variant: `tonalSpot`, `content`, `fidelity`, `monochrome`, `neutral`, `vibrant`, `expressive`, `rainbow`, `fruitSalad` | `content` |

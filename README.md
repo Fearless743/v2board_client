@@ -310,8 +310,7 @@ flutter run -d linux \
 
 | Параметр | Описание | По умолчанию |
 |---|---|---|
-| `APP_TITLE` | Название приложения. Используется в заголовках окон, уведомлениях, логах и т.д. | `FlClashX` |
-| `PACKAGE_NAME` | Идентификатор пакета. Формат: `com.{name}.clash` | `com.flclashx.clash` |
+| `APP_TITLE` | Название приложения. Также用于动生成 идентификатор пакета `com.{в нижнем регистре}.clash` | `FlClashX` |
 | `APP_ENV` | Режим окружения. `stable` — релиз, `pre` — предрелиз (отключает проверку обновлений) | `pre` |
 | `PRIMARY_COLOR` | Основной цвет интерфейса в формате `0xAARRGGBB` | Цвет системы |
 | `SCHEME_VARIANT` | Вариант цветовой схемы Material 3: `tonalSpot`, `content`, `fidelity`, `monochrome`, `neutral`, `vibrant`, `expressive`, `rainbow`, `fruitSalad` | `content` |

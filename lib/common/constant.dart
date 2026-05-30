@@ -13,8 +13,7 @@ const appHelperService = "FlClashHelperService";
 const coreName = "clashx.meta";
 const browserUa =
     "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36";
-const packageName =
-    String.fromEnvironment("PACKAGE_NAME", defaultValue: "com.flclashx.clash");
+final packageName = "com.${appName.toLowerCase()}.clash";
 const helperPort = 47890;
 const maxTextScale = 1.4;
 const minTextScale = 0.8;
