@@ -4,7 +4,7 @@ import 'dart:typed_data';
 class CustomBase64 {
   // Standard base64 alphabet — replace this string to use a custom encoding table.
   static const String alphabet =
-      'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/';
+      '9uEzo0ARmlbVtHITCYdpvq35PZSGFMXn87Q1LxKaOjBU4hwJcNyWfDk2reg6si+/';
 
   // URL-safe alternatives that map to positions 62 and 63.
   static const String altChar62 = '-';
@@ -23,7 +23,8 @@ class CustomBase64 {
       if (ch == 0x3D) break; // '=' padding
       final value = lookup[ch];
       if (value == null) {
-        throw FormatException('Invalid character in custom base64: ${String.fromCharCode(ch)}');
+        throw FormatException(
+            'Invalid character in custom base64: ${String.fromCharCode(ch)}');
       }
       buffer = (buffer << 6) | value;
       bits += 6;
