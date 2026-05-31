@@ -894,18 +894,11 @@ class BuildCommand extends Command {
         );
         return;
       case Target.android:
-        // Build all architectures: armeabi-v7a, arm64-v8a, x86_64
-        final allTargets = "android-arm,android-arm64,android-x64";
-
-        // Build split APKs (one per architecture)
-        await _buildDistributor(
-          target: target,
-          targets: "apk",
-          args:
-              ",split-per-abi --build-target-platform $allTargets --build-dart-define=CORE_VERSION=$coreVersion",
-          env: env,
-          v2boardBaseUrl: v2boardBaseUrl,
-        );
+        // Build all architectures: arm64-v8a, x86_64
+        final allTargets = Build.buildItems
+            .where((b) => b.target == Target.android)
+            .map((b) => Build.flutterTargetPlatform(b.archName))
+            .join(',');
 
         // Build universal APK (all architectures in one file)
         await _buildDistributor(
@@ -1134,15 +1127,7 @@ class BuildAllCommand extends Command {
         .where((b) => b.target == Target.android)
         .map((b) => Build.flutterTargetPlatform(b.archName))
         .join(',');
-    // Split per ABI
-    await Build.exec(
-      name: 'android-split',
-      Build.getExecutable(
-        'dart pub global run flutter_distributor:main package --skip-clean --platform android --targets apk,split-per-abi --flutter-build-args=verbose --build-target-platform $allTargets --build-dart-define=CORE_VERSION=$coreVersion $defines',
-      ),
-      environment: env,
-    );
-    // Universal
+    // Universal APK
     await Build.exec(
       name: 'android-universal',
       Build.getExecutable(
