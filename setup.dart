@@ -680,6 +680,18 @@ class BuildCommand extends Command {
       "v2board-base-url",
       help: "Default V2Board panel base URL",
     );
+    argParser.addOption(
+      "app-title",
+      help: "Application title (APP_TITLE)",
+    );
+    argParser.addOption(
+      "primary-color",
+      help: "PRIMARY_COLOR (e.g. 0xFF6750A4)",
+    );
+    argParser.addOption(
+      "scheme-variant",
+      help: "SCHEME_VARIANT (e.g. tonalSpot)",
+    );
     // Android builds always create both split and universal APKs
     // No additional flags needed
   }
@@ -750,11 +762,30 @@ class BuildCommand extends Command {
     return " --build-dart-define=V2BOARD_BASE_URL=$value";
   }
 
+  String _extraBuildDefines({
+    String? appTitle,
+    String? primaryColor,
+    String? schemeVariant,
+  }) {
+    final parts = <String>[];
+    if (appTitle != null && appTitle.isNotEmpty) {
+      parts.add("--build-dart-define=APP_TITLE=$appTitle");
+    }
+    if (primaryColor != null && primaryColor.isNotEmpty) {
+      parts.add("--build-dart-define=PRIMARY_COLOR=$primaryColor");
+    }
+    if (schemeVariant != null && schemeVariant.isNotEmpty) {
+      parts.add("--build-dart-define=SCHEME_VARIANT=$schemeVariant");
+    }
+    return parts.isEmpty ? "" : " ${parts.join(' ')}";
+  }
+
   _buildMacosApp({
     required Arch arch,
     required String env,
     required String coreVersion,
     String? v2boardBaseUrl,
+    String extraDefines = '',
   }) async {
     await Build.exec(
       name: "flutter build macos",
@@ -767,6 +798,10 @@ class BuildCommand extends Command {
         "--dart-define=CORE_VERSION=$coreVersion",
         if (v2boardBaseUrl?.trim().isNotEmpty == true)
           "--dart-define=V2BOARD_BASE_URL=${v2boardBaseUrl!.trim()}",
+        ...extraDefines
+            .split(' ')
+            .where((s) => s.startsWith('--build-dart-define='))
+            .map((s) => s.replaceFirst('--build-dart-define=', '--dart-define=')),
       ],
     );
 
@@ -850,6 +885,14 @@ class BuildCommand extends Command {
     final archName = argResults?["arch"];
     final env = argResults?["env"] ?? "pre";
     final v2boardBaseUrl = argResults?["v2board-base-url"] as String?;
+    final appTitle = argResults?["app-title"] as String?;
+    final primaryColor = argResults?["primary-color"] as String?;
+    final schemeVariant = argResults?["scheme-variant"] as String?;
+    final extraDefines = _extraBuildDefines(
+      appTitle: appTitle,
+      primaryColor: primaryColor,
+      schemeVariant: schemeVariant,
+    );
     final currentArches =
         arches.where((element) => element.name == archName).toList();
     final arch = currentArches.isEmpty ? null : currentArches.first;
@@ -881,7 +924,7 @@ class BuildCommand extends Command {
           target: target,
           targets: "exe,zip",
           args:
-              " --description $archName --build-dart-define=CORE_SHA256=$token --build-dart-define=CORE_VERSION=$coreVersion",
+              " --description $archName --build-dart-define=CORE_SHA256=$token --build-dart-define=CORE_VERSION=$coreVersion$extraDefines",
           env: env,
           v2boardBaseUrl: v2boardBaseUrl,
         );
@@ -902,7 +945,7 @@ class BuildCommand extends Command {
           target: target,
           targets: targets,
           args:
-              " --description $archName --build-target-platform $defaultTarget --build-dart-define=CORE_VERSION=$coreVersion",
+              " --description $archName --build-target-platform $defaultTarget --build-dart-define=CORE_VERSION=$coreVersion$extraDefines",
           env: env,
           v2boardBaseUrl: v2boardBaseUrl,
         );
@@ -919,7 +962,7 @@ class BuildCommand extends Command {
           target: target,
           targets: "apk",
           args:
-              " --build-target-platform $allTargets --build-dart-define=CORE_VERSION=$coreVersion",
+              " --build-target-platform $allTargets --build-dart-define=CORE_VERSION=$coreVersion$extraDefines",
           env: env,
           v2boardBaseUrl: v2boardBaseUrl,
         );
@@ -932,6 +975,7 @@ class BuildCommand extends Command {
           env: env,
           coreVersion: coreVersion,
           v2boardBaseUrl: v2boardBaseUrl,
+          extraDefines: extraDefines,
         );
         return;
     }

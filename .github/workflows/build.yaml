@@ -25,6 +25,18 @@ on:
         description: "V2Board panel base URL (optional)"
         type: string
         default: ""
+      app_title:
+        description: "Application title (APP_TITLE)"
+        type: string
+        default: ""
+      primary_color:
+        description: "Primary color (e.g. 0xFF6750A4)"
+        type: string
+        default: ""
+      scheme_variant:
+        description: "Color scheme variant (e.g. tonalSpot)"
+        type: string
+        default: ""
       create_release:
         description: "Create a GitHub release after build"
         type: boolean
@@ -185,6 +197,9 @@ jobs:
           ${{ matrix.arch && format('--arch {0}', matrix.arch) || '' }}
           ${{ env.BUILD_ENV == 'true' && '--env stable' || '' }}
           ${{ github.event.inputs.v2board_base_url && format('--v2board-base-url {0}', github.event.inputs.v2board_base_url) || '' }}
+          ${{ github.event.inputs.app_title && format('--app-title {0}', github.event.inputs.app_title) || '' }}
+          ${{ github.event.inputs.primary_color && format('--primary-color {0}', github.event.inputs.primary_color) || '' }}
+          ${{ github.event.inputs.scheme_variant && format('--scheme-variant {0}', github.event.inputs.scheme_variant) || '' }}
 
       - name: Upload
         uses: actions/upload-artifact@v4
