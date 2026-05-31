@@ -73,38 +73,39 @@ env:
     }}
 
 jobs:
+  prepare:
+    runs-on: ubuntu-latest
+    outputs:
+      matrix: ${{ steps.set-matrix.outputs.matrix }}
+    steps:
+      - id: set-matrix
+        run: |
+          MATRIX='[{"platform":"android","os":"ubuntu-latest"},{"platform":"windows","os":"windows-latest","arch":"amd64"},{"platform":"linux","os":"ubuntu-24.04","arch":"amd64"},{"platform":"macos","os":"macos-latest","arch":"amd64"},{"platform":"macos","os":"macos-latest","arch":"arm64"}]'
+
+          if [ "${{ github.event_name }}" == "workflow_dispatch" ]; then
+            PLATFORMS="${{ github.event.inputs.platforms }}"
+            ARCHES="${{ github.event.inputs.architectures }}"
+
+            FILTERED=$(echo "$MATRIX" | jq -c --arg p "$PLATFORMS" --arg a "$ARCHES" '{
+              include: [.[] |
+                select(
+                  ($p == "all" or (.platform as $pl | ($p | split(",") | map(gsub("^\\s+|\\s+$";"")) | index($pl) != null))) and
+                  ($a == "all" or (.arch == null) or (.arch as $ar | ($a | split(",") | map(gsub("^\\s+|\\s+$";"")) | index($ar) != null)))
+                )
+              ]
+            }')
+
+            echo "matrix=$FILTERED" >> $GITHUB_OUTPUT
+          else
+            echo "matrix={\"include\":$MATRIX}" >> $GITHUB_OUTPUT
+          fi
+
   build:
+    needs: prepare
     runs-on: ${{ matrix.os }}
-    if: >-
-      github.event_name == 'push' ||
-      (
-        (github.event.inputs.platforms == 'all' || contains(github.event.inputs.platforms, matrix.platform)) &&
-        (github.event.inputs.architectures == 'all' || !matrix.arch || contains(github.event.inputs.architectures, matrix.arch))
-      )
     strategy:
       fail-fast: false
-      matrix:
-        include:
-          - platform: android
-            os: ubuntu-latest
-          - platform: windows
-            os: windows-latest
-            arch: amd64
-          - platform: linux
-            os: ubuntu-24.04
-            arch: amd64
-          - platform: macos
-            os: macos-latest
-            arch: amd64
-          - platform: macos
-            os: macos-latest
-            arch: arm64
-          #- platform: windows
-          #  os: windows-11-arm
-          #  arch: arm64
-          #- platform: linux
-          #  os: ubuntu-24.04-arm
-          #  arch: arm64
+      matrix: ${{ fromJSON(needs.prepare.outputs.matrix) }}
 
     steps:
       - name: Setup Rust for Windows ARM64
