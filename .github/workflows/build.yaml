@@ -51,12 +51,8 @@ on:
         description: "URL to 1024x1024 PNG icon (replaces all platform icons)"
         type: string
         default: ""
-      create_release:
-        description: "Create a GitHub release after build"
-        type: boolean
-        default: false
       release_tag:
-        description: "Tag name for release (e.g. v0.3.1-beta.1). Required if creating a release."
+        description: "Custom tag name (auto-generated from version if empty)"
         type: string
         default: ""
       sign_macos:
@@ -89,11 +85,9 @@ jobs:
             TAG="${{ github.ref_name }}"
           elif [ -n "${{ github.event.inputs.release_tag }}" ]; then
             TAG="${{ github.event.inputs.release_tag }}"
-          elif [ "${{ github.event.inputs.create_release }}" == "true" ]; then
+          else
             VERSION=$(grep -m1 'version:' pubspec.yaml | sed 's/.*: *//' | cut -d'+' -f1)
             TAG="v${VERSION}-build.${{ github.run_number }}"
-          else
-            TAG="build-${{ github.run_number }}"
           fi
 
           echo "tag=$TAG" >> $GITHUB_OUTPUT
@@ -358,7 +352,7 @@ jobs:
   upload:
     permissions: write-all
     needs: [prepare, build, sign-macos]
-    if: always() && (needs.build.result == 'success') && (github.event_name == 'push' || github.event.inputs.create_release == 'true')
+    if: always() && (needs.build.result == 'success')
     runs-on: ubuntu-latest
     env:
       EFFECTIVE_TAG: ${{ needs.prepare.outputs.effective_tag }}
