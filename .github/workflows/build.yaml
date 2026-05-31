@@ -77,7 +77,33 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       matrix: ${{ steps.set-matrix.outputs.matrix }}
+      effective_tag: ${{ steps.set-tag.outputs.tag }}
+      is_stable: ${{ steps.set-tag.outputs.is_stable }}
     steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - id: set-tag
+        run: |
+          if [ "${{ github.event_name }}" == "push" ]; then
+            TAG="${{ github.ref_name }}"
+          elif [ -n "${{ github.event.inputs.release_tag }}" ]; then
+            TAG="${{ github.event.inputs.release_tag }}"
+          elif [ "${{ github.event.inputs.create_release }}" == "true" ]; then
+            VERSION=$(grep -m1 'version:' pubspec.yaml | sed 's/.*: *//' | cut -d'+' -f1)
+            TAG="v${VERSION}-build.${{ github.run_number }}"
+          else
+            TAG="build-${{ github.run_number }}"
+          fi
+
+          echo "tag=$TAG" >> $GITHUB_OUTPUT
+
+          if [[ "$TAG" == *-* ]]; then
+            echo "is_stable=false" >> $GITHUB_OUTPUT
+          else
+            echo "is_stable=true" >> $GITHUB_OUTPUT
+          fi
+
       - id: set-matrix
         run: |
           MATRIX='[{"platform":"android","os":"ubuntu-latest"},{"platform":"windows","os":"windows-latest","arch":"amd64"},{"platform":"linux","os":"ubuntu-24.04","arch":"amd64"},{"platform":"macos","os":"macos-latest","arch":"amd64"},{"platform":"macos","os":"macos-latest","arch":"arm64"}]'
@@ -331,11 +357,12 @@ jobs:
 
   upload:
     permissions: write-all
-    needs: [build, sign-macos]
+    needs: [prepare, build, sign-macos]
     if: always() && (needs.build.result == 'success') && (github.event_name == 'push' || github.event.inputs.create_release == 'true')
     runs-on: ubuntu-latest
     env:
-      EFFECTIVE_TAG: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.release_tag || github.ref_name }}
+      EFFECTIVE_TAG: ${{ needs.prepare.outputs.effective_tag }}
+      IS_STABLE: ${{ needs.prepare.outputs.is_stable }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -356,6 +383,19 @@ jobs:
           path: ./dist/
           pattern: artifact-macos-*-signed
           merge-multiple: true
+
+      - name: Create tag
+        if: github.event_name == 'workflow_dispatch'
+        run: |
+          if ! git rev-parse "$EFFECTIVE_TAG" >/dev/null 2>&1; then
+            git tag "$EFFECTIVE_TAG"
+            git push origin "$EFFECTIVE_TAG"
+            echo "Created and pushed tag: $EFFECTIVE_TAG"
+          else
+            echo "Tag $EFFECTIVE_TAG already exists"
+          fi
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Generate release.md
         run: |
@@ -412,7 +452,7 @@ jobs:
             sed "s|VERSION|$version|g" ./.github/pre_release_template.md >> release.md
           fi
 
-      - name: Generate sha256
+      - name: Download signed macOS artifacts
         if: env.IS_STABLE == 'true'
         run: |
           cd ./dist
