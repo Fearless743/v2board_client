@@ -6,6 +6,25 @@ on:
       - "v*"
   workflow_dispatch:
     inputs:
+      platforms:
+        description: "Platforms to build (comma-separated: android,windows,linux,macos or 'all')"
+        type: string
+        default: "all"
+      architectures:
+        description: "Architectures to build (comma-separated: amd64,arm64 or 'all')"
+        type: string
+        default: "all"
+      env:
+        description: "Build environment"
+        type: choice
+        options:
+          - pre
+          - stable
+        default: "pre"
+      v2board_base_url:
+        description: "V2Board panel base URL (optional)"
+        type: string
+        default: ""
       create_release:
         description: "Create a GitHub release after build"
         type: boolean
@@ -21,10 +40,21 @@ on:
 
 env:
   IS_STABLE: ${{ github.event_name == 'push' && !contains(github.ref, '-') || github.event.inputs.release_tag && !contains(github.event.inputs.release_tag, '-') }}
+  BUILD_ENV: >-
+    ${{
+      (github.event_name == 'push' && !contains(github.ref, '-')) ||
+      (github.event_name == 'workflow_dispatch' && github.event.inputs.env == 'stable')
+    }}
 
 jobs:
   build:
     runs-on: ${{ matrix.os }}
+    if: >-
+      github.event_name == 'push' ||
+      (
+        (github.event.inputs.platforms == 'all' || contains(github.event.inputs.platforms, matrix.platform)) &&
+        (github.event.inputs.architectures == 'all' || !matrix.arch || contains(github.event.inputs.architectures, matrix.arch))
+      )
     strategy:
       fail-fast: false
       matrix:
@@ -150,7 +180,11 @@ jobs:
           echo "✅ Created Local.xcconfig for signing"
 
       - name: Setup
-        run: dart setup.dart ${{ matrix.platform }} ${{ matrix.arch && format('--arch {0}', matrix.arch) }} ${{ env.IS_STABLE == 'true' && '--env stable' || '' }}
+        run: >-
+          dart setup.dart ${{ matrix.platform }}
+          ${{ matrix.arch && format('--arch {0}', matrix.arch) || '' }}
+          ${{ env.BUILD_ENV == 'true' && '--env stable' || '' }}
+          ${{ github.event.inputs.v2board_base_url && format('--v2board-base-url {0}', github.event.inputs.v2board_base_url) || '' }}
 
       - name: Upload
         uses: actions/upload-artifact@v4
