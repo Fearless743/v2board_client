@@ -34,8 +34,18 @@ on:
         type: string
         default: ""
       scheme_variant:
-        description: "Color scheme variant (e.g. tonalSpot)"
-        type: string
+        description: "Color scheme variant"
+        type: choice
+        options:
+          - ""
+          - tonalSpot
+          - vibrant
+          - expressive
+          - fidelity
+          - content
+          - monochrome
+          - neutral
+          - rainbow
         default: ""
       icon_url:
         description: "URL to 1024x1024 PNG icon (replaces all platform icons)"
