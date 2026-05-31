@@ -142,6 +142,15 @@ class Build {
 
   static String get appName => "FlClashX";
 
+  static String flutterTargetPlatform(String? archName) {
+    const map = {
+      'armeabi-v7a': 'android-arm',
+      'arm64-v8a': 'android-arm64',
+      'x86_64': 'android-x64',
+    };
+    return map[archName] ?? 'android-$archName';
+  }
+
   static String get coreName => "FlClashCore";
 
   static String get libName => "libclash";
@@ -1123,7 +1132,7 @@ class BuildAllCommand extends Command {
     await Build.getDistributor();
     final allTargets = Build.buildItems
         .where((b) => b.target == Target.android)
-        .map((b) => 'android-${b.archName}')
+        .map((b) => Build.flutterTargetPlatform(b.archName))
         .join(',');
     // Split per ABI
     await Build.exec(
