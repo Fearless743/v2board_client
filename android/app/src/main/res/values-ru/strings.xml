@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="widget_description">@string/app_name режим и туннель</string>
+    <string name="widget_description">Режим и туннель</string>
     <string name="widget_mode_rule">Правила</string>
     <string name="widget_mode_global">Глобал</string>
     <string name="widget_mode_direct">Прямой</string>
     <string name="widget_toggle_desc">Переключить туннель</string>
-    <string name="widget_on_off_description">@string/app_name вкл/выкл туннель</string>
+    <string name="widget_on_off_description">Вкл/выкл туннель</string>
 </resources>
