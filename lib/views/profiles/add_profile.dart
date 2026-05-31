@@ -133,14 +133,18 @@ class V2BoardLoginDialog extends StatefulWidget {
 }
 
 class _V2BoardLoginDialogState extends State<V2BoardLoginDialog> {
-  final baseUrlController = TextEditingController(
-    text: globalState.v2boardBaseUrl,
-  );
+  late String _selectedUrl;
   final emailController = TextEditingController();
   final passwordController = TextEditingController();
 
+  @override
+  void initState() {
+    super.initState();
+    _selectedUrl = globalState.v2boardSelectedUrl;
+  }
+
   void _handleSubmit() {
-    final baseUrl = baseUrlController.text.trim();
+    final baseUrl = _selectedUrl.trim();
     final email = emailController.text.trim();
     final password = passwordController.text;
     if (baseUrl.isEmpty || email.isEmpty || password.isEmpty) return;
@@ -155,7 +159,6 @@ class _V2BoardLoginDialogState extends State<V2BoardLoginDialog> {
 
   @override
   void dispose() {
-    baseUrlController.dispose();
     emailController.dispose();
     passwordController.dispose();
     super.dispose();
@@ -175,15 +178,41 @@ class _V2BoardLoginDialogState extends State<V2BoardLoginDialog> {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              TextField(
-                controller: baseUrlController,
-                keyboardType: TextInputType.url,
-                autofocus: true,
-                decoration: InputDecoration(
-                  border: const OutlineInputBorder(),
-                  labelText: appLocalizations.panelUrl,
+              if (globalState.v2boardBaseUrls.length > 1)
+                DropdownButtonFormField<String>(
+                  initialValue: _selectedUrl,
+                  decoration: InputDecoration(
+                    border: const OutlineInputBorder(),
+                    labelText: appLocalizations.panelUrl,
+                  ),
+                  items: globalState.v2boardBaseUrls
+                      .map((url) => DropdownMenuItem(
+                            value: url,
+                            child: Text(url, overflow: TextOverflow.ellipsis),
+                          ))
+                      .toList(),
+                  onChanged: (value) {
+                    if (value != null) setState(() => _selectedUrl = value);
+                  },
+                )
+              else if (_selectedUrl.isNotEmpty)
+                InputDecorator(
+                  decoration: InputDecoration(
+                    border: const OutlineInputBorder(),
+                    labelText: appLocalizations.panelUrl,
+                  ),
+                  child: Text(_selectedUrl),
+                )
+              else
+                TextField(
+                  keyboardType: TextInputType.url,
+                  autofocus: true,
+                  decoration: InputDecoration(
+                    border: const OutlineInputBorder(),
+                    labelText: appLocalizations.panelUrl,
+                  ),
+                  onChanged: (value) => _selectedUrl = value,
                 ),
-              ),
               const SizedBox(height: 12),
               TextField(
                 controller: emailController,

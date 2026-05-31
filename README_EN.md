@@ -207,7 +207,7 @@ flutter run -d linux \
   --dart-define=APP_ENV=stable \
   --dart-define=PRIMARY_COLOR=0xFF6750A4 \
   --dart-define=SCHEME_VARIANT=tonalSpot \
-  --dart-define=V2BOARD_BASE_URL=https://example.com
+  --dart-define=V2BOARD_BASE_URL=https://cdn.example.com/v2board-config.txt
 ```
 
 | Parameter | Description | Default |
@@ -218,7 +218,7 @@ flutter run -d linux \
 | `SCHEME_VARIANT` | Material 3 color scheme variant: `tonalSpot`, `content`, `fidelity`, `monochrome`, `neutral`, `vibrant`, `expressive`, `rainbow`, `fruitSalad` | `content` |
 | `CORE_VERSION` | Mihomo core version string. Falls back to `lib/core_version.dart` if omitted | — |
 | `CORE_SHA256` | SHA-256 hash of the core binary (Windows only) | — |
-| `V2BOARD_BASE_URL` | V2Board panel base URL | — |
+| `V2BOARD_BASE_URL` | Object storage direct link to V2Board config file (JSON encoded with custom-base64) | — |
 
 ## Application Usage
 

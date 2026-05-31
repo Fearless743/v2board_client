@@ -306,7 +306,7 @@ flutter run -d linux \
   --dart-define=APP_ENV=stable \
   --dart-define=PRIMARY_COLOR=0xFF6750A4 \
   --dart-define=SCHEME_VARIANT=tonalSpot \
-  --dart-define=V2BOARD_BASE_URL=https://example.com
+  --dart-define=V2BOARD_BASE_URL=https://cdn.example.com/v2board-config.txt
 ```
 
 | Параметр | Описание | По умолчанию |
@@ -317,7 +317,7 @@ flutter run -d linux \
 | `SCHEME_VARIANT` | Вариант цветовой схемы Material 3: `tonalSpot`, `content`, `fidelity`, `monochrome`, `neutral`, `vibrant`, `expressive`, `rainbow`, `fruitSalad` | `content` |
 | `CORE_VERSION` | Версия ядра mihomo. Если не указана, используется версия из `lib/core_version.dart` | — |
 | `CORE_SHA256` | SHA-256 хеш исполняемого файла ядра (только Windows) | — |
-| `V2BOARD_BASE_URL` | Базовый URL панели V2Board | — |
+| `V2BOARD_BASE_URL` | Прямая ссылка на файл конфигурации V2Board в объектном хранилище (JSON, закодированный в Base64 с пользовательской таблицей) | — |
 
 ## Использование
 

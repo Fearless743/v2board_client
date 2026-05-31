@@ -24,6 +24,7 @@ import 'controller.dart';
 import 'core_version.dart';
 import 'models/models.dart';
 import 'services/crypto_service.dart';
+import 'services/v2board_config_service.dart';
 
 typedef UpdateTasks = List<FutureOr Function()>;
 
@@ -43,7 +44,9 @@ class GlobalState {
   late Config config;
   late AppState appState;
   bool isPre = true;
-  String v2boardBaseUrl = "";
+  String v2boardConfigUrl = "";
+  List<String> v2boardBaseUrls = [];
+  String v2boardSelectedUrl = "";
   String? coreSHA256;
   String? coreVersion;
   int? buildPrimaryColor;
@@ -91,7 +94,17 @@ class GlobalState {
     coreVersion =
         coreVersionEnv.isEmpty ? kCoreVersionFromSource : coreVersionEnv;
     isPre = const String.fromEnvironment("APP_ENV") != 'stable';
-    v2boardBaseUrl = const String.fromEnvironment("V2BOARD_BASE_URL").trim();
+    v2boardConfigUrl = const String.fromEnvironment("V2BOARD_BASE_URL").trim();
+    if (v2boardConfigUrl.isNotEmpty) {
+      try {
+        v2boardBaseUrls = await V2boardConfigService().fetchBaseUrls(v2boardConfigUrl);
+        if (v2boardBaseUrls.isNotEmpty) {
+          v2boardSelectedUrl = v2boardBaseUrls.first;
+        }
+      } catch (_) {
+        // Config fetch failed; v2boardBaseUrls stays empty.
+      }
+    }
     final primaryColorEnv = const String.fromEnvironment("PRIMARY_COLOR").trim();
     if (primaryColorEnv.isNotEmpty) {
       buildPrimaryColor = int.tryParse(primaryColorEnv.replaceFirst('0x', '').replaceFirst('0X', ''), radix: 16);

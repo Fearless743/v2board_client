@@ -108,8 +108,8 @@ class _V2BoardLoginGateState extends State<V2BoardLoginGate> {
       setState(() {
         loggedIn = false;
         _phase = _GatePhase.ready;
-        error = globalState.v2boardBaseUrl.isEmpty
-            ? '未配置 V2Board 面板地址，请在启动参数中设置 V2BOARD_BASE_URL。'
+        error = globalState.v2boardSelectedUrl.isEmpty
+            ? '未配置 V2Board 面板地址，或配置文件获取失败。'
             : null;
       });
       return;
@@ -150,7 +150,7 @@ class _V2BoardLoginGateState extends State<V2BoardLoginGate> {
   }
 
   Future<void> _login() async {
-    final baseUrl = globalState.v2boardBaseUrl;
+    final baseUrl = globalState.v2boardSelectedUrl;
     final email = emailController.text.trim();
     final password = passwordController.text;
     if (baseUrl.isEmpty || email.isEmpty || password.isEmpty) return;
@@ -338,6 +338,38 @@ class _V2BoardLoginGateState extends State<V2BoardLoginGate> {
                     textAlign: TextAlign.center,
                   ),
                   const SizedBox(height: 24),
+                  if (globalState.v2boardBaseUrls.length > 1)
+                    DropdownButtonFormField<String>(
+                      initialValue: globalState.v2boardSelectedUrl,
+                      decoration: const InputDecoration(
+                        border: OutlineInputBorder(),
+                        labelText: '面板地址',
+                      ),
+                      items: globalState.v2boardBaseUrls
+                          .map((url) => DropdownMenuItem(
+                                value: url,
+                                child: Text(url, overflow: TextOverflow.ellipsis),
+                              ))
+                          .toList(),
+                      onChanged: (value) {
+                        if (value != null) {
+                          setState(() {
+                            globalState.v2boardSelectedUrl = value;
+                          });
+                        }
+                      },
+                    )
+                  else if (globalState.v2boardSelectedUrl.isNotEmpty)
+                    InputDecorator(
+                      decoration: const InputDecoration(
+                        border: OutlineInputBorder(),
+                        labelText: '面板地址',
+                      ),
+                      child: Text(globalState.v2boardSelectedUrl),
+                    ),
+                  if (globalState.v2boardBaseUrls.length > 1 ||
+                      globalState.v2boardSelectedUrl.isNotEmpty)
+                    const SizedBox(height: 12),
                   TextField(
                     controller: emailController,
                     keyboardType: TextInputType.emailAddress,
