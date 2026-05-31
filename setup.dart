@@ -130,11 +130,6 @@ class Build {
         ),
         BuildItem(
           target: Target.android,
-          arch: Arch.arm,
-          archName: 'armeabi-v7a',
-        ),
-        BuildItem(
-          target: Target.android,
           arch: Arch.arm64,
           archName: 'arm64-v8a',
         ),
