@@ -3,7 +3,6 @@
 import 'dart:convert';
 import 'dart:io';
 
-import 'package:archive/archive.dart';
 import 'package:args/command_runner.dart';
 import 'package:http/http.dart' as http;
 import 'package:path/path.dart';
@@ -259,6 +258,10 @@ class Build {
     const repo = "Fearless743/mihomo_core";
     final isLib = target == Target.android;
 
+    // coreVersion is the tag name (e.g. "core-v1.19.26").
+    // Asset names use the version without the "core-" prefix.
+    final version = coreVersion.replaceFirst(RegExp(r'^core-'), '');
+
     final items = buildItems
         .where(
           (e) =>
@@ -275,11 +278,16 @@ class Build {
       final archDir = join(targetOutDir, item.archName ?? '');
       await Directory(archDir).create(recursive: true);
 
-      final ext = isLib ? '.so' : (target == Target.windows ? '.exe' : '');
-      final assetBase = 'FlClashCore-${target.name}-${item.arch!.name}$ext';
       final expectedName =
-          isLib ? '$libName${target.dynamicLibExtensionName}' : '$coreName$ext';
+          isLib ? '$libName${target.dynamicLibExtensionName}' : '$coreName${target.executableExtensionName}';
       final destPath = join(archDir, expectedName);
+
+      // Asset name patterns from mihomo_core CI:
+      //   Desktop: FlClashCore-{os}-{arch}-v{ver}.gz
+      //   Android: libclash-android-{abi}-v{ver}.so.gz
+      final assetName = isLib
+          ? '$libName-${target.name}-${item.archName}-v${version}${target.dynamicLibExtensionName}.gz'
+          : '$coreName-${target.name}-${item.arch!.name}-v${version}${target.executableExtensionName}.gz';
 
       final mirrors = [
         '',
@@ -287,71 +295,32 @@ class Build {
         'https://gh-proxy.com/',
         'https://ghfast.top/',
       ];
-      final archiveExt = '.tar.gz';
-      final candidates = [
-        'https://github.com/$repo/releases/download/$coreVersion/$assetBase$archiveExt',
-        'https://github.com/$repo/releases/download/$coreVersion/$assetBase',
-      ];
+      final url = 'https://github.com/$repo/releases/download/$coreVersion/$assetName';
 
       var downloaded = false;
-      for (final url in candidates) {
-        for (final mirror in mirrors) {
-          try {
-            print("Trying: $mirror$url");
-            final resp =
-                await http.get(Uri.parse('$mirror$url'));
-            if (resp.statusCode != 200) continue;
+      for (final mirror in mirrors) {
+        try {
+          print("Trying: $mirror$url");
+          final resp = await http.get(Uri.parse('$mirror$url'));
+          if (resp.statusCode != 200) continue;
 
-            final isArchive = url.endsWith('.tar.gz');
+          final decompressed = gzip.decode(resp.bodyBytes);
+          File(destPath).writeAsBytesSync(decompressed);
 
-            if (isArchive) {
-              final decompressed = gzip.decode(resp.bodyBytes);
-              final archive = TarDecoder().decodeBytes(decompressed);
-              bool found = false;
-              for (final file in archive.files) {
-                if (file.isFile &&
-                    basename(file.name) == expectedName) {
-                  File(destPath)
-                      .writeAsBytesSync(file.content as List<int>);
-                  found = true;
-                  break;
-                }
-              }
-              if (!found) {
-                for (final file in archive.files) {
-                  if (file.isFile &&
-                      (file.name.endsWith('.so') ||
-                          file.name.endsWith('.exe') ||
-                          (!file.name.contains('.') &&
-                              basename(file.name).startsWith('FlClash')))) {
-                    File(destPath)
-                        .writeAsBytesSync(file.content as List<int>);
-                    found = true;
-                    break;
-                  }
-                }
-              }
-              if (!found) continue;
-            } else {
-              File(destPath).writeAsBytesSync(resp.bodyBytes);
-            }
-
-            if (!isLib) {
-              Process.runSync('chmod', ['+x', destPath]);
-            }
-            print("Downloaded: $destPath");
-            corePaths.add(destPath);
-            downloaded = true;
-            break;
-          } catch (e) {
-            print("Failed ($mirror$url): $e");
+          if (!isLib) {
+            Process.runSync('chmod', ['+x', destPath]);
           }
+          print("Downloaded: $destPath");
+          corePaths.add(destPath);
+          downloaded = true;
+          break;
+        } catch (e) {
+          print("Failed ($mirror$url): $e");
         }
-        if (downloaded) break;
       }
 
       if (!downloaded) {
-        throw "Failed to download $assetBase for ${target.name}-${item.arch!.name}";
+        throw "Failed to download $assetName for ${target.name}-${item.arch!.name}";
       }
 
       if (isLib) {
