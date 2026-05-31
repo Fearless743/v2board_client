@@ -90,7 +90,7 @@ final mainIsolate = "${appName}MainIsolate";
 final serviceIsolate = "${appName}ServiceIsolate";
 
 const mihomoRepo = "MetaCubeX/mihomo";
-const mihomoCoreRepo = "Fearless743/v2board_client";
+const mihomoCoreRepo = "Fearless743/mihomo_core";
 const mihomoGitHubApiUrl =
     "https://api.github.com/repos/$mihomoRepo/releases/latest";
 const mihomoMirrorPrefixes = [

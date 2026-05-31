@@ -14,7 +14,7 @@ on:
         required: false
 
 env:
-  CORE_REPO: Fearless743/v2board_client
+  CORE_REPO: Fearless743/mihomo_core
   MIHOMO_REPO: MetaCubeX/mihomo
 
 jobs:
