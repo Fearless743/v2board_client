@@ -4,8 +4,23 @@ on:
   push:
     tags:
       - "v*"
+  workflow_dispatch:
+    inputs:
+      create_release:
+        description: "Create a GitHub release after build"
+        type: boolean
+        default: false
+      release_tag:
+        description: "Tag name for release (e.g. v0.3.1-beta.1). Required if creating a release."
+        type: string
+        default: ""
+      sign_macos:
+        description: "Sign and notarize macOS builds"
+        type: boolean
+        default: false
+
 env:
-  IS_STABLE: ${{ !contains(github.ref, '-') }}
+  IS_STABLE: ${{ github.event_name == 'push' && !contains(github.ref, '-') || github.event.inputs.release_tag && !contains(github.event.inputs.release_tag, '-') }}
 
 jobs:
   build:
@@ -167,7 +182,7 @@ jobs:
 
   sign-macos:
     needs: [build]
-    if: startsWith(github.ref, 'refs/tags/v')
+    if: startsWith(github.ref, 'refs/tags/v') || (github.event_name == 'workflow_dispatch' && github.event.inputs.sign_macos == 'true')
     strategy:
       matrix:
         include:
@@ -191,6 +206,7 @@ jobs:
   changelog:
     runs-on: ubuntu-latest
     needs: [build]
+    if: github.event_name == 'push'
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -254,8 +270,10 @@ jobs:
   upload:
     permissions: write-all
     needs: [build, sign-macos]
-    if: always() && (needs.build.result == 'success')
+    if: always() && (needs.build.result == 'success') && (github.event_name == 'push' || github.event.inputs.create_release == 'true')
     runs-on: ubuntu-latest
+    env:
+      EFFECTIVE_TAG: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.release_tag || github.ref_name }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -270,7 +288,7 @@ jobs:
           merge-multiple: true
 
       - name: Download signed macOS artifacts
-        if: startsWith(github.ref, 'refs/tags/v')
+        if: startsWith(github.ref, 'refs/tags/v') || (github.event_name == 'workflow_dispatch' && github.event.inputs.sign_macos == 'true')
         uses: actions/download-artifact@v4
         with:
           path: ./dist/
@@ -325,7 +343,7 @@ jobs:
 
       - name: Patch release.md
         run: |
-          version=$(echo "${{ github.ref_name }}" | sed 's/^v//')
+          version=$(echo "${{ env.EFFECTIVE_TAG }}" | sed 's/^v//')
           if [ "${{ env.IS_STABLE }}" == "true" ]; then
             sed "s|VERSION|$version|g" ./.github/release_template.md >> release.md
           else
@@ -344,6 +362,7 @@ jobs:
         if: ${{ env.IS_STABLE == 'true' }}
         uses: softprops/action-gh-release@v2
         with:
+          tag_name: ${{ env.EFFECTIVE_TAG }}
           files: ./dist/*
           body_path: "./release.md"
           prerelease: false
@@ -352,6 +371,7 @@ jobs:
         if: ${{ env.IS_STABLE != 'true' }}
         uses: softprops/action-gh-release@v2
         with:
+          tag_name: ${{ env.EFFECTIVE_TAG }}
           files: ./dist/*
           body_path: "./release.md"
           prerelease: true
@@ -372,9 +392,9 @@ jobs:
           TELEGRAM_CHANNEL_ID_1: ${{ secrets.TELEGRAM_CHANNEL_ID_1 }}
           TELEGRAM_CHANNEL_ID_2: ${{ secrets.TELEGRAM_CHANNEL_ID_2 }}
           TELEGRAM_CHANNEL_ID_3: ${{ secrets.TELEGRAM_CHANNEL_ID_3 }}
-          VERSION: ${{ github.ref_name }}
+          VERSION: ${{ env.EFFECTIVE_TAG }}
           COMMITS: ${{ fromJSON(steps.prepare_commits.outputs.commits) }}
-          RELEASE_URL: https://github.com/${{ github.repository }}/releases/tag/${{ github.ref_name }}
+          RELEASE_URL: https://github.com/${{ github.repository }}/releases/tag/${{ env.EFFECTIVE_TAG }}
           IS_STABLE: ${{ env.IS_STABLE }}
         run: |
           python3 -m pip install requests --quiet
