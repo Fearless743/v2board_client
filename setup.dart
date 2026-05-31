@@ -485,6 +485,102 @@ class Build {
       orElse: () => throw "Invalid arch parameter: $value",
     );
   }
+
+  static Future<void> replaceIcons(String iconPath, String title) async {
+    final bytes = File(iconPath).readAsBytesSync();
+    final src = img.decodeImage(bytes);
+    if (src == null) throw 'Failed to decode icon: $iconPath';
+
+    _savePng(src, 'assets/images/icon.png', 1024);
+    _savePng(_makeWhite(src), 'assets/images/icon_white.png', 1024);
+    _savePng(_makeBlack(src), 'assets/images/icon_black.png', 1024);
+    _savePng(_makeIco(src), 'assets/images/icon.ico', 256);
+    _savePng(_makeWhite(src), 'assets/images/icon_white.ico', 256);
+
+    final stopped = _makeStopped(src);
+    _savePng(_makeWhite(stopped), 'assets/images/icon_stop_white.png', 256);
+    _savePng(_makeBlack(stopped), 'assets/images/icon_stop_black.png', 256);
+
+    final androidSizes = {
+      'mipmap-mdpi': 48, 'mipmap-hdpi': 72, 'mipmap-xhdpi': 96,
+      'mipmap-xxhdpi': 144, 'mipmap-xxxhdpi': 192,
+    };
+    for (final e in androidSizes.entries) {
+      _savePng(src, 'android/app/src/main/res/${e.key}/ic_launcher.png', e.value);
+    }
+
+    final drawableSizes = {
+      'drawable-mdpi': 108, 'drawable-hdpi': 162, 'drawable-xhdpi': 216,
+      'drawable-xxhdpi': 324, 'drawable-xxxhdpi': 432,
+    };
+    for (final e in drawableSizes.entries) {
+      _savePng(src, 'android/app/src/main/res/${e.key}/ic_launcher_foreground.png', e.value);
+      _savePng(_makeWhite(src), 'android/app/src/main/res/${e.key}/ic_launcher_monochrome.png', e.value);
+    }
+
+    _savePng(src, 'android/app/src/main/res/mipmap-xhdpi/ic_banner.png', 320, height: 180);
+
+    final macSizes = [16, 32, 64, 128, 256, 512, 1024];
+    for (final s in macSizes) {
+      _savePng(src, 'macos/Runner/Assets.xcassets/AppIcon.appiconset/app_icon_$s.png', s);
+    }
+
+    _saveIco(src, 'windows/runner/resources/app_icon.ico');
+
+    print('Icons replaced for all platforms.');
+  }
+
+  static Future<void> restoreIcons() async {
+    print('Restoring original icons ...');
+    await Process.run('git', ['checkout', '--',
+      'assets/images/',
+      'android/app/src/main/res/',
+      'macos/Runner/Assets.xcassets/AppIcon.appiconset/',
+      'windows/runner/resources/app_icon.ico',
+    ]);
+  }
+
+  static void _savePng(img.Image src, String path, int size, {int? height}) {
+    final resized = img.copyResize(src, width: size, height: height ?? size,
+        interpolation: img.Interpolation.cubic);
+    File(path).writeAsBytesSync(img.encodePng(resized));
+  }
+
+  static void _saveIco(img.Image src, String path) {
+    final resized = img.copyResize(src, width: 256, height: 256,
+        interpolation: img.Interpolation.cubic);
+    File(path).writeAsBytesSync(img.encodeIco(resized));
+  }
+
+  static img.Image _makeWhite(img.Image src) {
+    final out = img.Image(width: src.width, height: src.height, numChannels: 4);
+    for (final p in out) {
+      final s = src.getPixel(p.x, p.y);
+      final a = s.a.toInt();
+      if (a > 0) {
+        p.setRgba(255, 255, 255, a);
+      }
+    }
+    return out;
+  }
+
+  static img.Image _makeBlack(img.Image src) {
+    final out = img.Image(width: src.width, height: src.height, numChannels: 4);
+    for (final p in out) {
+      final s = src.getPixel(p.x, p.y);
+      final a = s.a.toInt();
+      if (a > 0) {
+        p.setRgba(0, 0, 0, a);
+      }
+    }
+    return out;
+  }
+
+  static img.Image _makeStopped(img.Image src) {
+    return img.adjustColor(src, saturation: -0.8, brightness: 0.1);
+  }
+
+  static img.Image _makeIco(img.Image src) => src;
 }
 
 class DevCommand extends Command {
@@ -692,6 +788,10 @@ class BuildCommand extends Command {
       "scheme-variant",
       help: "SCHEME_VARIANT (e.g. tonalSpot)",
     );
+    argParser.addOption(
+      "icon",
+      help: "Path to 1024x1024 PNG icon to replace all platform icons",
+    );
     // Android builds always create both split and universal APKs
     // No additional flags needed
   }
@@ -888,6 +988,7 @@ class BuildCommand extends Command {
     final appTitle = argResults?["app-title"] as String?;
     final primaryColor = argResults?["primary-color"] as String?;
     final schemeVariant = argResults?["scheme-variant"] as String?;
+    final iconPath = argResults?["icon"] as String?;
     final extraDefines = _extraBuildDefines(
       appTitle: appTitle,
       primaryColor: primaryColor,
@@ -901,21 +1002,26 @@ class BuildCommand extends Command {
       throw "Invalid arch parameter";
     }
 
-    await Build.syncCoreVersionDartFile();
-    final coreVersion = await Build.extractCoreVersion();
-
-    final corePaths = await Build.downloadCore(
-      target: target,
-      arch: arch,
-      coreVersion: coreVersion,
-    );
-
-    if (out != "app") {
-      return;
+    if (iconPath != null) {
+      await Build.replaceIcons(iconPath, appTitle ?? Build.appName);
     }
 
-    switch (target) {
-      case Target.windows:
+    try {
+      await Build.syncCoreVersionDartFile();
+      final coreVersion = await Build.extractCoreVersion();
+
+      final corePaths = await Build.downloadCore(
+        target: target,
+        arch: arch,
+        coreVersion: coreVersion,
+      );
+
+      if (out != "app") {
+        return;
+      }
+
+      switch (target) {
+        case Target.windows:
         final token = target != Target.android
             ? await Build.calcSha256(corePaths.first)
             : null;
@@ -979,6 +1085,11 @@ class BuildCommand extends Command {
         );
         return;
     }
+    } finally {
+      if (iconPath != null) {
+        await Build.restoreIcons();
+      }
+    }
   }
 }
 
@@ -1016,7 +1127,7 @@ class BuildAllCommand extends Command {
     // Replace icons if provided
     if (iconPath != null) {
       print('Replacing icons from $iconPath ...');
-      await _replaceIcons(iconPath, title);
+      await Build.replaceIcons(iconPath, title);
     }
 
     // Build dart-define args
@@ -1062,113 +1173,11 @@ class BuildAllCommand extends Command {
 
     // Restore original icons
     if (iconPath != null) {
-      print('\nRestoring original icons ...');
-      await Process.run('git', ['checkout', '--',
-        'assets/images/',
-        'android/app/src/main/res/',
-        'macos/Runner/Assets.xcassets/AppIcon.appiconset/',
-        'windows/runner/resources/app_icon.ico',
-      ]);
+      await Build.restoreIcons();
     }
 
     print('\n=== Build complete. Output: $outDir ===');
   }
-
-  // --- Icon replacement ---
-
-  Future<void> _replaceIcons(String iconPath, String title) async {
-    final bytes = File(iconPath).readAsBytesSync();
-    final src = img.decodeImage(bytes);
-    if (src == null) throw 'Failed to decode icon: $iconPath';
-
-    // 1. In-app assets
-    _savePng(src, 'assets/images/icon.png', 1024);
-    _savePng(_makeWhite(src), 'assets/images/icon_white.png', 1024);
-    _savePng(_makeBlack(src), 'assets/images/icon_black.png', 1024);
-    _savePng(_makeIco(src), 'assets/images/icon.ico', 256);
-    _savePng(_makeWhite(src), 'assets/images/icon_white.ico', 256);
-
-    // Stopped-state icons (dimmed version)
-    final stopped = _makeStopped(src);
-    _savePng(_makeWhite(stopped), 'assets/images/icon_stop_white.png', 256);
-    _savePng(_makeBlack(stopped), 'assets/images/icon_stop_black.png', 256);
-
-    // 2. Android mipmap (legacy launcher icons)
-    final androidSizes = {
-      'mipmap-mdpi': 48, 'mipmap-hdpi': 72, 'mipmap-xhdpi': 96,
-      'mipmap-xxhdpi': 144, 'mipmap-xxxhdpi': 192,
-    };
-    for (final e in androidSizes.entries) {
-      _savePng(src, 'android/app/src/main/res/${e.key}/ic_launcher.png', e.value);
-    }
-
-    // Android drawable (adaptive icon foreground + monochrome)
-    final drawableSizes = {
-      'drawable-mdpi': 108, 'drawable-hdpi': 162, 'drawable-xhdpi': 216,
-      'drawable-xxhdpi': 324, 'drawable-xxxhdpi': 432,
-    };
-    for (final e in drawableSizes.entries) {
-      _savePng(src, 'android/app/src/main/res/${e.key}/ic_launcher_foreground.png', e.value);
-      _savePng(_makeWhite(src), 'android/app/src/main/res/${e.key}/ic_launcher_monochrome.png', e.value);
-    }
-
-    // Android TV banner
-    _savePng(src, 'android/app/src/main/res/mipmap-xhdpi/ic_banner.png', 320, height: 180);
-
-    // 3. macOS icon set
-    final macSizes = [16, 32, 64, 128, 256, 512, 1024];
-    for (final s in macSizes) {
-      _savePng(src, 'macos/Runner/Assets.xcassets/AppIcon.appiconset/app_icon_$s.png', s);
-    }
-
-    // 4. Windows ICO
-    _saveIco(src, 'windows/runner/resources/app_icon.ico');
-
-    print('Icons replaced for all platforms.');
-  }
-
-  void _savePng(img.Image src, String path, int size, {int? height}) {
-    final resized = img.copyResize(src, width: size, height: height ?? size,
-        interpolation: img.Interpolation.cubic);
-    File(path).writeAsBytesSync(img.encodePng(resized));
-  }
-
-  void _saveIco(img.Image src, String path) {
-    // Encode ICO with 256px as the primary size
-    final resized = img.copyResize(src, width: 256, height: 256,
-        interpolation: img.Interpolation.cubic);
-    File(path).writeAsBytesSync(img.encodeIco(resized));
-  }
-
-  img.Image _makeWhite(img.Image src) {
-    final out = img.Image(width: src.width, height: src.height, numChannels: 4);
-    for (final p in out) {
-      final s = src.getPixel(p.x, p.y);
-      final a = s.a.toInt();
-      if (a > 0) {
-        p.setRgba(255, 255, 255, a);
-      }
-    }
-    return out;
-  }
-
-  img.Image _makeBlack(img.Image src) {
-    final out = img.Image(width: src.width, height: src.height, numChannels: 4);
-    for (final p in out) {
-      final s = src.getPixel(p.x, p.y);
-      final a = s.a.toInt();
-      if (a > 0) {
-        p.setRgba(0, 0, 0, a);
-      }
-    }
-    return out;
-  }
-
-  img.Image _makeStopped(img.Image src) {
-    return img.adjustColor(src, saturation: -0.8, brightness: 0.1);
-  }
-
-  img.Image _makeIco(img.Image src) => src;
 
   // --- Platform builds ---
 

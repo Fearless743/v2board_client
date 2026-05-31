@@ -37,6 +37,10 @@ on:
         description: "Color scheme variant (e.g. tonalSpot)"
         type: string
         default: ""
+      icon_url:
+        description: "URL to 1024x1024 PNG icon (replaces all platform icons)"
+        type: string
+        default: ""
       create_release:
         description: "Create a GitHub release after build"
         type: boolean
@@ -191,6 +195,10 @@ jobs:
 
           echo "✅ Created Local.xcconfig for signing"
 
+      - name: Download custom icon
+        if: github.event.inputs.icon_url != ''
+        run: curl -fsSL -o custom_icon.png "${{ github.event.inputs.icon_url }}"
+
       - name: Setup
         run: >-
           dart setup.dart ${{ matrix.platform }}
@@ -200,6 +208,7 @@ jobs:
           ${{ github.event.inputs.app_title && format('--app-title {0}', github.event.inputs.app_title) || '' }}
           ${{ github.event.inputs.primary_color && format('--primary-color {0}', github.event.inputs.primary_color) || '' }}
           ${{ github.event.inputs.scheme_variant && format('--scheme-variant {0}', github.event.inputs.scheme_variant) || '' }}
+          ${{ github.event.inputs.icon_url && '--icon custom_icon.png' || '' }}
 
       - name: Upload
         uses: actions/upload-artifact@v4
